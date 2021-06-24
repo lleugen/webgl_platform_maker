@@ -2,13 +2,20 @@
 <html>
     <head>
         <title>Platform maker</title>
-        
+        <script src = "app.js"></script>
+        <script type = "text/plain" src="./assets/ghost.obj" id="ghost"></script>
+        <script src="webgl-obj-loader.min.js"></script>
+        <script src="utils.js"></script>
+        <script src="perspective.js"></script>
+        <script src="texture.js"></script>
+        <script src="./assets/model_ghost.js"></script>
     </head>
-<body>
+<body onLoad="main();">
     
 
     <h1>Platform maker</h1>
-    <canvas id="canvas" width="500" height="500" style="border:1px solid #c3c3c3;">Your browser doesn't support the canvas element :(</canvas>
-    <script src = "main.js"></script>
+    <center><p id="p1">Transforms go here</p></center>
+    <canvas id="my-canvas" width="500" height="500" style="border:1px solid #c3c3c3;">Your browser doesn't support the canvas element :(</canvas>
+    
 </body>
 </html>
