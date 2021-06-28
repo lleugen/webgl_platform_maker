@@ -1,4 +1,4 @@
-objStr = `
+ghostMesh = `
 mtllib ghost.mtl
 o ghost
 v -0.212196 0.611094 -0.065135

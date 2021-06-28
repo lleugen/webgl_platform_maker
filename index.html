@@ -4,6 +4,8 @@
         <title>title</title>
         <script src="https://greggman.github.io/webgl-lint/webgl-lint.js"></script>
         <script src="utils.js"></script>
+        <script src="webgl-obj-loader.min.js"></script>
+        <script src="assets/model_ghost.js"></script>
     </head>
 
     <body>
@@ -36,7 +38,25 @@
             <tr>
                 <p><b> Slider </b></p>
                 <div id="slider1"> far plane -10 
-                    <input id="slide1" type="range" min="-10" max="300" step="1" value="0" onchange="onSliderChangez(this.value);"/> 300 <br/>	
+                    <input id="slide1" type="range" min="-10" max="300" step="1" value="5" onchange="onSliderChangez(this.value);"/> 300 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <p><b> Slider </b></p>
+                <div id="slider1"> camera window width 0.1 
+                    <input id="slide1" type="range" min="0.1" max="300" step="0.1" value="5" onchange="onSliderChangew(this.value);"/> 300 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <p><b> Slider </b></p>
+                <div id="slider1"> camera elevation -360
+                    <input id="slide1" type="range" min="-360" max="360" step="1" value="0" onchange="onSliderChangeElevation(this.value);"/> 300 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <p><b> Slider </b></p>
+                <div id="slider1"> camera angle -360 
+                    <input id="slide1" type="range" min="-360" max="360" step="1" value="0" onchange="onSliderChangeAngle(this.value);"/> 300 <br/>	
                 </div>
             </tr>
         </table>
@@ -63,7 +83,6 @@
       </script>
 
       <script  id="vertex-shader-2d_2" type="notjs">
-
         // an attribute will receive data from a buffer
         attribute vec3 a_position;
         uniform vec2 u_resolution;

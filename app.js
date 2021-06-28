@@ -4,6 +4,8 @@ var gl = null;
 var program = null;
 var program2 = null;
 
+var objectMesh = null;
+
 function main() {
     // Get A WebGL context
     var canvas = document.querySelector("#canvas");
@@ -12,104 +14,69 @@ function main() {
     if (!gl) {
       return;
     }
-
-    
     // Get the strings for our GLSL shaders
-    var vertexShaderSource = document.querySelector("#vertex-shader-2d").text;
     var fragmentShaderSource = document.querySelector("#fragment-shader-2d").text;
-
     var vertexShaderSource_2 = document.querySelector("#vertex-shader-2d_2").text;
-  
     // create GLSL shaders, upload the GLSL source, compile the shaders
-    var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-
     var vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
-    program2 = createProgram(gl, vertexShader_2, fragmentShader);
-  
     // Link the two shaders into a program
-    var program = createProgram(gl, vertexShader, fragmentShader);
-  
-    // look up where the vertex data needs to go.
-    var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-  
-    // Create a buffer and put three 2d clip space points in it
-    var positionBuffer = gl.createBuffer();
-  
-    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  
-    var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
-    
-
-    var positions = [
-      0, 1,
-      0, 0, 
-      1, 0,
-      0, 0, 
-      10,
-    ];
-    
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-  
-    // code above this line is initialization code.
-    // code below this line is rendering code.
-  
-    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
-  
-    // Tell WebGL how to convert from clip space to pixels
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  
-    // Clear the canvas
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-  
+    program2 = createProgram(gl, vertexShader_2, fragmentShader);
     // Tell it to use our program (pair of shaders)
-    gl.useProgram(program);
-    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
-
-    // Turn on the attribute
-    gl.enableVertexAttribArray(positionAttributeLocation);
-  
-    // Bind the position buffer.
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  
-    // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-    var size = 2;          // 2 components per iteration
-    var type = gl.FLOAT;   // the data is 32bit floats
-    var normalize = false; // don't normalize the data
-    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-    var offset = 0;        // start at the beginning of the buffer
-    gl.vertexAttribPointer(
-        positionAttributeLocation, size, type, normalize, stride, offset);
-  
-    // draw
-    var primitiveType = gl.TRIANGLES;
-    var offset = 0;
-    var count = 3;
-    gl.drawArrays(primitiveType, offset, count);
-
     gl.useProgram(program2);
-    var resolutionUniformLocation = gl.getUniformLocation(program2, "u_resolution");
-    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
-
+    //find attribute locations
     program2.projection_uniform_location = gl.getUniformLocation(program2, "projection");
     
     
-    
-    
+
+    // code above this line is initialization code.
+    // code below this line is rendering code.
+
+    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+    // Tell WebGL how to convert from clip space to pixels
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     
 
+//#####################################################################################
+    // objectMesh = new OBJ.Mesh(ghostMesh);
+    // // OBJ.initMeshBuffers(gl, ghostMesh);
+    // objectMesh.vertexBuffer = gl.createBuffer();
+
+    // // links mesh attributes to shader attributes
+		// program2.vertexPositionAttribute = gl.getAttribLocation(program2, "a_position");
+		// gl.enableVertexAttribArray(program2.vertexPositionAttribute);
+
+    // gl.bindBuffer(gl.ARRAY_BUFFER, objectMesh.vertexBuffer);
+    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectMesh.vertices), gl.STATIC_DRAW);
+		// gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+//#####################################################################################
+
     var positions2 = [
-        // 0, 0, -2,
-        // 1, 0, -2,
-        // 0, 1, -2,
-        0, 0, 0,
-        0, 1, 0,
-        -1, 0, 0,
-        
+      0, 0, -2,
+      1, 0, -2,
+      0, 1, -2,
+      0, 0, 0,
+      0, 1, 0,
+      -1, 0, 0,
+      0, 0, 1,
+      0, 1, 1,
+      -1, 0, 1,
     ];
+    
+
+    // look up where the vertex data needs to go.
+    var positionAttributeLocation = gl.getAttribLocation(program2, "a_position");
+    // Turn on the attribute
+    gl.enableVertexAttribArray(positionAttributeLocation);
+    // Create a buffer and put three 2d clip space points in it
+    var positionBuffer = gl.createBuffer();
+    // // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions2), gl.STATIC_DRAW);
+
     // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
     var size = 3;          // 2 components per iteration
     var type = gl.FLOAT;   // the data is 32bit floats
@@ -118,9 +85,7 @@ function main() {
     var offset = 0;        // start at the beginning of the buffer
     gl.vertexAttribPointer(
         positionAttributeLocation, size, type, normalize, stride, offset);
-
-    // console.log('here',program2)
-    
+        
     draw();
   }
 
@@ -128,12 +93,16 @@ function main() {
 
 function draw(){
   
-  var viewMatrix = utils.MakeView(sliderValuex,sliderValuey,sliderValuez,0,0);
+  // update WV matrix
+	// let cz = 10 * Math.cos(utils.degToRad(-cameraAngle)) * Math.cos(utils.degToRad(-cameraElevation));
+	// let cx = 10 * Math.sin(utils.degToRad(-cameraAngle)) * Math.cos(utils.degToRad(-cameraElevation));
+	// let cy = 10 * Math.sin(utils.degToRad(-cameraElevation));
+	let viewMatrix = utils.MakeView(sliderValuex, sliderValuey, sliderValuez, cameraElevation, -cameraAngle);
   // var worldMatrix = utils.MakeWorld(0,0,0,sliderValuex,sliderValuey,sliderValuez,1);
   // var projectionMatrix = utils.MakePerspective(60,2,nearPlane,farPlane);
 
   // Make an isometric view
-	let w = 1;
+	let w = cameraWindowWidth;
 	let a = 2;
 	let n = nearPlane;
 	let f = farPlane;
@@ -156,15 +125,18 @@ function draw(){
             0, 0, 0, 1];
   var A1 =  utils.multiplyMatrices(orthogonal_projection, x_rotation)
   let projectionMatrix = utils.multiplyMatrices(A1, y_rotation)
+  projectionMatrix = orthogonal_projection;
+  //make perspective view
+  // let projectionMatrix = utils.MakePerspective(65, canvas.width / canvas.height, nearPlane, farPlane)
 
   var primitiveType = gl.TRIANGLES;
   var offset = 0;
-  var count = 3;
+  var count = 3 //gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE);
   
   //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
   var projection_matrix_uniform = utils.multiplyMatrices(projectionMatrix, viewMatrix);
 
-  gl.uniformMatrix4fv(program2.projection_uniform_location, false, projection_matrix_uniform);
+  gl.uniformMatrix4fv(program2.projection_uniform_location, false, utils.transposeMatrix(projection_matrix_uniform));
   gl.drawArrays(primitiveType, offset, count);
   window.requestAnimationFrame(draw);
 }
@@ -223,5 +195,23 @@ function onSliderChangeFar(value){
     console.log("Slider value changed to "+value);
     farPlane = value;
 }
+var cameraWindowWidth = 5;
+function onSliderChangew(value){
+    console.log("Slider value changed to "+value);
+    cameraWindowWidth = value;
+}
+var cameraElevation = 0;
+function onSliderChangeElevation(value){
+    console.log("Slider value changed to "+value);
+    cameraElevation = value;
+}
+var cameraAngle = 0;
+function onSliderChangeAngle(value){
+    console.log("Slider value changed to "+value);
+    cameraAngle = value;
+}
+
+
+
 
 main();
