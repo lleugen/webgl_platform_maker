@@ -9,54 +9,67 @@
     </head>
 
     <body>
-        <canvas id='canvas'></canvas>
+        <canvas id='canvas', width='1000', height='500'></canvas>
         <table>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> cam x -50 
-                    <input id="slide1" type="range" min="-50" max="50" step="1" value="0" onchange="onSliderChangex(this.value);"/> 50 <br/>	
+                    <input id="slide1" type="range" min="-50" max="50" step="0.5" value="0" onchange="onSliderChangex(this.value);"/> 50 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> cam y -50 
-                    <input id="slide1" type="range" min="-50" max="50" step="1" value="0" onchange="onSliderChangey(this.value);"/> 50 <br/>	
+                    <input id="slide1" type="range" min="-50" max="50" step="0.5" value="0" onchange="onSliderChangey(this.value);"/> 50 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> cam z -50 
                     <input id="slide1" type="range" min="-50" max="50" step="1" value="0" onchange="onSliderChangez(this.value);"/> 50 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> near plane -10 
                     <input id="slide1" type="range" min="-10" max="10" step="0.1" value="0" onchange="onSliderChangez(this.value);"/> 10 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> far plane -10 
                     <input id="slide1" type="range" min="-10" max="300" step="1" value="5" onchange="onSliderChangez(this.value);"/> 300 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> camera window width 0.1 
                     <input id="slide1" type="range" min="0.1" max="300" step="0.1" value="5" onchange="onSliderChangew(this.value);"/> 300 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> camera elevation -360
-                    <input id="slide1" type="range" min="-360" max="360" step="1" value="0" onchange="onSliderChangeElevation(this.value);"/> 300 <br/>	
+                    <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeElevation(this.value);"/> 360 <br/>	
                 </div>
             </tr>
             <tr>
-                <p><b> Slider </b></p>
                 <div id="slider1"> camera angle -360 
-                    <input id="slide1" type="range" min="-360" max="360" step="1" value="0" onchange="onSliderChangeAngle(this.value);"/> 300 <br/>	
+                    <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeAngle(this.value);"/> 360 <br/>	
+                </div>
+            </tr>
+            <p><b> projection type </b></p>
+			<form>
+				<input type="radio" name="light" id="yesl" onchange="onRadioButtonChange(this.value);" value="orthogonal" checked> orthogonal <br/>
+				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="isometric" > isometric <br/>
+				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="perspective" > perspective <br/>
+			</form>	
+            <tr>
+                <div id="slider1"> world rotation x -360 
+                    <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeWorldAnglex(this.value);"/> 360 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <div id="slider1"> world rotation y -360 
+                    <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeWorldAngley(this.value);"/> 360 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <div id="slider1"> world rotation z -360 
+                    <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeWorldAnglez(this.value);"/> 360 <br/>	
                 </div>
             </tr>
         </table>
@@ -64,7 +77,7 @@
 
     <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
 
-    <script  id="vertex-shader-2d" type="notjs">
+    <script  id="vertex-shader-2d" type="notjs">#version 300 es
 
         // an attribute will receive data from a buffer
         attribute vec2 a_position;
@@ -82,36 +95,58 @@
       
       </script>
 
-      <script  id="vertex-shader-2d_2" type="notjs">
+      <script  id="vertex-shader-2d_2" type="notjs">#version 300 es
         // an attribute will receive data from a buffer
-        attribute vec3 a_position;
+        in vec3 a_position;
         uniform vec2 u_resolution;
         uniform mat4 projection;
+
+        out vec3 fs_pos;
       
         // all shaders have a main function
         void main() {
-            //vec4 transformed = projection * vec4(a_position, 1);
-            //vec4 normalized = transformed / transformed.w;
-            //vec2 clipSpace = (transformed.xy / u_resolution) * 2.0 - 1.0;
-            //gl_Position = vec4(clipSpace, 0, 1);
-
+            fs_pos = a_position;
             gl_Position = projection * vec4(a_position, 1);
         }
       
       </script>
 
-      <script  id="fragment-shader-2d" type="notjs">
+      <script  id="fragment-shader-2d" type="notjs">#version 300 es
       
         // fragment shaders don't have a default precision so we need
         // to pick one. mediump is a good default
         precision mediump float;
-      
+        out vec4 FragColor;
+
         void main() {
           // gl_FragColor is a special variable a fragment shader
           // is responsible for setting
-          gl_FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
+          FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
         }
       
+      </script>
+
+      <script id="fancyFragmentShader" type="notjs">#version 300 es
+        precision highp float;
+
+        in vec3 fs_pos;
+        
+        uniform vec4 light;
+        uniform vec4 matcol;
+        
+        out vec4 color;
+
+        void main() {
+            vec3 X = dFdx(fs_pos);
+            vec3 Y = dFdy(fs_pos);
+            vec3 n_norm = normalize(cross(X,Y));
+            
+            float dimFact = light.w * clamp(dot(n_norm, light.xyz),0.0,1.0);
+            //dimFact += lightDir2.w * clamp(dot(n_norm, lightDir2.xyz),0.0,1.0);
+            //dimFact += lightDir3.w * clamp(dot(n_norm, lightDir3.xyz),0.0,1.0);
+            dimFact = dimFact * matcol.a + (1.0 - matcol.a);
+            color = vec4(min(matcol.rgb * dimFact, vec3(1.0, 1.0, 1.0)), 1.0);
+        }
       </script>
 
       <script src='app.js'></script>
