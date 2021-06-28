@@ -418,26 +418,6 @@ var utils={
 
 		return perspective;
 	},
-	
-	MakeCompletePerspective:function(l, r, b, t, n, f) {
-	// Creates the perspective projection matrix. The matrix is returned.
-	// {fovy} contains the vertical field-of-view in degrees. {a} is the aspect ratio.
-	// {n} is the distance of the near plane, and {f} is the far plane.
-
-		var perspective = this.identityMatrix();
-
-		perspective[0] = 2*n / (r-l);
-		perspective[2] = (r+l) / (r-l);
-		perspective[5] = 2*n / (t-b);
-		perspective[6] = (t+b) / (t-b);
-		perspective[10] = (f + n) / (n - f);
-		perspective[11] = 2.0 * f * n / (n - f);
-		perspective[14] = -1.0;
-		perspective[15] = 0.0;	
-
-		return perspective;
-	},
-
 
 	MakeParallel:function(w, a, n, f) {
 	// Creates the parallel projection matrix. The matrix is returned.

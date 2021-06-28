@@ -1,224 +1,187 @@
-var canvas;
+"use strict";
 
-var context = null,
-	program = null,
-	mesh = null;
-	
-var projectionMatrix, 
-	viewMatrix,
-	worldMatrix;
-//Parameters for Camera
-var elevation = 0.0;
-var angle = 0.0;
+var gl = null;
+var program = null;
+var program2 = null;
 
-var tTransform;
-var sTransform = [];
-var sTransformText = [];
-
-var curr_tTransform = 0;
-var curr_sTransform = 0;
-var changeT = true;
-
-// Vertex shader
-var vs = `#version 300 es
-#define POSITION_LOCATION 0
-#define NORMAL_LOCATION 1
-#define UV_LOCATION 2
-
-layout(location = POSITION_LOCATION) in vec3 in_pos;
-layout(location = NORMAL_LOCATION) in vec3 in_norm;
-layout(location = UV_LOCATION) in vec2 in_uv;
-
-uniform mat4 pMatrix;
-
-out vec3 fs_pos;
-out vec3 fs_norm;
-out vec2 fs_uv;
-
-void main() {
-	fs_pos = in_pos;
-	fs_norm = in_norm;
-	fs_uv = vec2(in_uv.x,1.0-in_uv.y);
-	
-	gl_Position = pMatrix * vec4(in_pos, 1);
-}`;
-
-// Fragment shader
-var fs = `#version 300 es
-precision highp float;
-
-in vec3 fs_pos;
-in vec3 fs_norm;
-in vec2 fs_uv;
-
-uniform sampler2D u_texture;
-
-out vec4 color;
-
-void main() {
-	color = texture(u_texture, fs_uv);
-}`;
-
-function InitTransforms() {
-	vi = [utils.MakeScaleMatrix(0.1)];
-	tTransform = vi.concat(perspective());
-
-	sTransformText[0] = "Make perspective projection, FoV-y = 70 deg, a = 16/9, n = 1, f = 101";
-	sTransform[0] = utils.MakePerspective(70,16/9,1,101);
-		
-	sTransformText[1] = "Make perspective projection, FoV-y = 105 deg, a = 16/9, n = 1, f = 101";
-	sTransform[1] = utils.MakePerspective(105,16/9,1,101);
-
-
-	
-	sTransformText[2] = "Make perspective projection, FoV-y = 40 deg, a = 16/9, n = 1, f = 101";
-	sTransform[2] = utils.MakePerspective(40,16/9,1,101);
-
-	
-	sTransformText[3] = "Make perspective projection, FoV-y = 90 deg, a = 4/3, n = 1, f = 101. Note: since the aspect ratio is not correct, the image should appear to be deformed";
-	sTransform[3] = utils.MakePerspective(90,4/3,1,101);
-	       	       
-	sTransformText[4] = "Make perspective projection, l = -1.2, r = 0, t = 0.3375, b = -0.3375, n = 1, f = 101. Note: due to the asimmetry of this projection, only the left part of the scene should be visible";
-	sTransform[4] = utils.MakeCompletePerspective(-1.2,0,-0.3375,0.3375,1,101);
-	       	       
-	document.getElementById("p1").innerHTML = sTransformText[0];
-}
-
-function main(){
-    console.log('start')
-    InitTransforms();
-    canvas = document.getElementById("my-canvas");
-    if(!canvas){
-        console.log("could not get canvas")
-        return
-    }
-    context = canvas.getContext("webgl2");
-    if(!context){
-        console.log("could not get context")
-        return
-    }
-    if(context){
-        console.log('canvas and context loaded in main')
-    }
-    
-    program = context.createProgram();
-    var v1 = context.createShader(context.VERTEX_SHADER);
-    context.shaderSource(v1, vs);
-    context.compileShader(v1);
-    if (!context.getShaderParameter(v1, context.COMPILE_STATUS)) {
-        alert("ERROR IN VS SHADER : " + context.getShaderInfoLog(v1));
-    }
-    var v2 = context.createShader(context.FRAGMENT_SHADER);
-    context.shaderSource(v2, fs)
-    context.compileShader(v2);		
-    if (!context.getShaderParameter(v2, context.COMPILE_STATUS)) {
-        alert("ERROR IN FS SHADER : " + context.getShaderInfoLog(v2));
-    }			
-    context.attachShader(program, v1);
-    context.attachShader(program, v2);
-    context.linkProgram(program);				
-    
-    context.useProgram(program);
-
-    // objStr = document.getElementById('ghost').innerHTML
-
-    mesh = new OBJ.Mesh(objStr);
-
-    // Create a texture
-    // imgtx = new Image();
-    // imgtx.onload = function() {
-    //     var textureId = context.createTexture();
-    //     context.activeTexture(context.TEXTURE0 + 0);
-    //     context.bindTexture(context.TEXTURE_2D, textureId);		
-    //     context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imgtx);		
-    // // set the filtering so we don't need mips
-    //     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.NEAREST);
-    //     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.NEAREST);
-    //     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
-    //     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
-    // }
-    // imgtx.src = TextureData;
-    
-    // links mesh attributes to shader attributes
-    program.vertexPositionAttribute = context.getAttribLocation(program, "in_pos");
-    context.enableVertexAttribArray(program.vertexPositionAttribute);
-        
-    program.vertexNormalAttribute = context.getAttribLocation(program, "in_norm");
-    context.enableVertexAttribArray(program.vertexNormalAttribute);
-        
-    program.textureCoordAttribute = context.getAttribLocation(program, "in_uv");
-    context.enableVertexAttribArray(program.textureCoordAttribute);
-
-    program.WVPmatrixUniform = context.getUniformLocation(program, "pMatrix");
-    program.textureUniform = context.getUniformLocation(program, "u_texture");
-    
-    OBJ.initMeshBuffers(context, mesh);
-    
-    // prepares the world, view and projection matrices.
-    var w=canvas.clientWidth;
-    var h=canvas.clientHeight;
-    
-    context.clearColor(0.0, 0.0, 0.0, 1.0);
-    context.viewport(0.0, 0.0, w, h);
-    
-    // selects the mesh
-    context.bindBuffer(context.ARRAY_BUFFER, mesh.vertexBuffer);
-    context.vertexAttribPointer(program.vertexPositionAttribute, mesh.vertexBuffer.itemSize, context.FLOAT, false, 0, 0);
-    context.bindBuffer(context.ARRAY_BUFFER, mesh.textureBuffer);
-    context.vertexAttribPointer(program.textureCoordAttribute, mesh.textureBuffer.itemSize, context.FLOAT, false, 0, 0);
-    
-    context.bindBuffer(context.ARRAY_BUFFER, mesh.normalBuffer);
-    context.vertexAttribPointer(program.vertexNormalAttribute, mesh.normalBuffer.itemSize, context.FLOAT, false, 0, 0);
-        
-    context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);		
-    
-//     var textureId = context.createTexture();
-//     context.activeTexture(context.TEXTURE0 + 0);
-//     context.bindTexture(context.TEXTURE_2D, textureId);		
-//     context.texImage2D(context.TEXTURE_2D, 0, context.RGBA, context.RGBA, context.UNSIGNED_BYTE, imgtx);		
-// // set the filtering so we don't need mips
-//     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.NEAREST);
-//     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, context.NEAREST);
-//     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
-//     context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
-
-    // turn on depth testing
-    context.enable(context.DEPTH_TEST);
-    drawScene();
-}
-
-function drawScene() {
-    // update WV matrix
-    cx = utils.degToRad(angle*30);
-    cy = -utils.degToRad(elevation*30);
-    viewMatrix = utils.MakeWorld(0,0,-5, cx, cy, 0, 1);
-
-    // sets the uniforms
-    context.uniform1i(program.textureUniform, 0);
-
-    // draws the request
-    var preScale = 0.8;
-    WVPmatrix = utils.multiplyMatrices(utils.multiplyMatrices(sTransform[curr_sTransform], viewMatrix), utils.MakeScaleMatrix(preScale));
-    context.uniformMatrix4fv(program.WVPmatrixUniform, context.FALSE, utils.transposeMatrix(WVPmatrix));		
-    context.drawElements(context.LINE_STRIP, mesh.indexBuffer.numItems, context.UNSIGNED_SHORT, 0);		
-    
-    // draws the answer
-    if(!changeT) {
-        WVPmatrix = utils.multiplyMatrices(utils.multiplyMatrices(tTransform[curr_tTransform], viewMatrix), utils.MakeScaleMatrix(preScale));;
-        context.uniformMatrix4fv(program.WVPmatrixUniform, context.FALSE, utils.transposeMatrix(WVPmatrix));		
-        context.drawElements(context.TRIANGLES, mesh.indexBuffer.numItems, context.UNSIGNED_SHORT, 0);
+function main() {
+    // Get A WebGL context
+    var canvas = document.querySelector("#canvas");
+    console.log(canvas)
+    gl = canvas.getContext("webgl");
+    if (!gl) {
+      return;
     }
 
     
-    window.requestAnimationFrame(drawScene);		
+    // Get the strings for our GLSL shaders
+    var vertexShaderSource = document.querySelector("#vertex-shader-2d").text;
+    var fragmentShaderSource = document.querySelector("#fragment-shader-2d").text;
+
+    var vertexShaderSource_2 = document.querySelector("#vertex-shader-2d_2").text;
+  
+    // create GLSL shaders, upload the GLSL source, compile the shaders
+    var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+    var vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
+    program2 = createProgram(gl, vertexShader_2, fragmentShader);
+  
+    // Link the two shaders into a program
+    var program = createProgram(gl, vertexShader, fragmentShader);
+  
+    // look up where the vertex data needs to go.
+    var positionAttributeLocation = gl.getAttribLocation(program, "a_position");
+  
+    // Create a buffer and put three 2d clip space points in it
+    var positionBuffer = gl.createBuffer();
+  
+    // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  
+    var resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution");
+    
+
+    var positions = [
+      0, 1,
+      0, 0, 
+      1, 0,
+      0, 0, 
+      10,
+    ];
+    
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+  
+    // code above this line is initialization code.
+    // code below this line is rendering code.
+  
+    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+  
+    // Tell WebGL how to convert from clip space to pixels
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  
+    // Tell it to use our program (pair of shaders)
+    gl.useProgram(program);
+    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height)
+
+    // Turn on the attribute
+    gl.enableVertexAttribArray(positionAttributeLocation);
+  
+    // Bind the position buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  
+    // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    var size = 2;          // 2 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    gl.vertexAttribPointer(
+        positionAttributeLocation, size, type, normalize, stride, offset);
+  
+    // draw
+    var primitiveType = gl.TRIANGLES;
+    var offset = 0;
+    var count = 3;
+    gl.drawArrays(primitiveType, offset, count);
+
+    gl.useProgram(program2);
+    var resolutionUniformLocation = gl.getUniformLocation(program2, "u_resolution");
+    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
+    program2.projection_uniform_location = gl.getUniformLocation(program2, "projection");
+    
+    
+    
+    
+    
+
+    var positions2 = [
+        0, 0, -1,
+        1, 0, 0,
+        0, 1, 0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions2), gl.STATIC_DRAW);
+    // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    var size = 3;          // 2 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    gl.vertexAttribPointer(
+        positionAttributeLocation, size, type, normalize, stride, offset);
+
+    // console.log('here',program2)
+    
+    draw();
+  }
+
+
+function draw(){
+  
+  var viewMatrix = utils.MakeView(0,0,0,0,0);
+  var worldMatrix = utils.MakeWorld(0,0,0,sliderValuex,sliderValuey,sliderValuez,1);
+  var projectionMatrix = utils.MakePerspective(60,2,1,300);
+
+  var primitiveType = gl.TRIANGLES;
+  var offset = 0;
+  var count = 3;
+  
+  //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
+  var projection_matrix_uniform = utils.multiplyMatrices(utils.multiplyMatrices(worldMatrix, viewMatrix), projectionMatrix);
+
+  gl.uniformMatrix4fv(program2.projection_uniform_location, false, projection_matrix_uniform);
+  gl.drawArrays(primitiveType, offset, count);
+  window.requestAnimationFrame(draw);
 }
 
 
-// var canvas = document.getElementById("canvas");
-// var context = canvas.getContext("2d");
-// context.fillStyle = "#FF0000";
-// context.fillRect(0,0,150,75);
 
-// async function load_object(){
-//     const response = await fetch("./assets/ghost.obj");
-// }
+function createShader(gl, type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return shader;
+  }
+
+  console.log(gl.getShaderInfoLog(shader));
+  gl.deleteShader(shader);
+}
+
+function createProgram(gl, vertexShader, fragmentShader) {
+  var program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (success) {
+    return program;
+  }
+
+  console.log(gl.getProgramInfoLog(program));
+  gl.deleteProgram(program);
+}
+
+var sliderValuex = 1;
+function onSliderChangex(value){
+    console.log("Slider value changed to "+value);
+    sliderValuex = value;
+}
+var sliderValuey = 1;
+function onSliderChangey(value){
+    console.log("Slider value changed to "+value);
+    sliderValuey = value;
+}
+var sliderValuez = 1;
+function onSliderChangez(value){
+    console.log("Slider value changed to "+value);
+    sliderValuez = value;
+}
+
+main();

@@ -1,21 +1,87 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Platform maker</title>
-        <script src = "app.js"></script>
-        <script type = "text/plain" src="./assets/ghost.obj" id="ghost"></script>
-        <script src="webgl-obj-loader.min.js"></script>
+        <title>title</title>
+        <script src="https://greggman.github.io/webgl-lint/webgl-lint.js"></script>
         <script src="utils.js"></script>
-        <script src="perspective.js"></script>
-        <script src="texture.js"></script>
-        <script src="./assets/model_ghost.js"></script>
     </head>
-<body onLoad="main();">
-    
 
-    <h1>Platform maker</h1>
-    <center><p id="p1">Transforms go here</p></center>
-    <canvas id="my-canvas" width="500" height="500" style="border:1px solid #c3c3c3;">Your browser doesn't support the canvas element :(</canvas>
-    
-</body>
+    <body>
+        <canvas id='canvas'></canvas>
+        <table>
+            <tr>
+                <p><b> Slider </b></p>
+                <div id="slider1"> rotation x -50 
+                    <input id="slide1" type="range" min="-50" max="50" step="1" value="0" onchange="onSliderChangex(this.value);"/> 50 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <p><b> Slider </b></p>
+                <div id="slider1"> rotation y -50 
+                    <input id="slide1" type="range" min="-50" max="50" step="1" value="0" onchange="onSliderChangey(this.value);"/> 50 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <p><b> Slider </b></p>
+                <div id="slider1"> rotation z -50 
+                    <input id="slide1" type="range" min="-50" max="50" step="1" value="0" onchange="onSliderChangez(this.value);"/> 50 <br/>	
+                </div>
+            </tr>
+        </table>
+    </body>
+
+    <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+
+    <script  id="vertex-shader-2d" type="notjs">
+
+        // an attribute will receive data from a buffer
+        attribute vec2 a_position;
+        uniform vec2 u_resolution;
+      
+        // all shaders have a main function
+        void main() {
+            // vec2 zeroToOne = a_position / u_resolution;
+            // vec2 zeroToTwo = zeroToOne * 2.0;
+            // vec2 clipSpace = zeroToTwo - 1.0;
+            vec2 scaled = a_position * 100.0;
+            vec2 clipSpace = (scaled / u_resolution) * 2.0 - 1.0;
+            gl_Position = vec4(clipSpace, 0, 1);
+        }
+      
+      </script>
+
+      <script  id="vertex-shader-2d_2" type="notjs">
+
+        // an attribute will receive data from a buffer
+        attribute vec3 a_position;
+        uniform vec2 u_resolution;
+        uniform mat4 projection;
+      
+        // all shaders have a main function
+        void main() {
+            //vec4 transformed = projection * vec4(a_position, 1);
+            //vec4 normalized = transformed / transformed.w;
+            //vec2 clipSpace = (transformed.xy / u_resolution) * 2.0 - 1.0;
+            //gl_Position = vec4(clipSpace, 0, 1);
+
+            gl_Position = projection * vec4(a_position, 1);
+        }
+      
+      </script>
+
+      <script  id="fragment-shader-2d" type="notjs">
+      
+        // fragment shaders don't have a default precision so we need
+        // to pick one. mediump is a good default
+        precision mediump float;
+      
+        void main() {
+          // gl_FragColor is a special variable a fragment shader
+          // is responsible for setting
+          gl_FragColor = vec4(1, 0, 0.5, 1); // return redish-purple
+        }
+      
+      </script>
+
+      <script src='app.js'></script>
 </html>
