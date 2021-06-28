@@ -101,9 +101,13 @@ function main() {
     
 
     var positions2 = [
-        0, 0, -2,
-        1, 0, -2,
-        0, 1, -2,
+        // 0, 0, -2,
+        // 1, 0, -2,
+        // 0, 1, -2,
+        0, 0, 0,
+        0, 1, 0,
+        -1, 0, 0,
+        
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions2), gl.STATIC_DRAW);
     // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
@@ -121,18 +125,44 @@ function main() {
   }
 
 
+
 function draw(){
   
-  var viewMatrix = utils.MakeView(0,0,0,0,0);
-  var worldMatrix = utils.MakeWorld(0,0,0,sliderValuex,sliderValuey,sliderValuez,1);
-  var projectionMatrix = utils.MakePerspective(60,2,1,300);
+  var viewMatrix = utils.MakeView(sliderValuex,sliderValuey,sliderValuez,0,0);
+  // var worldMatrix = utils.MakeWorld(0,0,0,sliderValuex,sliderValuey,sliderValuez,1);
+  // var projectionMatrix = utils.MakePerspective(60,2,nearPlane,farPlane);
+
+  // Make an isometric view
+	let w = 1;
+	let a = 2;
+	let n = nearPlane;
+	let f = farPlane;
+	let orthogonal_projection =  [1/w,	0.0,		0.0,		0.0,
+                          0.0,		a/w,		0.0,		0.0,
+                          0.0,		0.0,		-2/(f-n),		-(f+n)/(f-n),
+                          0.0,		0.0,		0.0,		1.0];
+  let cos_45 = Math.cos(45/180*Math.PI)
+  let sin_45 = Math.sin(45/180*Math.PI)
+  let cos_35 = Math.cos(-35.26/180*Math.PI)
+  let sin_35 = Math.sin(-35.26/180*Math.PI)
+  let x_rotation = [1, 0, 0, 0,
+            0, cos_35, sin_35, 0,
+            0, -sin_35, cos_35, 0,
+            0, 0, 0, 1];
+  
+  let y_rotation = [cos_45, 0, sin_45, 0,
+            0, 1, 0, 0,
+            -sin_45, 0, cos_45, 0,
+            0, 0, 0, 1];
+  var A1 =  utils.multiplyMatrices(orthogonal_projection, x_rotation)
+  let projectionMatrix = utils.multiplyMatrices(A1, y_rotation)
 
   var primitiveType = gl.TRIANGLES;
   var offset = 0;
   var count = 3;
   
   //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
-  var projection_matrix_uniform = utils.multiplyMatrices(utils.multiplyMatrices(worldMatrix, viewMatrix), projectionMatrix);
+  var projection_matrix_uniform = utils.multiplyMatrices(projectionMatrix, viewMatrix);
 
   gl.uniformMatrix4fv(program2.projection_uniform_location, false, projection_matrix_uniform);
   gl.drawArrays(primitiveType, offset, count);
@@ -182,6 +212,16 @@ var sliderValuez = 1;
 function onSliderChangez(value){
     console.log("Slider value changed to "+value);
     sliderValuez = value;
+}
+var nearPlane = 1;
+function onSliderChangeNear(value){
+    console.log("Slider value changed to "+value);
+    nearPlane = value;
+}
+var farPlane = 10;
+function onSliderChangeFar(value){
+    console.log("Slider value changed to "+value);
+    farPlane = value;
 }
 
 main();
