@@ -101,9 +101,9 @@ function main() {
     
 
     var positions2 = [
-        0, 0, -1,
-        1, 0, 0,
-        0, 1, 0,
+        0, 0, -2,
+        1, 0, -2,
+        0, 1, -2,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions2), gl.STATIC_DRAW);
     // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
