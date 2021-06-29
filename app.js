@@ -158,7 +158,7 @@ function draw(){
   drawAxisLines();
   drawYplane();
   
-  mountain = new OBJ.Mesh(mountainStr);
+  let mountain = new OBJ.Mesh(mountainStr);
   drawModel(mountain);
   // cloud = 
   
