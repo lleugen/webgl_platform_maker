@@ -65,12 +65,12 @@ function drawYplane(){
     gl.useProgram(program);
     gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_1));
     var plane = [
-        -10,0,-10,
-        -10,0,10,
-        10,0,-10,
-        10,0,-10,
-        -10,0,10,
-        10,0,10,
+        -50,0,-50,
+        -50,0,50,
+        50,0,-50,
+        50,0,-50,
+        -50,0,50,
+        50,0,50,
     ]
     var planeBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, planeBuffer);
