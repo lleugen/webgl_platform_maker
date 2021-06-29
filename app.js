@@ -19,12 +19,12 @@ var viewMatrix;
 var projectionMatrix;
 
 var brickStr;
-var couldStr;
+var cloudStr;
 var cylinderStr;
 var hedgeStr;
 var mountainStr;
 var rockStr;
-var square;
+var squareStr;
 var treeStr;
 
 
@@ -34,12 +34,12 @@ async function loadShaders(){
   await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
   'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj'], function (meshText) {
     brickStr = meshText[0];
-    couldStr = meshText[1];
+    cloudStr = meshText[1];
     cylinderStr = meshText[2];
     hedgeStr = meshText[3];
     mountainStr = meshText[4];
     rockStr = meshText[5];
-    square = meshText[6];
+    squareStr = meshText[6];
     treeStr = meshText[7];
   });
 }
@@ -158,9 +158,38 @@ function draw(){
   drawAxisLines();
   drawYplane();
   
-  let mountain = new OBJ.Mesh(mountainStr);
-  drawModel(mountain);
-  // cloud = 
+  let worldMatrix
+  worldMatrix = utils.MakeWorld(0,0,0,0,0,0,1);
+  let mountain = new OBJ.Mesh(mountainStr, worldMatrix);
+  drawModel(mountain, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(10,0,0,0,0,0,1);
+  let cloud = new OBJ.Mesh(cloudStr, worldMatrix);
+  drawModel(cloud, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(20,0,0,0,0,0,1);
+  let cylinder = new OBJ.Mesh(cylinderStr, worldMatrix);
+  drawModel(cylinder, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(30,0,0,0,0,0,1);
+  let brick = new OBJ.Mesh(brickStr, worldMatrix);
+  drawModel(brick, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(0,0,10,0,0,0,1);
+  let hedge = new OBJ.Mesh(hedgeStr, worldMatrix);
+  drawModel(hedge, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(0,0,20,0,0,0,1);
+  let rock = new OBJ.Mesh(rockStr, worldMatrix);
+  drawModel(rock, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(0,0,30,0,0,0,1);
+  let square = new OBJ.Mesh(squareStr, worldMatrix);
+  drawModel(square, worldMatrix);
+
+  worldMatrix = utils.MakeWorld(0,0,40,0,0,0,1);
+  let tree = new OBJ.Mesh(treeStr, worldMatrix);
+  drawModel(tree, worldMatrix);
   
 
   window.requestAnimationFrame(draw);

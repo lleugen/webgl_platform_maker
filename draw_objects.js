@@ -79,7 +79,7 @@ function drawYplane(){
     gl.drawArrays(gl.TRIANGLES, 0, plane.length/3);
 }
 
-function drawModel(objectMesh){
+function drawModel(objectMesh, worldMatrix){
     gl.useProgram(program2);
     // create vertex buffer
     objectMesh.vertexBuffer = gl.createBuffer();
@@ -103,7 +103,7 @@ function drawModel(objectMesh){
     //##############################################################
     // update W matrix
 
-    var worldMatrix = utils.MakeWorld(sliderValuex,sliderValuey,sliderValuez,worldAnglex,worldAngley,worldAnglez,1);
+    // var worldMatrix = utils.MakeWorld(sliderValuex,sliderValuey,sliderValuez,worldAnglex,worldAngley,worldAnglez,1);
     //##############################################################
     //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
     var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
