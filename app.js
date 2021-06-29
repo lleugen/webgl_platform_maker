@@ -9,9 +9,47 @@ var program2 = null;
 
 var objectMesh = null;
 
+
+
+
+var lookRadius = 5
+var elevation = -15.0;
+var angle = 0.0;
+var cx = 4.5;
+var cy = 0.0;
+var cz = 10.0;
+var mouseState = false;
+var lastMouseX = -100, lastMouseY = -100;
+function doMouseDown(event) {
+	lastMouseX = event.pageX;
+	lastMouseY = event.pageY;
+	mouseState = true;
+}
+function doMouseUp(event) {
+	lastMouseX = -100;
+	lastMouseY = -100;
+	mouseState = false;
+}
+function doMouseMove(event) {
+	if(mouseState) {
+		var dx = event.pageX - lastMouseX;
+		var dy = lastMouseY - event.pageY;
+		lastMouseX = event.pageX;
+		lastMouseY = event.pageY;
+		
+		if((dx != 0) || (dy != 0)) {
+			angle = angle + 0.5 * dx;
+			elevation = elevation + 0.5 * dy;
+		}
+	}
+}
+
 function main() {
     // Get A WebGL context
     var canvas = document.querySelector("#canvas");
+    canvas.addEventListener("mousedown", doMouseDown, false);
+    canvas.addEventListener("mouseup", doMouseUp, false);
+    canvas.addEventListener("mousemove", doMouseMove, false);
     console.log(canvas)
     gl = canvas.getContext("webgl2");
     if (!gl) {
@@ -29,6 +67,9 @@ function main() {
 
     // Link the two shaders into a program
     program2 = createProgram(gl, vertexShader_2, fancyFragmentShader);
+
+    program = createProgram(gl, vertexShader_2, fragmentShader);
+    program.projection_uniform_location = gl.getUniformLocation(program, "projection");
     // Tell it to use our program (pair of shaders)
     gl.useProgram(program2);
     //find attribute locations
@@ -116,13 +157,17 @@ function main() {
 
 
 function draw(){
+  gl.useProgram(program2);
+  gl.bindBuffer(gl.ARRAY_BUFFER, objectMesh.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectMesh.vertices), gl.STATIC_DRAW);
+  gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
   
   // update WV matrix
 	// let cz = 10 * Math.cos(utils.degToRad(-cameraAngle)) * Math.cos(utils.degToRad(-cameraElevation));
 	// let cx = 10 * Math.sin(utils.degToRad(-cameraAngle)) * Math.cos(utils.degToRad(-cameraElevation));
 	// let cy = 10 * Math.sin(utils.degToRad(-cameraElevation));
 	let viewMatrix = utils.MakeView(sliderValuex, sliderValuey, sliderValuez, cameraElevation, -cameraAngle);
-  var worldMatrix = utils.MakeWorld(0,0,0,worldAnglex,worldAngley,worldAnglez,1);
+  var worldMatrix = utils.MakeWorld(0,0,2,worldAnglex,worldAngley,worldAnglez,1);
 
   // Make an isometric view
   if(projectionType == "orthogonal"){
@@ -173,11 +218,74 @@ function draw(){
   var wvpMatrix = utils.multiplyMatrices(worldMatrix, projectionMatrix)
   var wvpMatrix = utils.multiplyMatrices(wvpMatrix, viewMatrix);
 
-  gl.uniformMatrix4fv(program2.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix));
+  //##############################################################
+  var perspProjectionMatrix = utils.MakePerspective(65, canvas.width / canvas.height, 0.1, 100.0)
+
+	// update WV matrix
+	cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+	cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+	cy = lookRadius * Math.sin(utils.degToRad(-elevation));
+	viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+	projectionMatrix = utils.multiplyMatrices(perspProjectionMatrix, viewMatrix);
+  //##############################################################
+
+  gl.uniformMatrix4fv(program2.projection_uniform_location, false, utils.transposeMatrix(projectionMatrix));
   gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, 0);
+
+  // var worldMatrix = utils.MakeWorld(0,0,-2,worldAnglex,worldAngley,worldAnglez,1);
+  // var wvpMatrix = utils.multiplyMatrices(worldMatrix, projectionMatrix)
+  // var wvpMatrix = utils.multiplyMatrices(wvpMatrix, viewMatrix);
+  // gl.uniformMatrix4fv(program2.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix));
+  // gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, 0);
+
+  // drawAxisLines();
+  // drawYplane();
   // gl.drawArrays(primitiveType, offset, count);
   window.requestAnimationFrame(draw);
+
+
+
+
+
+
+  function drawAxisLines(){
+  
+    var lines = [
+      0,0,0,
+      10,0,0,
+      0,0,0,
+      0,10,0,
+      0,0,0,
+      0,0,10,
+    ]
+    var lineBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.LINES, 0, lines.length/3);
+  }
+  
+  function drawYplane(){
+    gl.useProgram(program);
+
+    gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix));
+    var plane = [
+      -10,0,-10,
+      -10,0,10,
+      10,0,-10,
+      10,0,-10,
+      -10,0,10,
+      10,0,10,
+    ]
+    var planeBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, planeBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(plane), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, plane.length/3);
+  }
 }
+
+
 
 
 
