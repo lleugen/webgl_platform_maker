@@ -16,14 +16,14 @@ function onSliderChangez(value){
 var nearPlane = 1;
 function onSliderChangeNear(value){
     console.log("Slider value changed to "+value);
-    nearPlane = value;
+    nearPlane = parseFloat(value);
 }
-var farPlane = 10;
+var farPlane = 100;
 function onSliderChangeFar(value){
     console.log("Slider value changed to "+value);
-    farPlane = value;
+    farPlane = parseFloat(value);
 }
-var cameraWindowWidth = 5;
+var cameraWindowWidth = 10;
 function onSliderChangew(value){
     console.log("Slider value changed to "+value);
     cameraWindowWidth = value;

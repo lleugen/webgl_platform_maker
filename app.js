@@ -18,8 +18,34 @@ var fancyFragmentShader;
 var viewMatrix;
 var projectionMatrix;
 
+var brickStr;
+var couldStr;
+var cylinderStr;
+var hedgeStr;
+var mountainStr;
+var rockStr;
+var square;
+var treeStr;
+
+
+
 
 async function loadShaders(){
+  await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
+  'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj'], function (meshText) {
+    brickStr = meshText[0];
+    couldStr = meshText[1];
+    cylinderStr = meshText[2];
+    hedgeStr = meshText[3];
+    mountainStr = meshText[4];
+    rockStr = meshText[5];
+    square = meshText[6];
+    treeStr = meshText[7];
+  });
+}
+loadShaders();
+
+async function loadModels(){
   await utils.loadFiles(['vertex-shader-2d.glsl', 'vertex-shader-2d_2.glsl', 'fragment-shader-2d.glsl', 'fancyFragmentShader.glsl'], function (shaderText) {
     vertexShaderSource = shaderText[0];
     vertexShaderSource_2 = shaderText[1];
@@ -27,7 +53,7 @@ async function loadShaders(){
     fancyFragmentShaderSource = shaderText[3];
   });
 }
-loadShaders();
+loadModels();
 
 
 
@@ -42,6 +68,7 @@ function main() {
     }
     // this is a linter which helps to get more information when errors occur
     const ext = gl.getExtension('GMAN_debug_helper');
+
     // create shaders from sources loaded above
     fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
     vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
@@ -62,19 +89,13 @@ function main() {
     program2.matcol = gl.getUniformLocation(program2, "matcol");
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    // load object from file
-    objectMesh = new OBJ.Mesh(ghostMesh);
+
     // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // gl.useProgram(program2);
-    // create vertex buffer
-    objectMesh.vertexBuffer = gl.createBuffer();
-    ext.tagObject(objectMesh.vertexBuffer, 'objectMesh.vertexBuffer');
-    // index buffer
-    objectMesh.indexBuffer = gl.createBuffer();
-    ext.tagObject(objectMesh.indexBuffer, "objectMesh.indexBuffer");
+    
+    
     gl.enable(gl.DEPTH_TEST);
 		gl.enable(gl.CULL_FACE);
 		gl.cullFace(gl.BACK);
@@ -88,6 +109,8 @@ function draw(){
 	cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
 	cy = lookRadius * Math.sin(utils.degToRad(-elevation));
 	viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+  // console.log(cx, cy, cz)
+  // viewMatrix = utils.MakeView(6,6,6, elevation, -angle);
   // Make projection matrix
   if(projectionType == "orthogonal"){
     let w = cameraWindowWidth;
@@ -126,6 +149,7 @@ function draw(){
     projectionMatrix = utils.multiplyMatrices(A1, y_rotation)
   }
   else if(projectionType == "perspective"){
+    console.log(nearPlane, farPlane)
     projectionMatrix = utils.MakePerspective(45,2,nearPlane,farPlane);
   }
 
@@ -133,6 +157,11 @@ function draw(){
   drawGhost();
   drawAxisLines();
   drawYplane();
+  
+  mountain = new OBJ.Mesh(mountainStr);
+  drawModel(mountain);
+  // cloud = 
+  
 
   window.requestAnimationFrame(draw);
 }

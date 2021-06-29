@@ -1,4 +1,4 @@
-var lookRadius = 5
+var lookRadius = 50;
 var elevation = -15.0;
 var angle = 0.0;
 var cx = 4.5;
