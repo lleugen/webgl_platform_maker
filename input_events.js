@@ -36,13 +36,13 @@ function doMouseMove(event) {
 			let cameraSpaceRay, worldSpaceRay;
 			let invView;
 			let cameraCoordinates;
-			renderer.updateObjectMouse(focusedObjectName, dx, dy);
+			// renderer.updateObjectMouse(focusedObjectName, dx, dy);
 			// raycast event.x and .y to y plane to find the new position of the object
 			// x = event.pageX * 2 / gl.canvas.width - 1;
 			// y = event.pageY * 2 / gl.canvas.height - 1;
-			x = event.pageX;
-			y = event.pageY;
-			// y = -y;
+			x = -(event.pageX - gl.canvas.width / 2);
+			y = (event.pageY - gl.canvas.height / 2);
+			console.log(event.pageX, event.pageY, x,y)
 			// console.log(x,y)
 			invProjection = utils.invertMatrix(projectionMatrix);
 			invView = utils.invertMatrix(viewMatrix)
@@ -53,11 +53,12 @@ function doMouseMove(event) {
 			worldSpaceRay = utils.normalizeVector3(worldSpaceRay);
 			// console.log(worldSpaceRay)
 			cameraCoordinates = [cx,cy,cz];
+			console.log('cam coords',cameraCoordinates)
 			// now calculate intersection with y=0
 			plane_x = -cy / worldSpaceRay[1] * worldSpaceRay[0] + cx;
 			plane_z = -cy / worldSpaceRay[1] * worldSpaceRay[2] + cz;
-			console.log(plane_x, plane_z);
-			renderer.updateObjectMouse('tree_1', plane_x, plane_z);
+			// console.log('updated coordinates',plane_x, plane_z);
+			renderer.updateObjectMouse('tree_0', plane_x, plane_z);
 			
 		}
 		

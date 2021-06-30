@@ -96,7 +96,7 @@ class staticObjectRenderer{
         delta[2] = delta[2]/delta[3];
         delta[3] = delta[3]/delta[3];
         // delta = utils.multiplyMatrixVector(utils.invertMatrix(viewMatrix), delta)
-        console.log(delta);
+        // console.log(delta);
         object.position[0] = delta[0];
         object.position[1] = delta[1];
         object.position[2] = delta[2];
@@ -113,12 +113,13 @@ class staticObjectRenderer{
         for(i=0; i<this.objects.length; i++){
             if(this.objects[i].name == name){
                 object = this.objects[i];
-                console.log('object selected', object.)
-
+                console.log('object selected', object.name, object.position);
+                break;
             }
         }   
         object.position[0] = dx;
         object.position[2] = dz;
+        console.log('new position',object.position);
 
         
     }
