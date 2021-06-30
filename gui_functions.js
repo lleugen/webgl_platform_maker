@@ -2,16 +2,19 @@ var sliderValuex = 1;
 function onSliderChangex(value){
     console.log("Slider value changed to "+value);
     sliderValuex = value;
+    renderer.updateObject(focusedObjectName);
 }
 var sliderValuey = 1;
 function onSliderChangey(value){
     console.log("Slider value changed to "+value);
     sliderValuey = value;
+    renderer.updateObject(focusedObjectName);
 }
 var sliderValuez = 1;
 function onSliderChangez(value){
     console.log("Slider value changed to "+value);
     sliderValuez = value;
+    renderer.updateObject(focusedObjectName);
 }
 var nearPlane = 1;
 function onSliderChangeNear(value){

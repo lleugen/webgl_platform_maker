@@ -27,8 +27,9 @@ var rockStr;
 var squareStr;
 var treeStr;
 
+var objectStrings = [];
 
-
+var focusedObjectName = 'world';
 
 async function loadShaders(){
   await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
@@ -41,6 +42,7 @@ async function loadShaders(){
     rockStr = meshText[5];
     squareStr = meshText[6];
     treeStr = meshText[7];
+    objectStrings = meshText;
   });
 }
 loadShaders();
@@ -55,9 +57,34 @@ async function loadModels(){
 }
 loadModels();
 
+var brick = new OBJ.Mesh(brickStr);
+var cloud = new OBJ.Mesh(cloudStr);
+var cylinder = new OBJ.Mesh(cylinderStr);
+var hedge = new OBJ.Mesh(hedgeStr);
+var mountain = new OBJ.Mesh(mountainStr);
+var rock = new OBJ.Mesh(rockStr);
+var square = new OBJ.Mesh(squareStr);
+var tree = new OBJ.Mesh(treeStr);
+
+var renderer;
+renderer = new staticObjectRenderer();
+renderer.addModel('tree', tree);
+renderer.addModel('hedge', hedge);
+renderer.addModel('rock', rock);
+renderer.drawNewObjectButtons();
+// let i;
+// for(i=0; i<objectStrings.length; i++){
+//   renderer.addModel()
+// }
+
 
 
 function main() {
+    
+
+
+
+
     canvas = document.querySelector("#canvas");
     // add input event listeners to the canvas, functions are defined in input_events.js
     addListeners(canvas);
@@ -153,68 +180,70 @@ function draw(){
     projectionMatrix = utils.MakePerspective(45,2,nearPlane,farPlane);
   }
 
+  
   // draw individual objects, functions defined in draw_objects.js
-  drawGhost();
+  // drawGhost();
   drawAxisLines();
+  renderer.drawObjects();
   // drawYplane();
   
   let worldMatrix
-  worldMatrix = utils.MakeWorld(0,0,30,0,0,0,1);
-  let mountain = new OBJ.Mesh(mountainStr, worldMatrix);
-  drawModel(mountain, worldMatrix);
+  // worldMatrix = utils.MakeWorld(0,0,30,0,0,0,1);
+  // let mountain = new OBJ.Mesh(mountainStr);
+  // drawModel(mountain, worldMatrix);
 
-  worldMatrix = utils.MakeWorld(0,30,0,0,0,0,1);
-  let lastUpdateTime = 0
-  var currentTime = (new Date).getTime();
-  var deltaC = (30 * (currentTime - lastUpdateTime)) / 1000.0;
-  var curRotation = utils.MakeRotateXYZMatrix(deltaC, -deltaC, deltaC);
-  lastUpdateTime = currentTime;
-  worldMatrix = utils.multiplyMatrices(worldMatrix, curRotation);
+  // worldMatrix = utils.MakeWorld(0,30,0,0,0,0,1);
+  // let lastUpdateTime = 0
+  // var currentTime = (new Date).getTime();
+  // var deltaC = (30 * (currentTime - lastUpdateTime)) / 1000.0;
+  // var curRotation = utils.MakeRotateXYZMatrix(deltaC, -deltaC, deltaC);
+  // lastUpdateTime = currentTime;
+  // worldMatrix = utils.multiplyMatrices(worldMatrix, curRotation);
 
-  let cloud_1 = new OBJ.Mesh(cloudStr, worldMatrix);
-  drawModel(cloud_1, worldMatrix);
-  worldMatrix = utils.MakeWorld(30,35,10,30,0,0,1);
-  let cloud_2 = new OBJ.Mesh(cloudStr, worldMatrix);
-  drawModel(cloud_2, worldMatrix);
+  // let cloud_1 = new OBJ.Mesh(cloudStr);
+  // drawModel(cloud_1, worldMatrix);
+  // worldMatrix = utils.MakeWorld(30,35,10,30,0,0,1);
+  // let cloud_2 = new OBJ.Mesh(cloudStr);
+  // drawModel(cloud_1, worldMatrix);
   
 
-  worldMatrix = utils.MakeWorld(0,0,-30,0,0,0,1);
-  let cylinder = new OBJ.Mesh(cylinderStr, worldMatrix);
-  drawModel(cylinder, worldMatrix);
+  // worldMatrix = utils.MakeWorld(0,0,-30,0,0,0,1);
+  // let cylinder = new OBJ.Mesh(cylinderStr);
+  // drawModel(cylinder, worldMatrix);
 
-  worldMatrix = utils.MakeWorld(0,15,0,0,0,0,0.1);
-  let brick = new OBJ.Mesh(brickStr, worldMatrix);
-  drawModel(brick, worldMatrix);
+  // worldMatrix = utils.MakeWorld(0,15,0,0,0,0,0.1);
+  // let brick = new OBJ.Mesh(brickStr);
+  // drawModel(brick, worldMatrix);
 
-  let hedge = new OBJ.Mesh(hedgeStr, worldMatrix);
-  let i;
-  for(i=-5; i<=5; i++){
-    worldMatrix = utils.MakeWorld(i*10,0,-50,0,0,0,0.5);
-    drawModel(hedge, worldMatrix);
-    worldMatrix = utils.MakeWorld(i*10,0,50,0,0,0,0.5);
-    drawModel(hedge, worldMatrix);
-  }
-  for(i=-4; i<5; i++){
-    worldMatrix = utils.MakeWorld(50,0,i*10,0,0,0,0.5);
-    drawModel(hedge, worldMatrix);
-    worldMatrix = utils.MakeWorld(-50,0,i*10,0,0,0,0.5);
-    drawModel(hedge, worldMatrix);
-  }
+  // let hedge = new OBJ.Mesh(hedgeStr);
+  // let i;
+  // for(i=-5; i<=5; i++){
+  //   worldMatrix = utils.MakeWorld(i*10,0,-50,0,0,0,0.5);
+  //   drawModel(hedge, worldMatrix);
+  //   worldMatrix = utils.MakeWorld(i*10,0,50,0,0,0,0.5);
+  //   drawModel(hedge, worldMatrix);
+  // }
+  // for(i=-4; i<5; i++){
+  //   worldMatrix = utils.MakeWorld(50,0,i*10,0,0,0,0.5);
+  //   drawModel(hedge, worldMatrix);
+  //   worldMatrix = utils.MakeWorld(-50,0,i*10,0,0,0,0.5);
+  //   drawModel(hedge, worldMatrix);
+  // }
 
-  worldMatrix = utils.MakeWorld(30,0,0,0,0,0,1);
-  let rock = new OBJ.Mesh(rockStr, worldMatrix);
-  drawModel(rock, worldMatrix);
+  // worldMatrix = utils.MakeWorld(30,0,0,0,0,0,1);
+  // let rock = new OBJ.Mesh(rockStr);
+  // drawModel(rock, worldMatrix);
 
   
-  let square = new OBJ.Mesh(squareStr, worldMatrix);
-  for(i=-3; i<4; i++){
-    worldMatrix = utils.MakeWorld(i*20,-15,0,0,0,0,1);
-    drawModel(square, worldMatrix);
-  }
+  // let square = new OBJ.Mesh(squareStr);
+  // for(i=-3; i<4; i++){
+  //   worldMatrix = utils.MakeWorld(i*20,-15,0,0,0,0,1);
+  //   drawModel(square, worldMatrix);
+  // }
 
-  worldMatrix = utils.MakeWorld(-30,0,0,0,0,0,1);
-  let tree = new OBJ.Mesh(treeStr, worldMatrix);
-  drawModel(tree, worldMatrix);
+  // worldMatrix = utils.MakeWorld(-30,0,0,0,0,0,1);
+  // let tree = new OBJ.Mesh(treeStr);
+  // drawModel(tree, worldMatrix);
   
   
 
