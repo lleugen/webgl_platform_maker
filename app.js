@@ -189,7 +189,7 @@ function draw(){
   // drawGhost();
   drawAxisLines();
   renderer.drawObjects();
-  // drawYplane();
+  drawYplane();
   
   let worldMatrix
   // worldMatrix = utils.MakeWorld(0,0,30,0,0,0,1);

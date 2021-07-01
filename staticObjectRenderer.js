@@ -133,7 +133,7 @@ class staticObjectRenderer{
     }
 
 
-    updateObjectMouse(name, dx, dz){
+    updateObjectMouse(name, x, z){
         // raycast on mouse down to id object and find intersection with y plane
         // use object selected with button for now
 
@@ -143,13 +143,14 @@ class staticObjectRenderer{
         for(i=0; i<this.objects.length; i++){
             if(this.objects[i].name == name){
                 object = this.objects[i];
-                console.log('object selected', object.name, object.position);
+                // console.log('object selected', object.name, object.position);
                 break;
             }
         }   
-        object.position[0] = dx;
-        object.position[2] = dz;
-        console.log('new position',object.position);
+        object.position[0] = x;
+        object.position[2] = z;
+
+        // console.log('new position',object.position);
 
         
     }

@@ -1,4 +1,4 @@
-var lookRadius = 100;
+var lookRadius = 30;
 var elevation = -15.0;
 var angle = 0.0;
 var cx = 100.0;
@@ -19,12 +19,11 @@ function doMouseUp(event) {
 }
 function doMouseMove(event) {
 	if(mouseState) {
-		var dx = event.pageX - lastMouseX;
-		var dy = lastMouseY - event.pageY;
-		lastMouseX = event.pageX;
-		lastMouseY = event.pageY;
-		
 		if(focusedObjectName == 'world'){
+			var dx = event.pageX - lastMouseX;
+			var dy = lastMouseY - event.pageY;
+			lastMouseX = event.pageX;
+			lastMouseY = event.pageY;
 			if((dx != 0) || (dy != 0)) {
 				angle = angle + 0.5 * dx;
 				elevation = elevation + 0.5 * dy;
@@ -36,29 +35,32 @@ function doMouseMove(event) {
 			let cameraSpaceRay, worldSpaceRay;
 			let invView;
 			let cameraCoordinates;
-			// renderer.updateObjectMouse(focusedObjectName, dx, dy);
 			// raycast event.x and .y to y plane to find the new position of the object
-			// x = event.pageX * 2 / gl.canvas.width - 1;
-			// y = event.pageY * 2 / gl.canvas.height - 1;
-			x = (event.offsetX - gl.canvas.width / 2);
-			y = (event.offsetY - gl.canvas.height / 2);
-			console.log(event.pageX, event.pageY, x,y)
-			// console.log(x,y)
+			// canvas coordinates -> normalized screen coordinates
+			x = event.pageX * 2 / gl.canvas.width - 1;
+			y = event.pageY * 2 / gl.canvas.height - 1;
+			y = -y;
+			
 			invProjection = utils.invertMatrix(projectionMatrix);
 			invView = utils.invertMatrix(viewMatrix)
 			cameraSpaceRay = utils.multiplyMatrixVector(invProjection, [x, y, -1, 1]);
-			// console.log(cameraSpaceRay)
+			cameraSpaceRay[3] = 0;
+			// console.log('cam',cameraSpaceRay)
 			worldSpaceRay = utils.multiplyMatrixVector(invView, cameraSpaceRay);
-			// console.log(worldSpaceRay)
-			worldSpaceRay = utils.normalizeVector3(worldSpaceRay);
-			// console.log(worldSpaceRay)
-			cameraCoordinates = [cx,cy,cz];
-			console.log('cam coords',cameraCoordinates)
-			// now calculate intersection with y=0
+			// console.log('world',worldSpaceRay)
+			worldSpaceRay[0] = worldSpaceRay[0]/worldSpaceRay[2]
+			worldSpaceRay[1] = worldSpaceRay[1]/worldSpaceRay[2]
+			worldSpaceRay[2] = worldSpaceRay[2]/worldSpaceRay[2]
+			// console.log('norm world',worldSpaceRay)
+
+
+			cameraCoordinates = [5,5,5];
+			// console.log('cam coords',cameraCoordinates)
+			// // now calculate intersection with y=0
 			plane_x = -cy / worldSpaceRay[1] * worldSpaceRay[0] + cx;
 			plane_z = -cy / worldSpaceRay[1] * worldSpaceRay[2] + cz;
 			// console.log('updated coordinates',plane_x, plane_z);
-			renderer.updateObjectMouse('tree_0', plane_x, plane_z);
+			renderer.updateObjectMouse(focusedObjectName, plane_x, plane_z);
 			
 		}
 		
