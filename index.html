@@ -18,7 +18,7 @@
 
     <body>
         
-        <canvas id='canvas', width='1000', height='500'></canvas>
+        <canvas id='canvas', width='1000', height='500', style="border:1px solid #000000;"></canvas>
         <table>
             <tr>
                 <div id="slider1"> object x -50 
@@ -52,12 +52,12 @@
             </tr>
             <tr>
                 <div id="slider1"> near plane -10 
-                    <input id="slide1" type="range" min="-10" max="10" step="0.1" value="0.1" onchange="onSliderChangeNear(this.value);"/> 10 <br/>	
+                    <input id="slide1" type="range" min="-10" max="10" step="0.1" value="1" onchange="onSliderChangeNear(this.value);"/> 10 <br/>	
                 </div>
             </tr>
             <tr>
                 <div id="slider1"> far plane -10 
-                    <input id="slide1" type="range" min="-10" max="300" step="1" value="100" onchange="onSliderChangeFar(this.value);"/> 300 <br/>	
+                    <input id="slide1" type="range" min="-10" max="300" step="1" value="300" onchange="onSliderChangeFar(this.value);"/> 300 <br/>	
                 </div>
             </tr>
             <!-- <tr>

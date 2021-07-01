@@ -65,25 +65,7 @@ async function loadShaders(){
 function main() {
   loadShaders();
   loadModels();
-  var brick = new OBJ.Mesh(brickStr);
-  var cloud = new OBJ.Mesh(cloudStr);
-  var cylinder = new OBJ.Mesh(cylinderStr);
-  var hedge = new OBJ.Mesh(hedgeStr);
-  var mountain = new OBJ.Mesh(mountainStr);
-  var rock = new OBJ.Mesh(rockStr);
-  var square = new OBJ.Mesh(squareStr);
-  var tree = new OBJ.Mesh(treeStr);
   
-  renderer = new staticObjectRenderer();
-  renderer.addModel('tree', tree);
-  renderer.addModel('hedge', hedge);
-  renderer.addModel('rock', rock);
-  renderer.addModel('brick', brick);
-  renderer.addModel('cloud', cloud);
-  renderer.addModel('cylinder', cylinder);
-  renderer.addModel('mountain', mountain);
-  renderer.addModel('square', square);
-  renderer.drawNewObjectButtons();
     
 
 
@@ -97,6 +79,9 @@ function main() {
   if (!gl) {
     return;
   }
+
+  
+
   // this is a linter which helps to get more information when errors occur
   const ext = gl.getExtension('GMAN_debug_helper');
 
@@ -121,6 +106,28 @@ function main() {
   webglUtils.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
+
+  // add model created buffers and puts the data inside, it need to have the locations already set
+  var brick = new OBJ.Mesh(brickStr);
+  var cloud = new OBJ.Mesh(cloudStr);
+  var cylinder = new OBJ.Mesh(cylinderStr);
+  var hedge = new OBJ.Mesh(hedgeStr);
+  var mountain = new OBJ.Mesh(mountainStr);
+  var rock = new OBJ.Mesh(rockStr);
+  var square = new OBJ.Mesh(squareStr);
+  var tree = new OBJ.Mesh(treeStr);
+  
+  renderer = new staticObjectRenderer();
+  renderer.addModel('tree', tree);
+  renderer.addModel('hedge', hedge);
+  renderer.addModel('rock', rock);
+  renderer.addModel('brick', brick);
+  renderer.addModel('cloud', cloud);
+  renderer.addModel('cylinder', cylinder);
+  renderer.addModel('mountain', mountain);
+  renderer.addModel('square', square);
+  renderer.drawNewObjectButtons();
+
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -130,7 +137,14 @@ function main() {
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
   gl.cullFace(gl.BACK);
+
+  // renderer.addObject('tree', 'tree', [0,0,0], [0,0,0], 0.5);
+
+  // let vertices, indices = drawSphere();
   // do the magic
+  
+
+
   draw();
 }
 
@@ -189,7 +203,9 @@ function draw(){
   // drawGhost();
   drawAxisLines();
   renderer.drawObjects();
-  drawYplane();
+  // drawYplane();
+  // drawSphere();
+  
   
   let worldMatrix
   // worldMatrix = utils.MakeWorld(0,0,30,0,0,0,1);

@@ -21,7 +21,7 @@ function onSliderChangeNear(value){
     console.log("Slider value changed to "+value);
     nearPlane = parseFloat(value);
 }
-var farPlane = 100;
+var farPlane = 300;
 function onSliderChangeFar(value){
     console.log("Slider value changed to "+value);
     farPlane = parseFloat(value);

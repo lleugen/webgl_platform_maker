@@ -1,20 +1,22 @@
 class staticObjectRenderer{
     constructor(){
         this.objects = [];
-        this.models = {};
+        this.models = [];
     }
 
 
-    addObject(name, type, position, orientation){
+    addObject(name, type, position, orientation, scale=1){
         let newObject = {
             'name': name,
-            'type': type,
+            'type': type, // model name
             'position': position,
-            'orientation': orientation
+            'orientation': orientation,
+            'scale': scale
         }
         this.objects.push(newObject);
         this.drawSelectButton(newObject.name);
         this.drawDeleteButton(newObject.name);
+        focusedObjectName = name;
         console.log('created new object', name)
     }
 
@@ -28,8 +30,23 @@ class staticObjectRenderer{
 
 
     addModel(name, model){
-        this.models[name] = model;
+        let vertexBuffer;
+        vertexBuffer = gl.createBuffer();
+        let indexBuffer;
+        indexBuffer = gl.createBuffer();
+    
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+
+        let newModel = {'name': name,
+                        'model': model,
+                        'vertexBuffer': vertexBuffer,
+                        'indexBuffer': indexBuffer};
+        this.models.push(newModel);
     }
 
 
@@ -44,7 +61,8 @@ class staticObjectRenderer{
                 this.objects[i].orientation[1],
                 this.objects[i].orientation[2],
                 1);
-            let model = this.models[this.objects[i].type];  
+            let model = this.models.filter(item => item.name == renderer.objects[i].type);
+            model = model[0];
             drawModel(model, worldMatrix);
         }
     }
@@ -56,13 +74,13 @@ class staticObjectRenderer{
         let button;
         let text;
         let space = document.getElementById("list2");
-        let keys = Object.keys(this.models);
+        // let keys = Object.keys(this.models);
         let item;
         // console.log(keys)
         
-        for(i=0; i<keys.length; i++){
+        for(i=0; i<this.models.length; i++){
             button = document.createElement("button");
-            button.innerHTML = keys[i];
+            button.innerHTML = this.models[i].name;
             
             text = document.createElement("INPUT");
             text.size = 7;
@@ -133,7 +151,7 @@ class staticObjectRenderer{
     }
 
 
-    updateObjectMouse(name, x, z){
+    updateObjectPosition(name, x, z){
         // raycast on mouse down to id object and find intersection with y plane
         // use object selected with button for now
 
@@ -153,5 +171,19 @@ class staticObjectRenderer{
         // console.log('new position',object.position);
 
         
+    }
+
+
+    updateObjectHeight(name, h){
+        let i;
+        let object;
+        for(i=0; i<this.objects.length; i++){
+            if(this.objects[i].name == name){
+                object = this.objects[i];
+                // console.log('object selected', object.name, object.position);
+                break;
+            }
+        }   
+        object.position[1] += h;
     }
 }
