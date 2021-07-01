@@ -16,17 +16,20 @@ function doMouseDown(event) {
 	let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
 	let hit = false;
 	for(i=0; i<renderer.objects.length; i++){
-		if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 5)){
-			focusedObjectName = renderer.objects[i].name;
-			hit = true;
-			console.log(focusedObjectName)
-			break;
+		if(renderer.objects[i].name != 'triangle_0'){
+			if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 1)){
+				focusedObjectName = renderer.objects[i].name;
+				hit = true;
+				console.log(focusedObjectName)
+				break;
+			}
 		}
+		
 	}
-	if(!hit){
-		focusedObjectName='world';
-		console.log('no hit, reset')
-	}
+	// if(!hit){
+	// 	focusedObjectName='world';
+	// 	console.log('no hit, reset')
+	// }
 
 }
 function doMouseUp(event) {
@@ -45,6 +48,29 @@ function doWheelRotate(event){
 }
 function doMouseMove(event) {
 	if(mouseState) {
+		//########################################
+		let x, y;
+		// raycast event.x and .y to y plane to find the new position of the object
+		// canvas coordinates -> normalized screen coordinates
+		x = event.pageX * 2 / gl.canvas.width - 1;
+		y = event.pageY * 2 / gl.canvas.height - 1;
+		y = -y;
+		// let height = renderer.objects.filter(item => item.name == focusedObjectName);
+		// height = height[0].position[1];
+		let height = 0;
+
+		let worldSpaceRay = raycast(x,y);
+		plane_x = (height-cy) / worldSpaceRay[1] * worldSpaceRay[0] + cx;
+		plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
+		let triangleModel = renderer.models.filter(item=>item.name=='triangle')[0]
+		triangleModel.model.vertices[0] = plane_x;
+		triangleModel.model.vertices[2] = plane_z;
+		// console.log(triangleModel.model.vertices)
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, triangleModel.vertexBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleModel.model.vertices), gl.STATIC_DRAW);
+		gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+		//##########################################
 		if(focusedObjectName == 'world'){
 			var dx = event.pageX - lastMouseX;
 			var dy = lastMouseY - event.pageY;
@@ -74,8 +100,12 @@ function doMouseMove(event) {
 			height = height[0].position[1];
 			plane_x = (height-cy) / worldSpaceRay[1] * worldSpaceRay[0] + cx;
 			plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
-			console.log('updated coordinates',plane_x, plane_z);
-			renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z);
+			// console.log('updated coordinates',plane_x, plane_z);
+			if(focusedObjectName != 'triangle_0'){
+				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z);
+			}
+			
+			
 			
 		}
 		
@@ -104,6 +134,7 @@ function raycast(x, y){
 
 //This algorithm is taken from the book Real Time Rendering fourth edition
 function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sphereRadius){
+	console.log('ray start', rayStartPoint, 'direction',rayNormalisedDir, 'sphere centre',sphereCentre)
     //Distance between sphere origin and origin of ray
     var l = [sphereCentre[0] - rayStartPoint[0], sphereCentre[1] - rayStartPoint[1], sphereCentre[2] - rayStartPoint[2]];
     var l_squared = l[0] * l[0] + l[1] * l[1] + l[2] * l[2];

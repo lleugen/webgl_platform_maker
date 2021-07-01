@@ -126,6 +126,8 @@ function main() {
   renderer.addModel('cylinder', cylinder);
   renderer.addModel('mountain', mountain);
   renderer.addModel('square', square);
+  renderer.addModel('sphere', drawSphere());
+  renderer.addModel('triangle', createTriangle());
   renderer.drawNewObjectButtons();
 
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
@@ -204,7 +206,6 @@ function draw(){
   drawAxisLines();
   renderer.drawObjects();
   // drawYplane();
-  // drawSphere();
   
   
   let worldMatrix
