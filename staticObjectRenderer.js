@@ -13,7 +13,17 @@ class staticObjectRenderer{
             'orientation': orientation
         }
         this.objects.push(newObject);
-        this.drawButton(newObject.name);
+        this.drawSelectButton(newObject.name);
+        this.drawDeleteButton(newObject.name);
+        console.log('created new object', name)
+    }
+
+
+    deleteObject(name){
+        this.objects = this.objects.filter(function(object){return object.name != name});
+        this.deleteButton(name);
+        this.deleteButton('delete '+name);
+        console.log('deleted', name, this.objects);
     }
 
 
@@ -41,7 +51,7 @@ class staticObjectRenderer{
 
 
     drawNewObjectButtons(){
-        this.drawButton('world');
+        this.drawSelectButton('world');
         let i;
         let button;
         let text;
@@ -68,14 +78,34 @@ class staticObjectRenderer{
     }
 
 
-    drawButton(name){
+    drawSelectButton(name){
         let button;
         let buttonSpace = document.getElementById("buttons");
 
         button = document.createElement("button");
         button.innerHTML = name;
+        button.id = name;
         button.onclick = function(){focusedObjectName = this.innerHTML}
         buttonSpace.appendChild(button);
+    }
+
+
+    drawDeleteButton(name){
+        let button;
+        let buttonSpace = document.getElementById("buttons");
+
+        button = document.createElement("button");
+        button.innerHTML = 'delete ' + name;
+        button.id = 'delete ' + name;
+        button.onclick = function(){renderer.deleteObject(name);}
+        buttonSpace.appendChild(button);
+    }
+
+
+    deleteButton(name){
+        let button = document.getElementById(name);
+        button.remove();
+
     }
 
 

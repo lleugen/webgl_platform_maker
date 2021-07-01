@@ -40,8 +40,8 @@ function doMouseMove(event) {
 			// raycast event.x and .y to y plane to find the new position of the object
 			// x = event.pageX * 2 / gl.canvas.width - 1;
 			// y = event.pageY * 2 / gl.canvas.height - 1;
-			x = -(event.pageX - gl.canvas.width / 2);
-			y = (event.pageY - gl.canvas.height / 2);
+			x = (event.offsetX - gl.canvas.width / 2);
+			y = (event.offsetY - gl.canvas.height / 2);
 			console.log(event.pageX, event.pageY, x,y)
 			// console.log(x,y)
 			invProjection = utils.invertMatrix(projectionMatrix);
