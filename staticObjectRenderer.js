@@ -56,13 +56,13 @@ class staticObjectRenderer{
             
             text = document.createElement("INPUT");
             text.size = 7;
-            text.id = "text";
+            text.id = "text"+i;
             text.placeholder = 'object name';
 
             item = document.createElement('li');
             item.appendChild(text);
             item.appendChild(button);
-            button.onclick = function() {renderer.addObject(text.value == '' ? this.innerHTML + '_' + renderer.objects.length : text.value, this.innerHTML  , [0,0,0], [0,0,0])};
+            button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, this.innerHTML  , [0,0,0], [0,0,0])};
             space.appendChild(item);
         }
     }
