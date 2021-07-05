@@ -25,25 +25,7 @@ class staticObjectRenderer{
                         'vertexBuffer': vertexBuffer,
                         'indexBuffer': indexBuffer};
         this.models.push(newModel);
-
-        let i;
-        let button;
-        let text;
-        let space = document.getElementById("list2");
-        // let keys = Object.keys(this.models);
-        let item;
-        // console.log(keys)
-        button = document.createElement("button");
-        button.innerHTML = name;
-        text = document.createElement("INPUT");
-        text.size = 7;
-        text.id = "text"+this.models.length;
-        text.placeholder = 'object name';
-        item = document.createElement('li');
-        item.appendChild(text);
-        item.appendChild(button);
-        button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, this.innerHTML  , [0,0,0], [0,0,0])};
-        space.appendChild(item);
+        this.drawCreateButton(name)   
     }
 
 
@@ -128,6 +110,27 @@ class staticObjectRenderer{
         button.id = 'delete ' + name;
         button.onclick = function(){renderer.deleteObject(name);}
         buttonSpace.appendChild(button);
+    }
+
+
+    drawCreateButton(name){
+        let button;
+        let text;
+        let space = document.getElementById("list2");
+        // let keys = Object.keys(this.models);
+        let item;
+        // console.log(keys)
+        button = document.createElement("button");
+        button.innerHTML = name;
+        text = document.createElement("INPUT");
+        text.size = 7;
+        text.id = "text"+this.models.length;
+        text.placeholder = 'object name';
+        item = document.createElement('li');
+        item.appendChild(text);
+        item.appendChild(button);
+        button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, this.innerHTML  , [0,0,0], [0,0,0])};
+        space.appendChild(item);
     }
 
 
