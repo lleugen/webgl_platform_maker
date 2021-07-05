@@ -116,7 +116,7 @@ class staticObjectRenderer{
 
     drawSelectButton(name){
         let button;
-        let buttonSpace = document.getElementById("buttons");
+        let buttonSpace = document.getElementById("buttons(object control)");
 
         button = document.createElement("button");
         button.innerHTML = name;
@@ -127,8 +127,8 @@ class staticObjectRenderer{
 
 
     drawDeleteButton(name){
-        let button;
-        let buttonSpace = document.getElementById("buttons");
+        // let button;
+        let buttonSpace = document.getElementById("buttons(object control)");
 
         button = document.createElement("button");
         button.innerHTML = 'delete ' + name;
@@ -141,7 +141,6 @@ class staticObjectRenderer{
     deleteButton(name){
         let button = document.getElementById(name);
         button.remove();
-
     }
 
 
