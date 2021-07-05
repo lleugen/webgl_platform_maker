@@ -38,7 +38,7 @@ function doWheelRotate(event){
 		lookRadius += event.deltaY;
 	}
 	else{
-		renderer.updateObjectHeight(focusedObjectName, event.deltaY);
+		renderer.updateObjectPosition(focusedObjectName, 0, 0, event.deltaY);
 	}
 }
 
@@ -99,7 +99,7 @@ function doMouseMove(event) {
 			plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
 			// console.log('updated coordinates',plane_x, plane_z);
 			if(focusedObjectName != 'triangle_0'){
-				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z);
+				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z, 0);
 			}
 			
 			

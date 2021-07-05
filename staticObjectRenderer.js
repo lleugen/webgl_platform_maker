@@ -127,63 +127,16 @@ class staticObjectRenderer{
     }
 
 
-    updateObject(name){
-        let i;
-        let object;
-        for(i=0; i<this.objects.length; i++){
-            if(this.objects[i].name == name){
-                object = this.objects[i];
-            }
-        }
-        let delta = utils.multiplyMatrixVector(utils.invertMatrix(projectionMatrix), [sliderValuex - object.position[0],
-                                                                        sliderValuey - object.position[1],
-                                                                        sliderValuez - object.position[2],
-                                                                        1])
-        delta[0] = delta[0]/delta[3];
-        delta[1] = delta[1]/delta[3];
-        delta[2] = delta[2]/delta[3];
-        delta[3] = delta[3]/delta[3];
-        // delta = utils.multiplyMatrixVector(utils.invertMatrix(viewMatrix), delta)
-        // console.log(delta);
-        object.position[0] = delta[0];
-        object.position[1] = delta[1];
-        object.position[2] = delta[2];
-    }
-
-
-    updateObjectPosition(name, x, z){
+    updateObjectPosition(name, x, z, h){
         // raycast on mouse down to id object and find intersection with y plane
         // use object selected with button for now
-
         // while mouse state update position
         let i;
         let object;
-        for(i=0; i<this.objects.length; i++){
-            if(this.objects[i].name == name){
-                object = this.objects[i];
-                // console.log('object selected', object.name, object.position);
-                break;
-            }
-        }   
+        object = this.objects.filter(item=>item.name==name)[0]
         object.position[0] = x;
         object.position[2] = z;
-
-        // console.log('new position',object.position);
-
-        
-    }
-
-
-    updateObjectHeight(name, h){
-        let i;
-        let object;
-        for(i=0; i<this.objects.length; i++){
-            if(this.objects[i].name == name){
-                object = this.objects[i];
-                // console.log('object selected', object.name, object.position);
-                break;
-            }
-        }   
         object.position[1] += h;
+        // console.log('new position',object.position);
     }
 }
