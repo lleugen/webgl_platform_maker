@@ -2,6 +2,7 @@ class staticObjectRenderer{
     constructor(){
         this.objects = [];
         this.models = [];
+        this.drawSelectButton('world');
     }
 
 
@@ -24,6 +25,25 @@ class staticObjectRenderer{
                         'vertexBuffer': vertexBuffer,
                         'indexBuffer': indexBuffer};
         this.models.push(newModel);
+
+        let i;
+        let button;
+        let text;
+        let space = document.getElementById("list2");
+        // let keys = Object.keys(this.models);
+        let item;
+        // console.log(keys)
+        button = document.createElement("button");
+        button.innerHTML = name;
+        text = document.createElement("INPUT");
+        text.size = 7;
+        text.id = "text"+this.models.length;
+        text.placeholder = 'object name';
+        item = document.createElement('li');
+        item.appendChild(text);
+        item.appendChild(button);
+        button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, this.innerHTML  , [0,0,0], [0,0,0])};
+        space.appendChild(item);
     }
 
 
@@ -86,34 +106,6 @@ class staticObjectRenderer{
       }
 
 
-    drawNewObjectButtons(){
-        this.drawSelectButton('world');
-        let i;
-        let button;
-        let text;
-        let space = document.getElementById("list2");
-        // let keys = Object.keys(this.models);
-        let item;
-        // console.log(keys)
-        
-        for(i=0; i<this.models.length; i++){
-            button = document.createElement("button");
-            button.innerHTML = this.models[i].name;
-            
-            text = document.createElement("INPUT");
-            text.size = 7;
-            text.id = "text"+i;
-            text.placeholder = 'object name';
-
-            item = document.createElement('li');
-            item.appendChild(text);
-            item.appendChild(button);
-            button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, this.innerHTML  , [0,0,0], [0,0,0])};
-            space.appendChild(item);
-        }
-    }
-
-
     drawSelectButton(name){
         let button;
         let buttonSpace = document.getElementById("buttons(object control)");
@@ -129,6 +121,7 @@ class staticObjectRenderer{
     drawDeleteButton(name){
         // let button;
         let buttonSpace = document.getElementById("buttons(object control)");
+        let button;
 
         button = document.createElement("button");
         button.innerHTML = 'delete ' + name;

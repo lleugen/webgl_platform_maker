@@ -55,7 +55,6 @@ function main() {
   renderer.addModel('square', square, program2);
   renderer.addModel('sphere', createSphere(), program2);
   renderer.addModel('triangle', createTriangle(), program2);
-  renderer.drawNewObjectButtons();
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
