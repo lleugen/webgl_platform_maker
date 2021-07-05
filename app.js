@@ -1,43 +1,7 @@
 "use strict";
-
-async function loadModels(){
-  await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
-  'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj'], function (meshText) {
-    brickStr = meshText[0];
-    cloudStr = meshText[1];
-    cylinderStr = meshText[2];
-    hedgeStr = meshText[3];
-    mountainStr = meshText[4];
-    rockStr = meshText[5];
-    squareStr = meshText[6];
-    treeStr = meshText[7];
-    objectStrings = meshText;
-  });
-}
-
-
-async function loadShaders(){
-  await utils.loadFiles(['vertex-shader-2d.glsl', 'vertex-shader-2d_2.glsl', 'fragment-shader-2d.glsl', 'fancyFragmentShader.glsl'], function (shaderText) {
-    vertexShaderSource = shaderText[0];
-    vertexShaderSource_2 = shaderText[1];
-    fragmentShaderSource = shaderText[2];
-    fancyFragmentShaderSource = shaderText[3];
-  });
-}
-
-
-
-
-
 function main() {
   loadShaders();
   loadModels();
-  
-    
-
-
-
-
   canvas = document.querySelector("#canvas");
   // add input event listeners to the canvas, functions are defined in input_events.js
   addListeners(canvas);
@@ -69,8 +33,6 @@ function main() {
   program2.matcol = gl.getUniformLocation(program2, "matcol");
   webglUtils.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-
   // add model created buffers and puts the data inside, it need to have the locations already set
   var brick = new OBJ.Mesh(brickStr);
   var cloud = new OBJ.Mesh(cloudStr);
@@ -80,7 +42,6 @@ function main() {
   var rock = new OBJ.Mesh(rockStr);
   var square = new OBJ.Mesh(squareStr);
   var tree = new OBJ.Mesh(treeStr);
-  
   renderer = new staticObjectRenderer();
   renderer.addModel('tree', tree, program2);
   renderer.addModel('hedge', hedge, program2);
@@ -90,27 +51,15 @@ function main() {
   renderer.addModel('cylinder', cylinder, program2);
   renderer.addModel('mountain', mountain, program2);
   renderer.addModel('square', square, program2);
-  renderer.addModel('sphere', drawSphere(), program2);
+  renderer.addModel('sphere', createSphere(), program2);
   renderer.addModel('triangle', createTriangle(), program2);
   renderer.drawNewObjectButtons();
-
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
-
-  
-  
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
   gl.cullFace(gl.BACK);
-
-  // renderer.addObject('tree', 'tree', [0,0,0], [0,0,0], 0.5);
-
-  // let vertices, indices = drawSphere();
-  // do the magic
-  
-
-
   draw();
 }
 
@@ -167,7 +116,7 @@ function draw(){
   
   // draw individual objects, functions defined in draw_objects.js
   // drawGhost();
-  drawAxisLines();
+  renderer.drawAxisLines();
   renderer.drawObjects();
   // drawYplane();
   
@@ -235,4 +184,28 @@ function draw(){
   window.requestAnimationFrame(draw);
 }
 
-main();
+
+async function loadModels(){
+  await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
+  'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj'], function (meshText) {
+    brickStr = meshText[0];
+    cloudStr = meshText[1];
+    cylinderStr = meshText[2];
+    hedgeStr = meshText[3];
+    mountainStr = meshText[4];
+    rockStr = meshText[5];
+    squareStr = meshText[6];
+    treeStr = meshText[7];
+    objectStrings = meshText;
+  });
+}
+
+
+async function loadShaders(){
+  await utils.loadFiles(['vertex-shader-2d.glsl', 'vertex-shader-2d_2.glsl', 'fragment-shader-2d.glsl', 'fancyFragmentShader.glsl'], function (shaderText) {
+    vertexShaderSource = shaderText[0];
+    vertexShaderSource_2 = shaderText[1];
+    fragmentShaderSource = shaderText[2];
+    fancyFragmentShaderSource = shaderText[3];
+  });
+}
