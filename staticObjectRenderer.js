@@ -13,7 +13,7 @@ class staticObjectRenderer{
     
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
@@ -67,6 +67,23 @@ class staticObjectRenderer{
             this.drawModel(model, worldMatrix, model.program);
         }
     }
+
+
+    draw(){
+        // make view matrix
+        cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+        cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+        cy = lookRadius * Math.sin(utils.degToRad(-elevation));
+        viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+    
+        projectionMatrix = createProjection(projectionType);
+      
+        // drawYplane();
+        renderer.drawAxisLines();
+        renderer.drawObjects();
+        
+        window.requestAnimationFrame(renderer.draw);
+      }
 
 
     drawNewObjectButtons(){
@@ -140,55 +157,15 @@ class staticObjectRenderer{
         object.position[1] += h;
         // console.log('new position',object.position);
     }
-
-
-    drawGhost(){
-        // load object from file
-        objectMesh = new OBJ.Mesh(ghostMesh);
-        // create vertex buffer
-        objectMesh.vertexBuffer = gl.createBuffer();
-        // index buffer
-        objectMesh.indexBuffer = gl.createBuffer();
-    
-        gl.useProgram(program2);
-        gl.bindBuffer(gl.ARRAY_BUFFER, objectMesh.vertexBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectMesh.vertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-    
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, objectMesh.indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(objectMesh.indices), gl.STATIC_DRAW);
-    
-    
-        let s45 = 0.707106781186548;
-        let gLightDir1 = [ 0.0, s45, s45, 1.0];
-        gl.uniform4f(program2.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
-        let colors = [1, 0, 0]
-        gl.uniform4f(program2.matcol, colors[0], colors[1], colors[2], 1.0);
-    
-        //##############################################################
-        // update W matrix
-    
-        var worldMatrix = utils.MakeWorld(sliderValuex,sliderValuey,sliderValuez,worldAnglex,worldAngley,worldAnglez,1);
-        //##############################################################
-        //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
-        var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
-        var wvpMatrix_2 = utils.multiplyMatrices(wvpMatrix_1, worldMatrix); // for program 2 used by ghost
-    
-        var primitiveType = gl.TRIANGLES;
-        var offset = 0;
-        var count = model.model.indices.length;
-    
-    
-        gl.uniformMatrix4fv(program2.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_2));
-        gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
-    }
     
     
     drawAxisLines(){
+        
         gl.useProgram(program);
         var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
         gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_1));
     
+
         var lines = [
             0,0,0,
             10,0,0,
@@ -197,12 +174,15 @@ class staticObjectRenderer{
             0,0,0,
             0,0,10,
         ]
+
+        
         var lineBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
         gl.drawArrays(gl.LINES, 0, lines.length/3);
     }
+    
     
     
     drawYplane(){
@@ -265,3 +245,48 @@ class staticObjectRenderer{
         gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
     }
 }
+
+function createProjection(projectionType){
+    // Make projection matrix
+    if(projectionType == "orthogonal"){
+      let w = cameraWindowWidth;
+      let a = 2;
+      let n = nearPlane;
+      let f = farPlane;
+      let orthogonal_projection =  [1/w,	0.0,		0.0,		0.0,
+                              0.0,		a/w,		0.0,		0.0,
+                              0.0,		0.0,		-2/(f-n),		-(f+n)/(f-n),
+                              0.0,		0.0,		0.0,		1.0];
+      projectionMatrix = orthogonal_projection;
+    }
+    else if(projectionType == "isometric"){
+      let w = cameraWindowWidth;
+      let a = 2;
+      let n = nearPlane;
+      let f = farPlane;
+      let orthogonal_projection =  [1/w,	0.0,		0.0,		0.0,
+                              0.0,		a/w,		0.0,		0.0,
+                              0.0,		0.0,		-2/(f-n),		-(f+n)/(f-n),
+                              0.0,		0.0,		0.0,		1.0];
+      let cos_45 = Math.cos(45/180*Math.PI)
+      let sin_45 = Math.sin(45/180*Math.PI)
+      let cos_35 = Math.cos(-35.26/180*Math.PI)
+      let sin_35 = Math.sin(-35.26/180*Math.PI)
+      let x_rotation = [1, 0, 0, 0,
+                0, cos_35, sin_35, 0,
+                0, -sin_35, cos_35, 0,
+                0, 0, 0, 1];
+      
+      let y_rotation = [cos_45, 0, sin_45, 0,
+                0, 1, 0, 0,
+                -sin_45, 0, cos_45, 0,
+                0, 0, 0, 1];
+      var A1 =  utils.multiplyMatrices(orthogonal_projection, x_rotation)
+      projectionMatrix = utils.multiplyMatrices(A1, y_rotation)
+    }
+    else if(projectionType == "perspective"){
+      // console.log(nearPlane, farPlane)
+      projectionMatrix = utils.MakePerspective(45,2,nearPlane,farPlane);
+    }
+    return projectionMatrix;
+  }
