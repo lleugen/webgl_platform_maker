@@ -81,8 +81,8 @@ function drawYplane(){
 }
 
 
-function drawModel(model, worldMatrix){
-    gl.useProgram(program2);
+function drawModel(model, worldMatrix, program){
+    gl.useProgram(program);
     // do buffers and data for every model
     // create vertex buffer
     // let vertexBuffer = gl.createBuffer();
@@ -91,7 +91,7 @@ function drawModel(model, worldMatrix){
     // console.log(model)
     gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
     // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectMesh.vertices), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
     // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(objectMesh.indices), gl.STATIC_DRAW);
@@ -99,9 +99,9 @@ function drawModel(model, worldMatrix){
 
     let s45 = 0.707106781186548;
     let gLightDir1 = [ 0.0, s45, s45, 1.0];
-    gl.uniform4f(program2.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
+    gl.uniform4f(program.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
     let colors = [1, 0, 0]
-    gl.uniform4f(program2.matcol, colors[0], colors[1], colors[2], 1.0);
+    gl.uniform4f(program.matcol, colors[0], colors[1], colors[2], 1.0);
 
     //##############################################################
     // update W matrix
@@ -117,7 +117,7 @@ function drawModel(model, worldMatrix){
     var count = model.model.indices.length;
 
 
-    gl.uniformMatrix4fv(program2.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_2));
+    gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_2));
     gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
 }
 

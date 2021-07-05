@@ -29,7 +29,7 @@ class staticObjectRenderer{
     }
 
 
-    addModel(name, model){
+    addModel(name, model, program){
         let vertexBuffer;
         vertexBuffer = gl.createBuffer();
         let indexBuffer;
@@ -44,6 +44,7 @@ class staticObjectRenderer{
 
         let newModel = {'name': name,
                         'model': model,
+                        'program': program,
                         'vertexBuffer': vertexBuffer,
                         'indexBuffer': indexBuffer};
         this.models.push(newModel);

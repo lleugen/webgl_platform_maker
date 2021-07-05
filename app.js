@@ -46,12 +46,8 @@ function main() {
   if (!gl) {
     return;
   }
-
-  
-
   // this is a linter which helps to get more information when errors occur
   const ext = gl.getExtension('GMAN_debug_helper');
-
   // create shaders from sources loaded above
   fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
   vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
@@ -59,6 +55,7 @@ function main() {
   fancyFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fancyFragmentShaderSource);
   // create programs with a vertex shader and a fragment shader
   // tag the programs with a name so the linter can tell us where errors come from
+  // todo make program for every model
   program2 = createProgram(gl, vertexShader_2, fancyFragmentShader);
   ext.tagObject(program2, "program2");
   program = createProgram(gl, vertexShader, fragmentShader);
@@ -85,16 +82,16 @@ function main() {
   var tree = new OBJ.Mesh(treeStr);
   
   renderer = new staticObjectRenderer();
-  renderer.addModel('tree', tree);
-  renderer.addModel('hedge', hedge);
-  renderer.addModel('rock', rock);
-  renderer.addModel('brick', brick);
-  renderer.addModel('cloud', cloud);
-  renderer.addModel('cylinder', cylinder);
-  renderer.addModel('mountain', mountain);
-  renderer.addModel('square', square);
-  renderer.addModel('sphere', drawSphere());
-  renderer.addModel('triangle', createTriangle());
+  renderer.addModel('tree', tree, program2);
+  renderer.addModel('hedge', hedge, program2);
+  renderer.addModel('rock', rock, program2);
+  renderer.addModel('brick', brick, program2);
+  renderer.addModel('cloud', cloud, program2);
+  renderer.addModel('cylinder', cylinder, program2);
+  renderer.addModel('mountain', mountain, program2);
+  renderer.addModel('square', square, program2);
+  renderer.addModel('sphere', drawSphere(), program2);
+  renderer.addModel('triangle', createTriangle(), program2);
   renderer.drawNewObjectButtons();
 
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
