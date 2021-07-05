@@ -9,9 +9,9 @@ function createShader(gl, type, source) {
 
     console.log(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
-    }
+}
 
-    function createProgram(gl, vertexShader, fragmentShader) {
+function createProgram(gl, vertexShader, fragmentShader) {
     var program = gl.createProgram();
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);

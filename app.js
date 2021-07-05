@@ -1,37 +1,4 @@
 "use strict";
-var gl = null;
-var canvas = null;
-var program = null;
-var program2 = null;
-var objectMesh = null;
-
-var vertexShaderSource;
-var vertexShaderSource_2;
-var fragmentShaderSource;
-var fancyFragmentShaderSource;
-
-var vertexShader;
-var vertexShader_2;
-var fragmentShader;
-var fancyFragmentShader;
-
-var viewMatrix;
-var projectionMatrix;
-
-var brickStr;
-var cloudStr;
-var cylinderStr;
-var hedgeStr;
-var mountainStr;
-var rockStr;
-var squareStr;
-var treeStr;
-
-var objectStrings = [];
-
-var focusedObjectName = 'world';
-
-var renderer;
 
 async function loadModels(){
   await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 

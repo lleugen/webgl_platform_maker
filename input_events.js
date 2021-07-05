@@ -1,12 +1,3 @@
-var lookRadius = 100;
-var elevation = -15.0;
-var angle = 0.0;
-var cx = 100.0;
-var cy = 100.0;
-var cz = 100.0;
-var mouseState = false;
-var lastMouseX = -100, lastMouseY = -100;
-
 function doMouseDown(event) {
 	lastMouseX = event.pageX;
 	lastMouseY = event.pageY;
@@ -32,11 +23,15 @@ function doMouseDown(event) {
 	// }
 
 }
+
+
 function doMouseUp(event) {
 	lastMouseX = -100;
 	lastMouseY = -100;
 	mouseState = false;
 }
+
+
 function doWheelRotate(event){
 	if(focusedObjectName == 'world'){
 		// console.log(event.deltaX, event.deltaY, event.deltaZ);
@@ -46,6 +41,8 @@ function doWheelRotate(event){
 		renderer.updateObjectHeight(focusedObjectName, event.deltaY);
 	}
 }
+
+
 function doMouseMove(event) {
 	if(mouseState) {
 		//########################################
@@ -122,67 +119,75 @@ function addTree(){
 }
 
 
-var sliderValuex = 1;
 function onSliderChangex(value){
     console.log("Slider value changed to "+value);
     sliderValuex = value;
     renderer.updateObject(focusedObjectName);
 }
-var sliderValuey = 1;
+
+
 function onSliderChangey(value){
     console.log("Slider value changed to "+value);
     sliderValuey = value;
     renderer.updateObject(focusedObjectName);
 }
-var sliderValuez = 1;
+
+
 function onSliderChangez(value){
     console.log("Slider value changed to "+value);
     sliderValuez = value;
     renderer.updateObject(focusedObjectName);
 }
-var nearPlane = 1;
+
+
 function onSliderChangeNear(value){
     console.log("Slider value changed to "+value);
     nearPlane = parseFloat(value);
 }
-var farPlane = 300;
+
+
 function onSliderChangeFar(value){
     console.log("Slider value changed to "+value);
     farPlane = parseFloat(value);
 }
-var cameraWindowWidth = 10;
+
+
 function onSliderChangew(value){
     console.log("Slider value changed to "+value);
     cameraWindowWidth = value;
 }
-var cameraElevation = 0;
+
+
 function onSliderChangeElevation(value){
     console.log("Slider value changed to "+value);
     cameraElevation = value;
 }
-var cameraAngle = 0;
+
+
 function onSliderChangeAngle(value){
     console.log("Slider value changed to "+value);
     cameraAngle = value;
 }
 
-var projectionType = "perspective";
+
 function onRadioButtonChange(value){
   console.log("Radio button value changed to "+value);
   projectionType = value;
 }
 
-var worldAnglex = 0;
+
 function onSliderChangeWorldAnglex(value){
     console.log("Slider value changed to "+value);
     worldAnglex = value;
 }
-var worldAngley = 0;
+
+
 function onSliderChangeWorldAngley(value){
     console.log("Slider value changed to "+value);
     worldAngley = value;
 }
-var worldAnglez = 0;
+
+
 function onSliderChangeWorldAnglez(value){
     console.log("Slider value changed to "+value);
     worldAnglez = value;
@@ -238,6 +243,7 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
     return true;
     
 }
+
 
 function addListeners(canvas){
     canvas.addEventListener("mousedown", doMouseDown, false);
