@@ -46,6 +46,7 @@ var sliderValuex = 1;
 var sliderValuey = 1;
 
 var sliderValuez = 1;
+var sliderScale = 1;
 
 var nearPlane = 1;
 var farPlane = 300;

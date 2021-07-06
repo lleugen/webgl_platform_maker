@@ -63,7 +63,7 @@ class staticObjectRenderer{
                 this.objects[i].orientation[0],
                 this.objects[i].orientation[1],
                 this.objects[i].orientation[2],
-                1);
+                this.objects[i].scale);
             let model = this.models.filter(item => item.name == renderer.objects[i].type);
             model = model[0];
             this.drawModel(model, worldMatrix, model.program);
@@ -140,17 +140,25 @@ class staticObjectRenderer{
     }
 
 
-    updateObjectPosition(name, x, z, h){
-        // raycast on mouse down to id object and find intersection with y plane
-        // use object selected with button for now
-        // while mouse state update position
-        let i;
+    updateObjectPosition(name, x, z){
         let object;
         object = this.objects.filter(item=>item.name==name)[0]
         object.position[0] = x;
         object.position[2] = z;
+    }
+
+
+    updateObjectHeight(name, h){
+        let object;
+        object = this.objects.filter(item=>item.name==name)[0]
         object.position[1] += h;
-        // console.log('new position',object.position);
+    }
+
+
+    updateObjectScale(name, s){
+        let object;
+        object = this.objects.filter(item=>item.name==name)[0]
+        object.scale = s;
     }
     
     

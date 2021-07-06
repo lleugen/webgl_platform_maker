@@ -18,8 +18,13 @@
     <body onload="main()">
         
         <canvas id='canvas', width='1000', height='500', style="border:1px solid #000000;"></canvas>
-        <!-- <table>
+        <table>
             <tr>
+                <div id="slider1"> object scale 0.01 
+                    <input id="slide1" type="range" min="0.05" max="10" step="0.05" value="1" onchange="onSliderChangeScale(this.value);"/> 10 <br/>	
+                </div>
+            </tr>
+            <!-- <tr>
                 <div id="slider1"> object x -50 
                     <input id="slide1" type="range" min="-50" max="50" step="0.5" value="0" onchange="onSliderChangex(this.value);"/> 50 <br/>	
                 </div>
@@ -58,8 +63,8 @@
                 <div id="slider1"> far plane -10 
                     <input id="slide1" type="range" min="-10" max="300" step="1" value="300" onchange="onSliderChangeFar(this.value);"/> 300 <br/>	
                 </div>
-            </tr> -->
-            <!-- <tr>
+            </tr>
+            <tr>
                 <div id="slider1"> camera window width 0.1 
                     <input id="slide1" type="range" min="0.1" max="300" step="0.1" value="10" onchange="onSliderChangew(this.value);"/> 300 <br/>	
                 </div>
@@ -92,7 +97,7 @@
 				</p>
 			</div> -->
             
-        <!-- </table> -->
+        </table>
         <div id="buttons(object control)"></div>
         <div style="position: absolute;right:0%;top:0%"><ul id='list2'><li>select objects to create</li></ul></div>
     </body>

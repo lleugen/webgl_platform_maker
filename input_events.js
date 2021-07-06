@@ -3,20 +3,20 @@ function doMouseDown(event) {
 	lastMouseY = event.pageY;
 	mouseState = true;
 	// raycast and select the first object that intersects, if none then select world
-	let i;
-	let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
-	let hit = false;
-	for(i=0; i<renderer.objects.length; i++){
-		if(renderer.objects[i].name != 'triangle_0'){
-			if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 1)){
-				focusedObjectName = renderer.objects[i].name;
-				hit = true;
-				console.log(focusedObjectName)
-				break;
-			}
-		}
+	// let i;
+	// let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
+	// let hit = false;
+	// for(i=0; i<renderer.objects.length; i++){
+	// 	if(renderer.objects[i].name != 'triangle_0'){
+	// 		if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 1)){
+	// 			focusedObjectName = renderer.objects[i].name;
+	// 			hit = true;
+	// 			console.log(focusedObjectName)
+	// 			break;
+	// 		}
+	// 	}
 		
-	}
+	// }
 	// if(!hit){
 	// 	focusedObjectName='world';
 	// 	console.log('no hit, reset')
@@ -38,7 +38,7 @@ function doWheelRotate(event){
 		lookRadius += event.deltaY;
 	}
 	else{
-		renderer.updateObjectPosition(focusedObjectName, 0, 0, event.deltaY);
+		renderer.updateObjectHeight(focusedObjectName, event.deltaY);
 	}
 }
 
@@ -99,7 +99,7 @@ function doMouseMove(event) {
 			plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
 			// console.log('updated coordinates',plane_x, plane_z);
 			if(focusedObjectName != 'triangle_0'){
-				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z, 0);
+				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z);
 			}
 			
 			
@@ -123,6 +123,13 @@ function onSliderChangex(value){
     console.log("Slider value changed to "+value);
     sliderValuex = value;
     renderer.updateObject(focusedObjectName);
+}
+
+
+function onSliderChangeScale(value){
+	console.log("slider value changed to", value)
+	sliderScale = value;
+	renderer.updateObjectScale(focusedObjectName, value)
 }
 
 

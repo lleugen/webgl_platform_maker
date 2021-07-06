@@ -88,10 +88,10 @@ async function loadModels(){
 
 
 async function loadShaders(){
-  await utils.loadFiles(['vertex-shader-2d.glsl',
-                        'vertex-shader-2d_2.glsl',
-                        'axisFragmentShader.glsl',
-                        'fancyFragmentShader.glsl'], function (shaderText) {
+  await utils.loadFiles(['shaders/vertex-shader-2d.glsl',
+                        'shaders/vertex-shader-2d_2.glsl',
+                        'shaders/axisFragmentShader.glsl',
+                        'shaders/fancyFragmentShader.glsl'], function (shaderText) {
     vertexShaderSource = shaderText[0];
     vertexShaderSource_2 = shaderText[1];
     fragmentShaderSource = shaderText[2];
