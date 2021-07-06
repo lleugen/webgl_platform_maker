@@ -252,9 +252,35 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
 }
 
 
+function keyFunctionDown(e){
+	switch(e.keyCode) {
+	case 81:
+		renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientation[0] -= 10
+		break;
+	case 87:
+		renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientation[0] += 10
+		break;
+	case 65:
+		renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientation[1] -= 10
+		break;
+	case 83:
+		renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientation[1] += 10
+		break;
+	case 90:
+		renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientation[2] -= 10
+		break;
+	case 88:
+		renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientation[2] += 10
+		break;
+	}
+}
+
+
 function addListeners(canvas){
     canvas.addEventListener("mousedown", doMouseDown, false);
     canvas.addEventListener("mouseup", doMouseUp, false);
     canvas.addEventListener("mousemove", doMouseMove, false);
 	canvas.addEventListener("wheel", doWheelRotate, false);
+	// window.addEventListener("keyup", keyFunctionUp, false);
+	window.addEventListener("keydown", keyFunctionDown, false);
 }

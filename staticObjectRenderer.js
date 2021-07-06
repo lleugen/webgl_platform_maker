@@ -159,6 +159,10 @@ class staticObjectRenderer{
         let object;
         object = this.objects.filter(item=>item.name==name)[0]
         object.scale = s;
+        if(object.scale <= 0){
+            object.scale = 0.05;
+            console.log('object scale is lower bounded at 0.05')
+        }
     }
     
     
@@ -292,4 +296,4 @@ function createProjection(projectionType){
       projectionMatrix = utils.MakePerspective(45,2,nearPlane,farPlane);
     }
     return projectionMatrix;
-  }
+}
