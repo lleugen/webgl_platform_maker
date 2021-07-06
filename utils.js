@@ -313,7 +313,7 @@ var utils={
 		return out; 
 	},
 
-	MakeRotateXYZMatrix: function(rx, ry, rz, s){
+	MakeRotateXYZMatrix: function(rx, ry, rz){
 	//Creates a world matrix for an object.
 
 		var Rx = this.MakeRotateXMatrix(ry);                

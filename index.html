@@ -13,6 +13,7 @@
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
         <script src="draw_objects.js"></script>
         <script src="staticObjectRenderer.js"></script>
+        <script src="quaternion.min.js"></script>
     </head>
 
     <body onload="main()">
@@ -25,6 +26,12 @@
                 </div>
                 <button onclick="renderer.updateObjectScale(focusedObjectName, renderer.objects.filter(item=>item.name==focusedObjectName)[0].scale - 0.05)">reduce</button>
                 <button onclick="renderer.updateObjectScale(focusedObjectName, renderer.objects.filter(item=>item.name==focusedObjectName)[0].scale + 0.05)">enlarge</button>
+            </tr>
+            <tr>
+                <div>
+                    <input type="checkbox", id="quaternionRotation">
+                    <label for="quaternionRotation">Enable quaternion rotation</label>
+                </div>
             </tr>
             <!-- <tr>
                 <div id="slider1"> object x -50 
