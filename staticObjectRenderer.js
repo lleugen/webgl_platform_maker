@@ -56,16 +56,18 @@ class staticObjectRenderer{
     drawObjects(){
         let i;
         let worldMatrix;
+
         for(i=0; i<this.objects.length; i++){
-            worldMatrix = utils.MakeWorld(this.objects[i].position[0],
-                this.objects[i].position[1],
-                this.objects[i].position[2],
-                this.objects[i].orientation[0],
-                this.objects[i].orientation[1],
-                this.objects[i].orientation[2],
-                this.objects[i].scale);
-            let model = this.models.filter(item => item.name == renderer.objects[i].type);
-            model = model[0];
+            let q = this.objects[i].orientation
+            let rotation_matrix = [1 - 2*q.y**2 - 2*q.z**2, 2*q.x*q.y + 2*q.w*q.z, 2*q.x*q.z - 2*q.w*q.y, 0,
+                2*q.x*q.y - 2*q.w*q.z, 1 - 2*q.x**2 - 2*q.z**2, 2*q.y*q.z + 2*q.w*q.x, 0,
+                2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,	
+                0, 0, 0, 1];
+            let translation_matrix = utils.MakeTranslateMatrix(this.objects[i].position[0],this.objects[i].position[1],this.objects[i].position[2])
+            let scale_matrix = utils.MakeScaleMatrix(this.objects[i].scale);
+            worldMatrix = utils.multiplyMatrices(rotation_matrix, scale_matrix);
+            worldMatrix = utils.multiplyMatrices(translation_matrix, worldMatrix);
+            let model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
             this.drawModel(model, worldMatrix, model.program);
         }
     }
@@ -129,7 +131,10 @@ class staticObjectRenderer{
         item = document.createElement('li');
         item.appendChild(text);
         item.appendChild(button);
-        button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, this.innerHTML  , [0,0,0], [0,0,0])};
+        button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, // object name
+                                                        this.innerHTML, // model name
+                                                        [0,0,0], // position
+                                                        new Quaternion(1,0,0,0))}; // orientation
         space.appendChild(item);
     }
 

@@ -253,10 +253,11 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
 
 
 function updateOrientation(rvx, rvy, rvz){
-	let x1, x2, y1, y2, z1, z2;
-	let w=1, x=0, y=0, z=0;
+	let object = renderer.objects.filter(i=>i.name==focusedObjectName)[0];
+	// let x1, x2, y1, y2, z1, z2;
+	// let w=1, x=0, y=0, z=0;
 	let axis_x, axis_y, axis_z;
-	let object_position = renderer.objects.filter(item=>item.name==focusedObjectName)[0].position
+	let object_position = object.position;
 	axis_x = -object_position[0]+cx;
 	axis_y = -object_position[1]+cy;
 	axis_z = -object_position[2]+cz;
@@ -264,53 +265,60 @@ function updateOrientation(rvx, rvy, rvz){
 							Math.sin(rvx/2/180*Math.PI)*1,
 							Math.sin(rvx/2/180*Math.PI)*0,
 							Math.sin(rvx/2/180*Math.PI)*0);
+	dq1.normalize();
 	let dq2 = new Quaternion(Math.cos(rvy/2/180*Math.PI),
 							Math.sin(rvy/2/180*Math.PI)*0,
 							Math.sin(rvy/2/180*Math.PI)*1,
 							Math.sin(rvy/2/180*Math.PI)*0);
+	dq2.normalize();
 	let dq3 = new Quaternion(Math.cos(rvz/2/180*Math.PI),
 							Math.sin(rvz/2/180*Math.PI)*0,
 							Math.sin(rvz/2/180*Math.PI)*0,
 							Math.sin(rvz/2/180*Math.PI)*1);
+	dq3.normalize();
 	let dq = dq1.mul(dq2).mul(dq3)
-	let start = new Quaternion(w, x, y, z)
+	dq.normalize();
+	let start = object.orientation;
 
-	let q = start.mul(dq)
-	let rotation_matrix = [1 - 2*q.y**2 - 2*q.z**2, 2*q.x*q.y + 2*q.w*q.z, 2*q.x*q.z - 2*q.w*q.y, 0,
-						2*q.x*q.y - 2*q.w*q.z, 1 - 2*q.x**2 - 2*q.z**2, 2*q.y*q.z + 2*q.w*q.x, 0,
-						2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,	
-						0, 0, 0, 1];
-	console.log(rotation_matrix[8])
-	if(rotation_matrix[8] != 1 && rotation_matrix[8] != -1){
-		y1 = -Math.asin(rotation_matrix[8]);
-		y2 = Math.PI - y1;
-		x1 = Math.atan2(rotation_matrix[9] / Math.cos(y1), rotation_matrix[10] / Math.cos(y1));
-		x2 = Math.atan2(rotation_matrix[9] / Math.cos(y2), rotation_matrix[10] / Math.cos(y2));
-		z1 = Math.atan2(rotation_matrix[4] / Math.cos(y1), rotation_matrix[0] / Math.cos(y1));
-		z2 = Math.atan2(rotation_matrix[4] / Math.cos(y2), rotation_matrix[0] / Math.cos(y2));
-	}
-	else{
-		console.log('r13 is +-1')
-		z1 = 0;
-		z2 = 0;
-		if(rotation_matrix[8] == -1){
-			y1 = Math.PI / 2;
-			y2 = Math.PI / 2;
-			x1 = z1 + Math.atan2(rotation_matrix[1], rotation_matrix[2]);
-			x2 = z2 + Math.atan2(rotation_matrix[1], rotation_matrix[2]);
-		}
-		else{
-			y1 = -Math.PI / 2;
-			y2 = -Math.PI / 2;
-			x1 = -z1 + Math.atan2(-rotation_matrix[1], -rotation_matrix[2]);
-			x2 = -z2 + Math.atan2(-rotation_matrix[1], -rotation_matrix[2]);
-		}
-	}
-	object = renderer.objects.filter(item=>item.name==focusedObjectName)[0]
-	object.orientation[0] += x1;
-	object.orientation[1] += y1;
-	object.orientation[2] += z1;
-	console.log(object.orientation)
+	let q = start.mul(dq);
+	q.normalize();
+	object.orientation = q;
+	console.log(object.position, object.orientation, object.scale)
+	// let rotation_matrix = [1 - 2*q.y**2 - 2*q.z**2, 2*q.x*q.y + 2*q.w*q.z, 2*q.x*q.z - 2*q.w*q.y, 0,
+	// 					2*q.x*q.y - 2*q.w*q.z, 1 - 2*q.x**2 - 2*q.z**2, 2*q.y*q.z + 2*q.w*q.x, 0,
+	// 					2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,	
+	// 					0, 0, 0, 1];
+	// console.log(rotation_matrix[8])
+	// if(rotation_matrix[8] != 1 && rotation_matrix[8] != -1){
+	// 	y1 = -Math.asin(rotation_matrix[8]);
+	// 	y2 = Math.PI - y1;
+	// 	x1 = Math.atan2(rotation_matrix[9] / Math.cos(y1), rotation_matrix[10] / Math.cos(y1));
+	// 	x2 = Math.atan2(rotation_matrix[9] / Math.cos(y2), rotation_matrix[10] / Math.cos(y2));
+	// 	z1 = Math.atan2(rotation_matrix[4] / Math.cos(y1), rotation_matrix[0] / Math.cos(y1));
+	// 	z2 = Math.atan2(rotation_matrix[4] / Math.cos(y2), rotation_matrix[0] / Math.cos(y2));
+	// }
+	// else{
+	// 	console.log('r13 is +-1')
+	// 	z1 = 0;
+	// 	z2 = 0;
+	// 	if(rotation_matrix[8] == -1){
+	// 		y1 = Math.PI / 2;
+	// 		y2 = Math.PI / 2;
+	// 		x1 = z1 + Math.atan2(rotation_matrix[1], rotation_matrix[2]);
+	// 		x2 = z2 + Math.atan2(rotation_matrix[1], rotation_matrix[2]);
+	// 	}
+	// 	else{
+	// 		y1 = -Math.PI / 2;
+	// 		y2 = -Math.PI / 2;
+	// 		x1 = -z1 + Math.atan2(-rotation_matrix[1], -rotation_matrix[2]);
+	// 		x2 = -z2 + Math.atan2(-rotation_matrix[1], -rotation_matrix[2]);
+	// 	}
+	// }
+	// object = renderer.objects.filter(item=>item.name==focusedObjectName)[0]
+	// object.orientation[0] += x1;
+	// object.orientation[1] += y1;
+	// object.orientation[2] += z1;
+	// console.log(object.orientation)
 
 }
 
@@ -321,22 +329,22 @@ function doKeyDown(e){
 		if(document.getElementById("quaternionRotation").checked){
 			switch(e.keyCode) {
 				case 81:
-					updateOrientation(-100,0,0)
+					updateOrientation(-10,0,0)
 					break;
 				case 87:
-					updateOrientation(100,0,0)
+					updateOrientation(10,0,0)
 					break;
 				case 65:
-					updateOrientation(0,-100,0)
+					updateOrientation(0,-10,0)
 					break;
 				case 83:
-					updateOrientation(0,100,0)
+					updateOrientation(0,10,0)
 					break;
 				case 90:
-					updateOrientation(0,0,-100)
+					updateOrientation(0,0,-10)
 					break;
 				case 88:
-					updateOrientation(0,0,100)
+					updateOrientation(0,0,10)
 					break;
 				}
 		}
