@@ -45,7 +45,9 @@ function main() {
   var square = new OBJ.Mesh(squareStr);
   var tree = new OBJ.Mesh(treeStr);
   var ghost = new OBJ.Mesh(ghostStr);
+  inputElementsManager = new InputElementsManager();
   renderer = new staticObjectRenderer();
+  
   renderer.addModel('tree', tree, program2);
   renderer.addModel('hedge', hedge, program2);
   renderer.addModel('rock', rock, program2);

@@ -32,6 +32,7 @@ var objectStrings = [];
 var focusedObjectName = 'world';
 
 var renderer;
+var inputElementsManager;
 
 var lookRadius = 100;
 var elevation = -15.0;
@@ -58,3 +59,6 @@ var projectionType = "perspective";
 var worldAnglex = 0;
 var worldAngley = 0;
 var worldAnglez = 0;
+
+
+var wheelSensitivity = 1;

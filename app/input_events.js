@@ -35,10 +35,10 @@ function doMouseUp(event) {
 function doWheelRotate(event){
 	if(focusedObjectName == 'world'){
 		// console.log(event.deltaX, event.deltaY, event.deltaZ);
-		lookRadius += event.deltaY;
+		lookRadius += event.deltaY * wheelSensitivity;
 	}
 	else{
-		renderer.updateObjectHeight(focusedObjectName, event.deltaY);
+		renderer.updateObjectHeight(focusedObjectName, event.deltaY * wheelSensitivity);
 	}
 }
 
@@ -198,6 +198,12 @@ function onSliderChangeWorldAngley(value){
 function onSliderChangeWorldAnglez(value){
     console.log("Slider value changed to "+value);
     worldAnglez = value;
+}
+
+
+function onSliderChangeWheelSensitivity(value){
+    console.log("Slider value changed to "+value);
+    wheelSensitivity = value;
 }
 
 
