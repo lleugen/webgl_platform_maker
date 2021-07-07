@@ -44,6 +44,7 @@ function main() {
   var rock = new OBJ.Mesh(rockStr);
   var square = new OBJ.Mesh(squareStr);
   var tree = new OBJ.Mesh(treeStr);
+  var ghost = new OBJ.Mesh(ghostStr);
   renderer = new staticObjectRenderer();
   renderer.addModel('tree', tree, program2);
   renderer.addModel('hedge', hedge, program2);
@@ -55,6 +56,7 @@ function main() {
   renderer.addModel('square', square, program2);
   renderer.addModel('sphere', createSphere(), program2);
   renderer.addModel('triangle', createTriangle(), program2);
+  renderer.addModel('ghost', ghost, program2);
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -73,7 +75,7 @@ function main() {
 
 async function loadModels(){
   await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
-  'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj'], function (meshText) {
+  'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj', 'assets/ghost.obj'], function (meshText) {
     brickStr = meshText[0];
     cloudStr = meshText[1];
     cylinderStr = meshText[2];
@@ -82,6 +84,7 @@ async function loadModels(){
     rockStr = meshText[5];
     squareStr = meshText[6];
     treeStr = meshText[7];
+    ghostStr = meshText[8];
     objectStrings = meshText;
   });
 }

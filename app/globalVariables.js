@@ -25,6 +25,7 @@ var mountainStr;
 var rockStr;
 var squareStr;
 var treeStr;
+var ghostStr;
 
 var objectStrings = [];
 
