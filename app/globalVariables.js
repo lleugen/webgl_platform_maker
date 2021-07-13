@@ -62,3 +62,5 @@ var worldAnglez = 0;
 
 
 var wheelSensitivity = 1;
+
+var toggleCreate = 'none';

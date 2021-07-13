@@ -3,7 +3,8 @@ class staticObjectRenderer{
         this.objects = [];
         this.models = [];
         inputElementsManager.drawSelectButton('world');
-        // this.objectRegistry = new ObjectRegistry();
+        inputElementsManager.drawCreateButton('none');
+        console.log('renderer created');
     }
 
 
