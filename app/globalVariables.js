@@ -51,8 +51,8 @@ var sliderValuez = 1;
 var sliderScale = 1;
 
 var nearPlane = 1;
-var farPlane = 300;
-var cameraWindowWidth = 10;
+var farPlane = 1000;
+var cameraWindowWidth = 50;
 var cameraElevation = 0;
 var cameraAngle = 0;
 var projectionType = "perspective";

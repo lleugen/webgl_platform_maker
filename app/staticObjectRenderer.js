@@ -30,12 +30,13 @@ class staticObjectRenderer{
     }
 
 
-    addObject(name, type, position, orientation, scale=1){
+    addObject(name, type, position=[0,0,0], orientation=new Quaternion(), orientationDeg=[0,0,0], scale=1){
         let newObject = {
             'name': name,
             'type': type, // model name
             'position': position,
             'orientation': orientation,
+            'orientationDeg': orientationDeg,
             'scale': scale
         }
         this.objects.push(newObject);
@@ -48,8 +49,8 @@ class staticObjectRenderer{
 
     deleteObject(name){
         this.objects = this.objects.filter(function(object){return object.name != name});
-        this.deleteButton(name);
-        this.deleteButton('delete '+name);
+        inputElementsManager.deleteButton(name);
+        inputElementsManager.deleteButton('delete '+name);
         console.log('deleted', name, this.objects);
     }
 
@@ -60,10 +61,22 @@ class staticObjectRenderer{
 
         for(i=0; i<this.objects.length; i++){
             let q = this.objects[i].orientation
-            let rotation_matrix = [1 - 2*q.y**2 - 2*q.z**2, 2*q.x*q.y + 2*q.w*q.z, 2*q.x*q.z - 2*q.w*q.y, 0,
-                2*q.x*q.y - 2*q.w*q.z, 1 - 2*q.x**2 - 2*q.z**2, 2*q.y*q.z + 2*q.w*q.x, 0,
-                2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,	
-                0, 0, 0, 1];
+            let rotation_matrix;
+            if(document.getElementById("quaternionRotation").checked){
+                rotation_matrix = [1.0 - 2.0*q.y*q.y - 2.0*q.z*q.z,     2.0*q.x*q.y + 2.0*q.w*q.z,          2.0*q.x*q.z - 2.0*q.w*q.y,   0.0,
+                                   2.0*q.x*q.y - 2.0*q.w*q.z,           1.0 - 2.0*q.x*q.x - 2.0*q.z*q.z,    2.0*q.y*q.z + 2.0*q.w*q.x,   0.0,
+                                   2.0*q.x*q.z + 2.0*q.w*q.y,           2.0*q.y*q.z - 2.0*q.w*q.x,          1.0 - 2.0*q.x*q.x - q.y*q.y, 0.0,	
+                                   0.0,                                 0.0,                                0.0,                         1.0];
+            }
+            else{
+                let rx = utils.MakeRotateXMatrix(this.objects[i].orientationDeg[0]);
+                let ry = utils.MakeRotateYMatrix(this.objects[i].orientationDeg[1]);
+                let rz = utils.MakeRotateZMatrix(this.objects[i].orientationDeg[2]);
+                rotation_matrix = utils.multiplyMatrices(rx, ry);
+                rotation_matrix = utils.multiplyMatrices(rotation_matrix, rz);
+            }
+            
+            // rotation_matrix = utils.transposeMatrix(rotation_matrix)
             let translation_matrix = utils.MakeTranslateMatrix(this.objects[i].position[0],this.objects[i].position[1],this.objects[i].position[2])
             let scale_matrix = utils.MakeScaleMatrix(this.objects[i].scale);
             worldMatrix = utils.multiplyMatrices(rotation_matrix, scale_matrix);
@@ -117,6 +130,76 @@ class staticObjectRenderer{
             object.scale = 0.05;
             console.log('object scale is lower bounded at 0.05')
         }
+    }
+
+
+    updateOrientation(rvx, rvy, rvz){
+        let object = renderer.objects.filter(i=>i.name==focusedObjectName)[0];
+        if(document.getElementById("quaternionRotation").checked){
+            let dq1 = new Quaternion(Math.cos(rvx/2/180*Math.PI),
+                                    Math.sin(rvx/2/180*Math.PI)*1,
+                                    Math.sin(rvx/2/180*Math.PI)*0,
+                                    Math.sin(rvx/2/180*Math.PI)*0);
+            dq1.normalize();
+            let dq2 = new Quaternion(Math.cos(rvy/2/180*Math.PI),
+                                    Math.sin(rvy/2/180*Math.PI)*0,
+                                    Math.sin(rvy/2/180*Math.PI)*1,
+                                    Math.sin(rvy/2/180*Math.PI)*0);
+            dq2.normalize();
+            let dq3 = new Quaternion(Math.cos(rvz/2/180*Math.PI),
+                                    Math.sin(rvz/2/180*Math.PI)*0,
+                                    Math.sin(rvz/2/180*Math.PI)*0,
+                                    Math.sin(rvz/2/180*Math.PI)*1);
+            dq3.normalize();
+            let dq = dq1.mul(dq2).mul(dq3);
+            object.orientation = (dq.mul(object.orientation)).normalize()
+            console.log(object.position, object.orientation, object.scale)
+        }
+        else{
+            object.orientationDeg[0] += rvx;
+            object.orientationDeg[1] += rvy;
+            object.orientationDeg[2] += rvz;
+        }
+        
+
+
+        // code for extracting quaternions from rotation matrix
+        // let rotation_matrix = [1 - 2*q.y**2 - 2*q.z**2, 2*q.x*q.y + 2*q.w*q.z, 2*q.x*q.z - 2*q.w*q.y, 0,
+        // 					2*q.x*q.y - 2*q.w*q.z, 1 - 2*q.x**2 - 2*q.z**2, 2*q.y*q.z + 2*q.w*q.x, 0,
+        // 					2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,	
+        // 					0, 0, 0, 1];
+        // console.log(rotation_matrix[8])
+        // if(rotation_matrix[8] != 1 && rotation_matrix[8] != -1){
+        // 	y1 = -Math.asin(rotation_matrix[8]);
+        // 	y2 = Math.PI - y1;
+        // 	x1 = Math.atan2(rotation_matrix[9] / Math.cos(y1), rotation_matrix[10] / Math.cos(y1));
+        // 	x2 = Math.atan2(rotation_matrix[9] / Math.cos(y2), rotation_matrix[10] / Math.cos(y2));
+        // 	z1 = Math.atan2(rotation_matrix[4] / Math.cos(y1), rotation_matrix[0] / Math.cos(y1));
+        // 	z2 = Math.atan2(rotation_matrix[4] / Math.cos(y2), rotation_matrix[0] / Math.cos(y2));
+        // }
+        // else{
+        // 	console.log('r13 is +-1')
+        // 	z1 = 0;
+        // 	z2 = 0;
+        // 	if(rotation_matrix[8] == -1){
+        // 		y1 = Math.PI / 2;
+        // 		y2 = Math.PI / 2;
+        // 		x1 = z1 + Math.atan2(rotation_matrix[1], rotation_matrix[2]);
+        // 		x2 = z2 + Math.atan2(rotation_matrix[1], rotation_matrix[2]);
+        // 	}
+        // 	else{
+        // 		y1 = -Math.PI / 2;
+        // 		y2 = -Math.PI / 2;
+        // 		x1 = -z1 + Math.atan2(-rotation_matrix[1], -rotation_matrix[2]);
+        // 		x2 = -z2 + Math.atan2(-rotation_matrix[1], -rotation_matrix[2]);
+        // 	}
+        // }
+        // object = renderer.objects.filter(item=>item.name==focusedObjectName)[0]
+        // object.orientation[0] += x1;
+        // object.orientation[1] += y1;
+        // object.orientation[2] += z1;
+        // console.log(object.orientation)
+    
     }
     
     

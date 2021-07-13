@@ -48,7 +48,7 @@ class InputElementsManager{
         button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, // object name
                                                         this.innerHTML, // model name
                                                         [0,0,0], // position
-                                                        new Quaternion(1,0,0,0))}; // orientation
+                                                        new Quaternion())}; // orientation
         space.appendChild(item);
     }
     
