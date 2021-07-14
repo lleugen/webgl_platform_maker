@@ -204,6 +204,12 @@ function onRadioButtonChange(value){
 }
 
 
+function onRadioButtonChangeCamera(value){
+	console.log("Radio button value changed to "+value);
+	cameraType = value;
+}
+
+
 function onSliderChangeWorldAnglex(value){
     console.log("Slider value changed to "+value);
     worldAnglex = value;
@@ -326,6 +332,34 @@ function doKeyDown(e){
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] += 10
 					break;
 			}
+		}
+		switch(e.keyCode){
+			case 69: // e
+				cx -= 10 * -Math.sin(angle/180*Math.PI)
+				cy -= 10 * -Math.sin(elevation/180*Math.PI)
+				break;
+			case 82: // r
+				cx += 10 * -Math.sin(angle/180*Math.PI)
+				cy += 10 * -Math.sin(elevation/180*Math.PI)
+				break;
+			case 68: // d
+				cy -= 10
+				break;
+			case 70: // f
+				cy += 10
+				break;
+			case 67: // c
+				cz += 10 * Math.cos(angle/180*Math.PI)
+				cx -= 10 * Math.sin(angle/180*Math.PI)
+				cy += 10 * Math.sin(elevation/180*Math.PI)
+				cz -= 10 * Math.cos(elevation/180*Math.PI)
+				break;
+			case 86: // v
+				cz -= 10 * Math.cos(angle/180*Math.PI)
+				cx += 10 * Math.sin(angle/180*Math.PI)
+				cy -= 10 * Math.sin(elevation/180*Math.PI)
+				cz += 10 * Math.cos(elevation/180*Math.PI)
+				break;
 		}
 }
 

@@ -64,10 +64,11 @@ class staticObjectRenderer{
             let q = this.objects[i].orientation
             let rotation_matrix;
             if(document.getElementById("quaternionRotation").checked){
-                rotation_matrix = [1.0 - 2.0*q.y*q.y - 2.0*q.z*q.z,     2.0*q.x*q.y + 2.0*q.w*q.z,          2.0*q.x*q.z - 2.0*q.w*q.y,   0.0,
-                                   2.0*q.x*q.y - 2.0*q.w*q.z,           1.0 - 2.0*q.x*q.x - 2.0*q.z*q.z,    2.0*q.y*q.z + 2.0*q.w*q.x,   0.0,
-                                   2.0*q.x*q.z + 2.0*q.w*q.y,           2.0*q.y*q.z - 2.0*q.w*q.x,          1.0 - 2.0*q.x*q.x - q.y*q.y, 0.0,	
-                                   0.0,                                 0.0,                                0.0,                         1.0];
+                // rotation_matrix = [1.0 - 2.0*q.y*q.y - 2.0*q.z*q.z,     2.0*q.x*q.y + 2.0*q.w*q.z,          2.0*q.x*q.z - 2.0*q.w*q.y,   0.0,
+                //                    2.0*q.x*q.y - 2.0*q.w*q.z,           1.0 - 2.0*q.x*q.x - 2.0*q.z*q.z,    2.0*q.y*q.z + 2.0*q.w*q.x,   0.0,
+                //                    2.0*q.x*q.z + 2.0*q.w*q.y,           2.0*q.y*q.z - 2.0*q.w*q.x,          1.0 - 2.0*q.x*q.x - q.y*q.y, 0.0,	
+                //                    0.0,                                 0.0,                                0.0,                         1.0];
+                rotation_matrix = q.toMatrix4();
             }
             else{
                 let rx = utils.MakeRotateXMatrix(this.objects[i].orientationDeg[0]);
@@ -90,10 +91,18 @@ class staticObjectRenderer{
 
     draw(){
         // make view matrix
-        cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
-        cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
-        cy = lookRadius * Math.sin(utils.degToRad(-elevation));
-        viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+        switch(cameraType){
+            case 'lookAt1':
+                cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+                cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+                cy = lookRadius * Math.sin(utils.degToRad(-elevation));
+                viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+                break;
+            case 'lookDirection':
+                viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+                break;
+        }
+        
     
         projectionMatrix = createProjection(projectionType);
       
