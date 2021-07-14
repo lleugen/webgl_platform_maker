@@ -2,6 +2,7 @@
 function main() {
   loadShaders();
   loadModels();
+  loadDir();
   canvas = document.querySelector("#canvas");
   // add input event listeners to the canvas, functions are defined in input_events.js
   addListeners(canvas);
@@ -12,11 +13,35 @@ function main() {
   }
   // this is a linter which helps to get more information when errors occur
   const ext = gl.getExtension('GMAN_debug_helper');
+
+  textureTerrain = gl.createTexture();
+  // use texture unit 0
+  gl.activeTexture(gl.TEXTURE0);
+  // bind to the TEXTURE_2D bind point of texture unit 0
+  gl.bindTexture(gl.TEXTURE_2D, textureTerrain);
+  // Asynchronously load an image
+  var image = new Image();
+  image.src = baseDir + "Terrain-Texture_2.png";
+  image.onload = function() {
+      gl.bindTexture(gl.TEXTURE_2D, textureTerrain);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+
+      gl.generateMipmap(gl.TEXTURE_2D);
+    };
+
+
   // create shaders from sources loaded above
   fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
   vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
   vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
   fancyFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fancyFragmentShaderSource);
+  vertexShader_tex = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_tex);
+  fragmentShader_tex = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource_tex);
+
   // create programs with a vertex shader and a fragment shader
   // tag the programs with a name so the linter can tell us where errors come from
   // todo make program for every model
@@ -24,15 +49,28 @@ function main() {
   ext.tagObject(program2, "program2");
   program = createProgram(gl, vertexShader, fragmentShader);
   ext.tagObject(program, "program");
-  // get uniform locations inside the programs 
+  programTex = createProgram(gl, vertexShader_tex, fragmentShader_tex);
+  ext.tagObject(programTex, "programTex");
+
+
+  // get uniform locations inside the programs
   program.projection_uniform_location = gl.getUniformLocation(program, "projection");
-  program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
   program2.projection_uniform_location = gl.getUniformLocation(program2, "projection");
+  programTex.projection_uniform_location = gl.getUniformLocation(programTex, "matrix");
+
+  program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
+  gl.enableVertexAttribArray(program.vertexPositionAttribute);
   program2.vertexPositionAttribute = gl.getAttribLocation(program2, "a_position");
   gl.enableVertexAttribArray(program2.vertexPositionAttribute);
-  gl.enableVertexAttribArray(program.vertexPositionAttribute);
+  programTex.vertexPositionAttribute = gl.getAttribLocation(programTex, "a_position")
+  gl.enableVertexAttribArray(programTex.vertexPositionAttribute);
+
   program2.light = gl.getUniformLocation(program2, "light");
   program2.matcol = gl.getUniformLocation(program2, "matcol");
+
+  programTex.uvAttributeLocation = gl.getAttribLocation(programTex, "a_uv");
+  programTex.textLocation = gl.getUniformLocation(programTex, "u_texture");
+
   webglUtils.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   // add model created buffers and puts the data inside, it need to have the locations already set
@@ -47,18 +85,18 @@ function main() {
   var ghost = new OBJ.Mesh(ghostStr);
   inputElementsManager = new InputElementsManager();
   renderer = new staticObjectRenderer();
-  
-  renderer.addModel('tree', tree, program2);
-  renderer.addModel('hedge', hedge, program2);
-  renderer.addModel('rock', rock, program2);
-  renderer.addModel('brick', brick, program2);
-  renderer.addModel('cloud', cloud, program2);
-  renderer.addModel('cylinder', cylinder, program2);
-  renderer.addModel('mountain', mountain, program2);
-  renderer.addModel('square', square, program2);
-  renderer.addModel('sphere', createSphere(), program2);
-  renderer.addModel('triangle', createTriangle(), program2);
-  renderer.addModel('ghost', ghost, program2);
+
+  renderer.addModel('tree', tree, programTex, textureTerrain);
+  renderer.addModel('hedge', hedge, programTex, textureTerrain);
+  renderer.addModel('rock', rock, program2,null);
+  renderer.addModel('brick', brick,programTex,textureTerrain);
+  renderer.addModel('cloud', cloud,programTex,textureTerrain);
+  renderer.addModel('cylinder', cylinder,programTex,textureTerrain);
+  renderer.addModel('mountain', mountain,programTex,textureTerrain);
+  renderer.addModel('square', square, program2,null);
+  renderer.addModel('sphere', createSphere(), program2,null);
+  renderer.addModel('triangle', createTriangle(), program2,null);
+  renderer.addModel('ghost', ghost, program2,null);
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -76,7 +114,7 @@ function main() {
 
 
 async function loadModels(){
-  await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj', 
+  await utils.loadFiles(['assets/brick.obj', 'assets/cloud.obj', 'assets/cylinderIsland.obj', 'assets/hedge.obj',
   'assets/mountain.obj', 'assets/rock.obj', 'assets/squareIsland.obj', 'assets/tree.obj', 'assets/ghost.obj'], function (meshText) {
     brickStr = meshText[0];
     cloudStr = meshText[1];
@@ -96,10 +134,21 @@ async function loadShaders(){
   await utils.loadFiles(['shaders/vertex-shader-2d.glsl',
                         'shaders/vertex-shader-2d_2.glsl',
                         'shaders/axisFragmentShader.glsl',
-                        'shaders/fancyFragmentShader.glsl'], function (shaderText) {
+                        'shaders/fancyFragmentShader.glsl',
+                        'shaders/vertex-shader-tex.glsl',
+                        'shaders/texFragmentShader.glsl'], function (shaderText) {
     vertexShaderSource = shaderText[0];
     vertexShaderSource_2 = shaderText[1];
     fragmentShaderSource = shaderText[2];
     fancyFragmentShaderSource = shaderText[3];
+    vertexShaderSource_tex = shaderText[4];
+    fragmentShaderSource_tex = shaderText[5];
   });
+}
+async function loadDir(){
+  // Asynchronously load an image
+  var path = window.location.pathname;
+  var page = path.split("/").pop();
+  baseDir = window.location.href.replace(page, '');
+
 }

@@ -8,12 +8,12 @@ class staticObjectRenderer{
     }
 
 
-    addModel(name, model, program){
+    /*addModel(name, model, program){
         let vertexBuffer;
         vertexBuffer = gl.createBuffer();
         let indexBuffer;
         indexBuffer = gl.createBuffer();
-    
+
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
@@ -27,7 +27,47 @@ class staticObjectRenderer{
                         'vertexBuffer': vertexBuffer,
                         'indexBuffer': indexBuffer};
         this.models.push(newModel);
-        inputElementsManager.drawCreateButton(name)   
+        inputElementsManager.drawCreateButton(name)
+    }*/
+    addModel(name, model, program, texture){
+      console.log("in addModel= "+ program);
+        let vertexBuffer;
+        vertexBuffer = gl.createBuffer();
+        let indexBuffer;
+        indexBuffer = gl.createBuffer();
+        let uvBuffer;
+        uvBuffer = gl.createBuffer();
+
+        if(texture!=null){
+        gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textures), gl.STATIC_DRAW);
+        //gl.enableVertexAttribArray(program.uvAttributeLocation);
+        gl.vertexAttribPointer(program.uvAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+        }else{uvBuffer=null}
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+
+        // use texture unit 0
+        //gl.activeTexture(gl.TEXTURE0);
+        // bind to the TEXTURE_2D bind point of texture unit 0
+      //  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        let newModel = {'name': name,
+                        'model': model,
+                        'uvBuffer': uvBuffer,
+                        'vertexBuffer': vertexBuffer,
+                        'indexBuffer': indexBuffer,
+                        'program': program,
+                        'texture': texture};
+                        console.log("in newModel obg= "+newModel.program);
+                        console.log("in newModel obg texture= "+newModel.texture);
+        this.models.push(newModel);
+        inputElementsManager.drawCreateButton(name);
     }
 
 
@@ -66,7 +106,7 @@ class staticObjectRenderer{
             if(document.getElementById("quaternionRotation").checked){
                 rotation_matrix = [1.0 - 2.0*q.y*q.y - 2.0*q.z*q.z,     2.0*q.x*q.y + 2.0*q.w*q.z,          2.0*q.x*q.z - 2.0*q.w*q.y,   0.0,
                                    2.0*q.x*q.y - 2.0*q.w*q.z,           1.0 - 2.0*q.x*q.x - 2.0*q.z*q.z,    2.0*q.y*q.z + 2.0*q.w*q.x,   0.0,
-                                   2.0*q.x*q.z + 2.0*q.w*q.y,           2.0*q.y*q.z - 2.0*q.w*q.x,          1.0 - 2.0*q.x*q.x - q.y*q.y, 0.0,	
+                                   2.0*q.x*q.z + 2.0*q.w*q.y,           2.0*q.y*q.z - 2.0*q.w*q.x,          1.0 - 2.0*q.x*q.x - q.y*q.y, 0.0,
                                    0.0,                                 0.0,                                0.0,                         1.0];
             }
             else{
@@ -76,14 +116,15 @@ class staticObjectRenderer{
                 rotation_matrix = utils.multiplyMatrices(rx, ry);
                 rotation_matrix = utils.multiplyMatrices(rotation_matrix, rz);
             }
-            
+
             // rotation_matrix = utils.transposeMatrix(rotation_matrix)
             let translation_matrix = utils.MakeTranslateMatrix(this.objects[i].position[0],this.objects[i].position[1],this.objects[i].position[2])
             let scale_matrix = utils.MakeScaleMatrix(this.objects[i].scale);
             worldMatrix = utils.multiplyMatrices(rotation_matrix, scale_matrix);
             worldMatrix = utils.multiplyMatrices(translation_matrix, worldMatrix);
             let model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
-            this.drawModel(model, worldMatrix, model.program);
+            this.drawModel(model, worldMatrix);
+            console.log("in drawobjects texture= "+model.texture);
         }
     }
 
@@ -94,18 +135,18 @@ class staticObjectRenderer{
         cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
         cy = lookRadius * Math.sin(utils.degToRad(-elevation));
         viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
-    
+
         projectionMatrix = createProjection(projectionType);
-      
+
         // drawYplane();
         renderer.drawAxisLines();
         renderer.drawObjects();
-        
+
         window.requestAnimationFrame(renderer.draw);
       }
 
 
-    
+
 
 
     updateObjectPosition(name, x, z){
@@ -161,13 +202,13 @@ class staticObjectRenderer{
             object.orientationDeg[1] += rvy;
             object.orientationDeg[2] += rvz;
         }
-        
+
 
 
         // code for extracting quaternions from rotation matrix
         // let rotation_matrix = [1 - 2*q.y**2 - 2*q.z**2, 2*q.x*q.y + 2*q.w*q.z, 2*q.x*q.z - 2*q.w*q.y, 0,
         // 					2*q.x*q.y - 2*q.w*q.z, 1 - 2*q.x**2 - 2*q.z**2, 2*q.y*q.z + 2*q.w*q.x, 0,
-        // 					2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,	
+        // 					2*q.x*q.z + 2*q.w*q.y, 2*q.y*q.z - 2*q.w*q.x, 1 - 2*q.x**2 - q.y**2, 0,
         // 					0, 0, 0, 1];
         // console.log(rotation_matrix[8])
         // if(rotation_matrix[8] != 1 && rotation_matrix[8] != -1){
@@ -200,16 +241,16 @@ class staticObjectRenderer{
         // object.orientation[1] += y1;
         // object.orientation[2] += z1;
         // console.log(object.orientation)
-    
+
     }
-    
-    
+
+
     drawAxisLines(){
-        
+
         gl.useProgram(program);
         var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
         gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_1));
-    
+
 
         var lines = [
             0,0,0,
@@ -220,16 +261,16 @@ class staticObjectRenderer{
             0,0,10,
         ]
 
-        
+
         var lineBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
         gl.drawArrays(gl.LINES, 0, lines.length/3);
     }
-    
-    
-    
+
+
+
     drawYplane(){
         var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
         gl.useProgram(program);
@@ -248,9 +289,9 @@ class staticObjectRenderer{
         gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
         gl.drawArrays(gl.TRIANGLES, 0, plane.length/3);
     }
-    
-    
-    drawModel(model, worldMatrix, program){
+
+
+  /*  drawModel(model, worldMatrix, program){
         gl.useProgram(program);
         // do buffers and data for every model
         // create vertex buffer
@@ -261,32 +302,86 @@ class staticObjectRenderer{
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
         // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectMesh.vertices), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-    
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
         // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(objectMesh.indices), gl.STATIC_DRAW);
-    
-    
+
+
         let s45 = 0.707106781186548;
         let gLightDir1 = [ 0.0, s45, s45, 1.0];
         gl.uniform4f(program.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
         let colors = [1, 0, 0]
         gl.uniform4f(program.matcol, colors[0], colors[1], colors[2], 1.0);
-    
+
         //##############################################################
         // update W matrix
-    
+
         // var worldMatrix = utils.MakeWorld(sliderValuex,sliderValuey,sliderValuez,worldAnglex,worldAngley,worldAnglez,1);
         //##############################################################
         //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
         var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
         var wvpMatrix_2 = utils.multiplyMatrices(wvpMatrix_1, worldMatrix); // for program 2 used by ghost
-    
+
         var primitiveType = gl.TRIANGLES;
         var offset = 0;
         var count = model.model.indices.length;
-    
-    
+
+
         gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_2));
+        gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
+    }*/
+    drawModel(model, worldMatrix){
+        gl.useProgram(model.program);
+        console.log(model.program);
+        console.log(model.texture);
+
+        var vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
+        gl.enableVertexAttribArray(model.program.vertexPositionAttribute);
+        gl.vertexAttribPointer(model.program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
+        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(objectMesh.indices), gl.STATIC_DRAW);
+
+        //gl.enableVertexAttribArray(uvAttributeLocation);
+        //gl.vertexAttribPointer(uvAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+        //gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+        if(model.uvBuffer!=null){
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.uvBuffer);
+        gl.enableVertexAttribArray(model.program.uvAttributeLocation);
+        gl.vertexAttribPointer(model.program.uvAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+        }
+
+        if(model.program==program2){
+        let s45 = 0.707106781186548;
+        let gLightDir1 = [ 0.0, s45, s45, 1.0];
+        gl.uniform4f(program2.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
+        let colors = [1, 0, 0]
+        gl.uniform4f(program2.matcol, colors[0], colors[1], colors[2], 1.0);
+      }
+        //##############################################################
+        // update W matrix
+
+        //   var worldMatrix = utils.MakeWorld(sliderValuex,sliderValuey,sliderValuez,worldAnglex,worldAngley,worldAnglez,1);
+        //##############################################################
+        //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
+        var wvpMatrix_1 = utils.multiplyMatrices(projectionMatrix, viewMatrix); // for program 1, used by plane and axis
+        var wvpMatrix_2 = utils.multiplyMatrices(wvpMatrix_1, worldMatrix); // for program 2 used by ghost
+
+        if(model.texture!=null){
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, model.texture);
+        gl.uniform1i(model.program.textLocation, 0);
+        }
+
+        var primitiveType = gl.TRIANGLES;
+        var offset = 0;
+        var count = model.model.indices.length;
+
+        gl.bindVertexArray(vao);
+        gl.uniformMatrix4fv(model.program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_2));
         gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
     }
 }
@@ -321,7 +416,7 @@ function createProjection(projectionType){
                 0, cos_35, sin_35, 0,
                 0, -sin_35, cos_35, 0,
                 0, 0, 0, 1];
-      
+
       let y_rotation = [cos_45, 0, sin_45, 0,
                 0, 1, 0, 0,
                 -sin_45, 0, cos_45, 0,

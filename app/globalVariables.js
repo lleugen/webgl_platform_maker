@@ -3,6 +3,7 @@ var canvas = null;
 var program = null;
 var program2 = null;
 var objectMesh = null;
+var programTex=null;
 
 var vertexShaderSource;
 var vertexShaderSource_2;
@@ -13,6 +14,13 @@ var vertexShader;
 var vertexShader_2;
 var fragmentShader;
 var fancyFragmentShader;
+//new Lia
+var vertexShader_tex;
+var fragmentShader_tex;
+var vertexShaderSource_tex;
+var fragmentShaderSource_tex;
+var textureTerrain;
+var baseDir;
 
 var viewMatrix;
 var projectionMatrix;
