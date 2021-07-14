@@ -66,3 +66,5 @@ var wheelSensitivity = 1;
 var toggleCreate = 'none';
 
 var cameraType = 'lookAt1'
+
+var fov = 45;

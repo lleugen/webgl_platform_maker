@@ -234,6 +234,12 @@ function onSliderChangeWheelSensitivity(value){
 }
 
 
+function onSliderChangeFov(value){
+    console.log("Slider value changed to "+value);
+    fov = value;
+}
+
+
 function raycast(x, y){
 	let invProjection;
 	let cameraSpaceRay, worldSpaceRay;

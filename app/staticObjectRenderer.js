@@ -340,7 +340,7 @@ function createProjection(projectionType){
     }
     else if(projectionType == "perspective"){
       // console.log(nearPlane, farPlane)
-      projectionMatrix = utils.MakePerspective(45,2,nearPlane,farPlane);
+      projectionMatrix = utils.MakePerspective(fov,2,nearPlane,farPlane);
     }
     return projectionMatrix;
 }
