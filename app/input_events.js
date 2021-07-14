@@ -20,7 +20,7 @@ function doMouseDown(event) {
 		let height = 0;
 		plane_x = (height-cy) / worldSpaceRay[1] * worldSpaceRay[0] + cx;
 		plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
-		renderer.addObject(toggleCreate, // object name
+		renderer.addObject(toggleCreate+renderer.objects.length, // object name
 							toggleCreate, // model name
 							[plane_x,0, plane_z], // position
 							new Quaternion()); // orientation
