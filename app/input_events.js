@@ -2,7 +2,7 @@ function doMouseDown(event) {
 	lastMouseX = event.pageX;
 	lastMouseY = event.pageY;
 	mouseState = true;
-	if(toggleCreate != 'none'){
+	if(toggleCreate != 'none' && toggleCreate != 'delete'){
 		let x, y;
 		// raycast event.x and .y to y plane to find the new position of the object
 		// canvas coordinates -> normalized screen coordinates
@@ -25,7 +25,7 @@ function doMouseDown(event) {
 							[plane_x,0, plane_z], // position
 							new Quaternion()); // orientation
 	}
-	else{
+	else if(toggleCreate == 'none'){
 		// select focused object by clicking on it
 		// raycast and select the first object that intersects, if none then select world
 		let i;
@@ -40,11 +40,26 @@ function doMouseDown(event) {
 					break;
 				}
 			}
-			
 		}
 		if(!hit){
 			focusedObjectName='world';
 			console.log('no hit, reset')
+		}
+	}
+	else{
+		// delete clicked objects
+		let i;
+		let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
+		let hit = false;
+		for(i=0; i<renderer.objects.length; i++){
+			if(renderer.objects[i].name != 'triangle_0'){
+				if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 10)){
+					console.log('deleting', renderer.objects[i].name)
+					renderer.deleteObject(renderer.objects[i].name)
+					focusedObjectName = 'world'
+					break;
+				}
+			}
 		}
 	}
 }

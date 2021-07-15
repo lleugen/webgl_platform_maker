@@ -3,6 +3,7 @@ class staticObjectRenderer{
         this.objects = [];
         this.models = [];
         inputElementsManager.drawSelectButton('world');
+        inputElementsManager.drawCreateButton('delete');
         inputElementsManager.drawCreateButton('none');
         console.log('renderer created');
     }
@@ -106,8 +107,12 @@ class staticObjectRenderer{
     
         projectionMatrix = createProjection(projectionType);
       
-        // drawYplane();
-        renderer.drawAxisLines();
+        if(document.getElementById('xz_plane').checked){
+            renderer.drawYplane();
+        }
+        if(document.getElementById('draw_axis').checked){
+            renderer.drawAxisLines();
+        }
         renderer.drawObjects();
         
         window.requestAnimationFrame(renderer.draw);

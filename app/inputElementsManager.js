@@ -38,24 +38,24 @@ class InputElementsManager{
         // console.log(keys)
         button = document.createElement("button");
         button.innerHTML = name;
-        text = document.createElement("INPUT");
-        text.size = 7;
-        if(renderer == null){
-            text.id = 'sample text'
-        }
-        else{
-            text.id = "text"+renderer.models.length;
-        }
+        // text = document.createElement("INPUT");
+        // text.size = 7;
+        // if(renderer == null){
+        //     text.id = 'sample text'
+        // }
+        // else{
+        //     text.id = "text"+renderer.models.length;
+        // }
         
-        text.placeholder = 'object name';
+        // text.placeholder = 'object name';
         item = document.createElement('li');
-        item.appendChild(text);
+        // item.appendChild(text);
         item.appendChild(button);
         // button.onclick = function() {renderer.addObject(this.parentElement.children[0].value == '' ? this.innerHTML + '_' + renderer.objects.length : this.parentElement.children[0].value, // object name
         //                                                 this.innerHTML, // model name
         //                                                 [0,0,0], // position
         //                                                 new Quaternion())}; // orientation
-        button.onclick = function() {toggleCreate = name == 'none' ? 'none' : this.innerHTML;}
+        button.onclick = function() {toggleCreate = this.innerHTML;}
         space.appendChild(item);
     }
     
