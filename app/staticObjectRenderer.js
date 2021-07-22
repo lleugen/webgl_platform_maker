@@ -2,6 +2,7 @@ class staticObjectRenderer{
     constructor(){
         this.objects = [];
         this.models = [];
+        this.camera = new Camera();
         inputElementsManager.drawSelectButton('world');
         inputElementsManager.drawCreateButton('delete');
         inputElementsManager.drawCreateButton('none');
@@ -92,17 +93,7 @@ class staticObjectRenderer{
 
     draw(){
         // make view matrix
-        switch(cameraType){
-            case 'lookAt1':
-                cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
-                cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
-                cy = lookRadius * Math.sin(utils.degToRad(-elevation));
-                viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
-                break;
-            case 'lookDirection':
-                viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
-                break;
-        }
+        viewMatrix = renderer.camera.view();
         
     
         projectionMatrix = createProjection(projectionType);

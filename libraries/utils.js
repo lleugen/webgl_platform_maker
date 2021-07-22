@@ -392,7 +392,7 @@ var utils={
 		return out;
 	},
 
-	MakeView: function(cx, cy, cz, elev, ang) {
+	MakeView: function(cx, cy, cz, elev, ang) {// look in direction (1st person)
 	// Creates in {out} a view matrix. The camera is centerd in ({cx}, {cy}, {cz}).
 	// It looks {ang} degrees on y axis, and {elev} degrees on the x axis.
 		
@@ -411,6 +411,7 @@ var utils={
 
 		return out;
 	},
+
 
 	MakePerspective:function(fovy, a, n, f) {
 	// Creates the perspective projection matrix. The matrix is returned.

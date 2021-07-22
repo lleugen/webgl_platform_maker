@@ -85,7 +85,7 @@ function doWheelRotate(event){
 
 function doMouseMove(event) {
 	if(mouseState) {
-		//########################################
+		//######### raycast mouse pointer and build debug triangle ###########
 		let x, y;
 		// raycast event.x and .y to y plane to find the new position of the object
 		// canvas coordinates -> normalized screen coordinates
@@ -108,7 +108,7 @@ function doMouseMove(event) {
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleModel.model.vertices), gl.STATIC_DRAW);
 		gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 		//##########################################
-		if(focusedObjectName == 'world'){
+		if(focusedObjectName == 'world'){ // move camera view
 			var dx = event.pageX - lastMouseX;
 			var dy = lastMouseY - event.pageY;
 			lastMouseX = event.pageX;
@@ -118,7 +118,7 @@ function doMouseMove(event) {
 				elevation = elevation + 0.5 * dy;
 			}
 		}
-		else{
+		else{ // raycast mouse pointer and move objects
 			let x, y;
 			// raycast event.x and .y to y plane to find the new position of the object
 			// canvas coordinates -> normalized screen coordinates
@@ -308,78 +308,112 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
 
 
 function doKeyDown(e){
-	// rotation around axis
+	let lookAtVectorLength, cosx, cosy, cosz;
 	
 		if(document.getElementById("quaternionRotation").checked){
-			switch(e.keyCode) {
-				case 81:
+			switch(e.keyCode) {// object rotation
+				case 81://q
 					renderer.updateOrientation(-10,0,0)
 					break;
-				case 87:
+				case 87://w
 					renderer.updateOrientation(10,0,0)
 					break;
-				case 65:
+				case 65://a
 					renderer.updateOrientation(0,-10,0)
 					break;
-				case 83:
+				case 83://s
 					renderer.updateOrientation(0,10,0)
 					break;
-				case 90:
+				case 90://z
 					renderer.updateOrientation(0,0,-10)
 					break;
-				case 88:
+				case 88://x
 					renderer.updateOrientation(0,0,10)
 					break;
 			}
 		}
 		else{
-			switch(e.keyCode) {
-				case 81:
+			switch(e.keyCode) {// object rotation but with world axis
+				case 81://q
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] -= 10
 					break;
-				case 87:
+				case 87://w
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] += 10
 					break;
-				case 65:
+				case 65://a
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] -= 10
 					break;
-				case 83:
+				case 83://s
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] += 10
 					break;
-				case 90:
+				case 90://z
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] -= 10
 					break;
-				case 88:
+				case 88://x
 					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] += 10
 					break;
 			}
 		}
-		switch(e.keyCode){
+		switch(e.keyCode){// camera control
 			case 69: // e
-				cx -= 10 * -Math.sin(angle/180*Math.PI)
-				cy -= 10 * -Math.sin(elevation/180*Math.PI)
+				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
+				// cosx = (cx-lookAtX) / (lookAtVectorLength)
+				// cosy = (cy-lookAtY) / lookAtVectorLength
+				// cosz = (cz-lookAtZ) / lookAtVectorLength
+				// lookAtVectorLength -= 5
+				// cx = cosx * lookAtVectorLength + lookAtX
+				// cy = cosy * lookAtVectorLength + lookAtY
+				// cz = cosz * lookAtVectorLength + lookAtZ
+				renderer.camera.move(-1,0,0)
 				break;
 			case 82: // r
-				cx += 10 * -Math.sin(angle/180*Math.PI)
-				cy += 10 * -Math.sin(elevation/180*Math.PI)
+				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
+				// cosx = (cx-lookAtX) / (lookAtVectorLength)
+				// cosy = (cy-lookAtY) / lookAtVectorLength
+				// cosz = (cz-lookAtZ) / lookAtVectorLength
+				// lookAtVectorLength += 5
+				// cx = cosx * lookAtVectorLength + lookAtX
+				// cy = cosy * lookAtVectorLength + lookAtY
+				// cz = cosz * lookAtVectorLength + lookAtZ
+				renderer.camera.move(1,0,0)
 				break;
 			case 68: // d
-				cy -= 10
+				renderer.camera.move(0,-1,0)
 				break;
 			case 70: // f
-				cy += 10
+				renderer.camera.move(0,1,0)
 				break;
 			case 67: // c
-				cz += 10 * Math.cos(angle/180*Math.PI)
-				cx -= 10 * Math.sin(angle/180*Math.PI)
-				cy += 10 * Math.sin(elevation/180*Math.PI)
-				cz -= 10 * Math.cos(elevation/180*Math.PI)
+				// u = 1
+				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cz - lookAtZ)**2)
+				// a = Math.acos(cx / lookAtVectorLength)
+				// cx = cx - u * Math.sin(a)
+				// cz = cz + u * Math.cos(a)
+				// lookAtX = lookAtX - u * Math.sin(a)
+				// lookAtZ = lookAtZ + u * Math.cos(a)
+				renderer.camera.move(0,0,-1)
 				break;
 			case 86: // v
-				cz -= 10 * Math.cos(angle/180*Math.PI)
-				cx += 10 * Math.sin(angle/180*Math.PI)
-				cy -= 10 * Math.sin(elevation/180*Math.PI)
-				cz += 10 * Math.cos(elevation/180*Math.PI)
+				// u = 1
+				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cz - lookAtZ)**2)
+				// a = Math.acos(cx / lookAtVectorLength)
+				// cx = cx + u * Math.sin(a)
+				// cz = cz - u * Math.cos(a)
+				// lookAtX = lookAtX + u * Math.sin(a)
+				// lookAtZ = lookAtZ - u * Math.cos(a)
+				renderer.camera.move(0,0,1)
+				break;
+			case 84: // t
+				renderer.camera.elevation -= 1;
+				break;
+			case 89: // y
+				renderer.camera.elevation += 1;
+				break;
+			case 71: // g
+				renderer.camera.angle -= 1;
+				break;
+			case 72: // h
+				renderer.camera.angle += 1;
 				break;
 		}
 }

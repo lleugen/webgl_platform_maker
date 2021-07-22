@@ -68,3 +68,7 @@ var toggleCreate = 'none';
 var cameraType = 'lookAt1'
 
 var fov = 45;
+
+var lookAtX = 0;
+var lookAtY = 0;
+var lookAtZ = 0;
