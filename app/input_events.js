@@ -364,7 +364,7 @@ function doKeyDown(e){
 				// cx = cosx * lookAtVectorLength + lookAtX
 				// cy = cosy * lookAtVectorLength + lookAtY
 				// cz = cosz * lookAtVectorLength + lookAtZ
-				renderer.camera.move(-1,0,0)
+				renderer.camera.move(1,0,0)
 				break;
 			case 37: // left arrow move left
 				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
@@ -375,13 +375,13 @@ function doKeyDown(e){
 				// cx = cosx * lookAtVectorLength + lookAtX
 				// cy = cosy * lookAtVectorLength + lookAtY
 				// cz = cosz * lookAtVectorLength + lookAtZ
-				renderer.camera.move(1,0,0)
+				renderer.camera.move(-1,0,0)
 				break;
-			case 34: // page up move up
-				renderer.camera.move(0,-1,0)
-				break;
-			case 33: // page down move down
+			case 33: // page up move up
 				renderer.camera.move(0,1,0)
+				break;
+			case 34: // page down move down
+				renderer.camera.move(0,-1,0)
 				break;
 			case 38: // forward/up arrow move closer, forward
 				// u = 1
