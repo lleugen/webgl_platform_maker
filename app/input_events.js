@@ -355,7 +355,7 @@ function doKeyDown(e){
 			}
 		}
 		switch(e.keyCode){// camera control
-			case 69: // e
+			case 39: // right arrow move right
 				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
 				// cosx = (cx-lookAtX) / (lookAtVectorLength)
 				// cosy = (cy-lookAtY) / lookAtVectorLength
@@ -366,7 +366,7 @@ function doKeyDown(e){
 				// cz = cosz * lookAtVectorLength + lookAtZ
 				renderer.camera.move(-1,0,0)
 				break;
-			case 82: // r
+			case 37: // left arrow move left
 				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
 				// cosx = (cx-lookAtX) / (lookAtVectorLength)
 				// cosy = (cy-lookAtY) / lookAtVectorLength
@@ -377,13 +377,13 @@ function doKeyDown(e){
 				// cz = cosz * lookAtVectorLength + lookAtZ
 				renderer.camera.move(1,0,0)
 				break;
-			case 68: // d
+			case 34: // page up move up
 				renderer.camera.move(0,-1,0)
 				break;
-			case 70: // f
+			case 33: // page down move down
 				renderer.camera.move(0,1,0)
 				break;
-			case 67: // c
+			case 38: // forward/up arrow move closer, forward
 				// u = 1
 				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cz - lookAtZ)**2)
 				// a = Math.acos(cx / lookAtVectorLength)
@@ -393,7 +393,7 @@ function doKeyDown(e){
 				// lookAtZ = lookAtZ + u * Math.cos(a)
 				renderer.camera.move(0,0,-1)
 				break;
-			case 86: // v
+			case 40: // down arrow move back
 				// u = 1
 				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cz - lookAtZ)**2)
 				// a = Math.acos(cx / lookAtVectorLength)
