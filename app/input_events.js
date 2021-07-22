@@ -1,3 +1,14 @@
+function projectPointer(x, y, h=0){
+	let worldSpaceRay = raycast(x,y);
+	let cameraCoordinates = [renderer.camera.x, renderer.camera.y, renderer.camera.z];
+	// calculate intersection with y=object height
+	let height = h;
+	plane_x = (height-cameraCoordinates[1]) / worldSpaceRay[1] * worldSpaceRay[0] + cameraCoordinates[0];
+	plane_z = (height-cameraCoordinates[1]) / worldSpaceRay[1] * worldSpaceRay[2] + cameraCoordinates[2];
+	return [plane_x, plane_z];
+}
+
+
 function doMouseDown(event) {
 	lastMouseX = event.pageX;
 	lastMouseY = event.pageY;
@@ -9,18 +20,10 @@ function doMouseDown(event) {
 		x = event.pageX * 2 / gl.canvas.width - 1;
 		y = event.pageY * 2 / gl.canvas.height - 1;
 		y = -y;
-
-		let worldSpaceRay = raycast(x,y);
-
-		let cameraCoordinates;
-		cameraCoordinates = [cx,cy,cz];
-		// console.log('cam coords',cameraCoordinates)
-		// now calculate intersection with y=0
-		// calculate intersection with y=object height
-		let height = 0;
-		plane_x = (height-cy) / worldSpaceRay[1] * worldSpaceRay[0] + cx;
-		plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
-		renderer.addObject(toggleCreate+renderer.objects.length, // object name
+		let projection_coordinates = projectPointer(x, y);
+		plane_x = projection_coordinates[0];
+		plane_z = projection_coordinates[1];
+		renderer.addObject(toggleCreate+'_'+renderer.objects.length, // object name
 							toggleCreate, // model name
 							[plane_x,0, plane_z], // position
 							new Quaternion()); // orientation
@@ -33,7 +36,7 @@ function doMouseDown(event) {
 		let hit = false;
 		for(i=0; i<renderer.objects.length; i++){
 			if(renderer.objects[i].name != 'triangle_0'){
-				if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 10)){
+				if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
 					focusedObjectName = renderer.objects[i].name;
 					hit = true;
 					console.log(focusedObjectName)
@@ -53,7 +56,7 @@ function doMouseDown(event) {
 		let hit = false;
 		for(i=0; i<renderer.objects.length; i++){
 			if(renderer.objects[i].name != 'triangle_0'){
-				if(raySphereIntersection([cx,cy,cz], ray, renderer.objects[i].position, 10)){
+				if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
 					console.log('deleting', renderer.objects[i].name)
 					renderer.deleteObject(renderer.objects[i].name)
 					focusedObjectName = 'world'
@@ -86,27 +89,21 @@ function doWheelRotate(event){
 function doMouseMove(event) {
 	if(mouseState) {
 		//######### raycast mouse pointer and build debug triangle ###########
-		let x, y;
-		// raycast event.x and .y to y plane to find the new position of the object
-		// canvas coordinates -> normalized screen coordinates
-		x = event.pageX * 2 / gl.canvas.width - 1;
-		y = event.pageY * 2 / gl.canvas.height - 1;
-		y = -y;
-		// let height = renderer.objects.filter(item => item.name == focusedObjectName);
-		// height = height[0].position[1];
-		let height = 0;
-
-		let worldSpaceRay = raycast(x,y);
-		plane_x = (height-cy) / worldSpaceRay[1] * worldSpaceRay[0] + cx;
-		plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
-		let triangleModel = renderer.models.filter(item=>item.name=='triangle')[0]
-		triangleModel.model.vertices[0] = plane_x;
-		triangleModel.model.vertices[2] = plane_z;
-		// console.log(triangleModel.model.vertices)
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, triangleModel.vertexBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleModel.model.vertices), gl.STATIC_DRAW);
-		gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+		// let x, y;
+		// // raycast event.x and .y to y plane to find the new position of the object
+		// // canvas coordinates -> normalized screen coordinates
+		// x = event.pageX * 2 / gl.canvas.width - 1;
+		// y = event.pageY * 2 / gl.canvas.height - 1;
+		// y = -y;
+		// let projection_coordinates = projectPointer();
+		// plane_x = projection_coordinates[0];
+		// plane_z = projection_coordinates[1];
+		// let triangleModel = renderer.models.filter(item=>item.name=='triangle')[0]
+		// triangleModel.model.vertices[0] = plane_x;
+		// triangleModel.model.vertices[2] = plane_z;
+		// gl.bindBuffer(gl.ARRAY_BUFFER, triangleModel.vertexBuffer);
+		// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleModel.model.vertices), gl.STATIC_DRAW);
+		// gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 		//##########################################
 		if(focusedObjectName == 'world'){ // move camera view
 			var dx = event.pageX - lastMouseX;
@@ -114,8 +111,8 @@ function doMouseMove(event) {
 			lastMouseX = event.pageX;
 			lastMouseY = event.pageY;
 			if((dx != 0) || (dy != 0)) {
-				angle = angle + 0.5 * dx;
-				elevation = elevation + 0.5 * dy;
+				renderer.camera.angle = renderer.camera.angle + 0.5 * dx;
+				renderer.camera.elevation = renderer.camera.elevation + 0.5 * dy;
 			}
 		}
 		else{ // raycast mouse pointer and move objects
@@ -125,19 +122,10 @@ function doMouseMove(event) {
 			x = event.pageX * 2 / gl.canvas.width - 1;
 			y = event.pageY * 2 / gl.canvas.height - 1;
 			y = -y;
-
-			let worldSpaceRay = raycast(x,y);
-
-			let cameraCoordinates;
-			cameraCoordinates = [cx,cy,cz];
-			// console.log('cam coords',cameraCoordinates)
-			// now calculate intersection with y=0
-			// calculate intersection with y=object height
-			let height = renderer.objects.filter(item => item.name == focusedObjectName);
-			height = height[0].position[1];
-			plane_x = (height-cy) / worldSpaceRay[1] * worldSpaceRay[0] + cx;
-			plane_z = (height-cy) / worldSpaceRay[1] * worldSpaceRay[2] + cz;
-			// console.log('updated coordinates',plane_x, plane_z);
+			let height = renderer.objects.filter(item => item.name == focusedObjectName)[0].position[1];
+			let projection_coordinates = projectPointer(x, y, height);
+			plane_x = projection_coordinates[0]
+			plane_z = projection_coordinates[1]
 			if(focusedObjectName != 'triangle_0'){
 				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z);
 			}

@@ -27,10 +27,11 @@ class Camera{
     move(dx, dy, dz){
         // camera position in world space -> view matrix -> position in camera space -> transformation -> camera matrix (inverse view matrix) -> position in world space
         let world_position = [this.x, this.y, this.z, 1];
-        let camera_position = utils.multiplyMatrixVector(this.viewMatrix, world_position);
+        let viewMatrixWithAlignedUp = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, 0, renderer.camera.angle)
+        let camera_position = utils.multiplyMatrixVector(viewMatrixWithAlignedUp, world_position);
         let translation = utils.MakeTranslateMatrix(dx, dy, dz);
         let new_camera_position = utils.multiplyMatrixVector(translation, camera_position);
-        let camera_matrix = utils.invertMatrix(this.viewMatrix);
+        let camera_matrix = utils.invertMatrix(viewMatrixWithAlignedUp);
         new_camera_position = utils.multiplyMatrixVector(camera_matrix, new_camera_position);
         this.x = new_camera_position[0];
         this.y = new_camera_position[1];

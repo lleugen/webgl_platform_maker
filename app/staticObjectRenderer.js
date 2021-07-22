@@ -7,6 +7,7 @@ class staticObjectRenderer{
         inputElementsManager.drawCreateButton('delete');
         inputElementsManager.drawCreateButton('none');
         console.log('renderer created');
+        // this.addObject('triangle_0', 'triangle', [0,0,0], [0,0,0], [0,0,0], 1);
     }
 
 
@@ -92,9 +93,7 @@ class staticObjectRenderer{
 
 
     draw(){
-        // make view matrix
         viewMatrix = renderer.camera.view();
-        
     
         projectionMatrix = createProjection(projectionType);
       
