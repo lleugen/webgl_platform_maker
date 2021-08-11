@@ -10,10 +10,10 @@ class Camera{
     view(){
         switch(cameraType){
             case 'lookAt1': // look at point from fixed distance, control camera position
-                cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation)) + lookAtZ;
-                cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation)) + lookAtX;
-                cy = lookRadius * Math.sin(utils.degToRad(-elevation)) + lookAtY;
-                this.viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+                renderer.camera.z = lookRadius * Math.cos(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + lookAtZ;
+                renderer.camera.x = lookRadius * Math.sin(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + lookAtX;
+                renderer.camera.y = lookRadius * Math.sin(utils.degToRad(-renderer.camera.elevation)) + lookAtY;
+                this.viewMatrix = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, renderer.camera.elevation, -renderer.camera.angle);
                 break;
             case 'lookDirection':
                 this.viewMatrix = utils.MakeView(this.x, this.y, this.z, this.elevation, this.angle);
@@ -36,7 +36,7 @@ class Camera{
         this.x = new_camera_position[0];
         this.y = new_camera_position[1];
         this.z = new_camera_position[2];
-        console.log(world_position, camera_position, translation, new_camera_position)
+        // console.log(world_position, camera_position, translation, new_camera_position)
     }
     changeOrientation(de, da){
         this.elevation += de;

@@ -88,7 +88,7 @@ function doWheelRotate(event){
 
 function doMouseMove(event) {
 	if(mouseState) {
-		//######### raycast mouse pointer and build debug triangle ###########
+		// // ######### raycast mouse pointer and build debug triangle ###########
 		// let x, y;
 		// // raycast event.x and .y to y plane to find the new position of the object
 		// // canvas coordinates -> normalized screen coordinates
@@ -104,7 +104,7 @@ function doMouseMove(event) {
 		// gl.bindBuffer(gl.ARRAY_BUFFER, triangleModel.vertexBuffer);
 		// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleModel.model.vertices), gl.STATIC_DRAW);
 		// gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-		//##########################################
+		// // ##########################################
 		if(focusedObjectName == 'world'){ // move camera view
 			var dx = event.pageX - lastMouseX;
 			var dy = lastMouseY - event.pageY;
@@ -342,27 +342,14 @@ function doKeyDown(e){
 					break;
 			}
 		}
+
+
+
 		switch(e.keyCode){// camera control
 			case 39: // right arrow move right
-				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
-				// cosx = (cx-lookAtX) / (lookAtVectorLength)
-				// cosy = (cy-lookAtY) / lookAtVectorLength
-				// cosz = (cz-lookAtZ) / lookAtVectorLength
-				// lookAtVectorLength -= 5
-				// cx = cosx * lookAtVectorLength + lookAtX
-				// cy = cosy * lookAtVectorLength + lookAtY
-				// cz = cosz * lookAtVectorLength + lookAtZ
 				renderer.camera.move(1,0,0)
 				break;
 			case 37: // left arrow move left
-				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cy - lookAtY)**2 + (cz - lookAtZ)**2)
-				// cosx = (cx-lookAtX) / (lookAtVectorLength)
-				// cosy = (cy-lookAtY) / lookAtVectorLength
-				// cosz = (cz-lookAtZ) / lookAtVectorLength
-				// lookAtVectorLength += 5
-				// cx = cosx * lookAtVectorLength + lookAtX
-				// cy = cosy * lookAtVectorLength + lookAtY
-				// cz = cosz * lookAtVectorLength + lookAtZ
 				renderer.camera.move(-1,0,0)
 				break;
 			case 33: // page up move up
@@ -372,23 +359,9 @@ function doKeyDown(e){
 				renderer.camera.move(0,-1,0)
 				break;
 			case 38: // forward/up arrow move closer, forward
-				// u = 1
-				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cz - lookAtZ)**2)
-				// a = Math.acos(cx / lookAtVectorLength)
-				// cx = cx - u * Math.sin(a)
-				// cz = cz + u * Math.cos(a)
-				// lookAtX = lookAtX - u * Math.sin(a)
-				// lookAtZ = lookAtZ + u * Math.cos(a)
 				renderer.camera.move(0,0,-1)
 				break;
 			case 40: // down arrow move back
-				// u = 1
-				// lookAtVectorLength = Math.sqrt((cx - lookAtX)**2 + (cz - lookAtZ)**2)
-				// a = Math.acos(cx / lookAtVectorLength)
-				// cx = cx + u * Math.sin(a)
-				// cz = cz - u * Math.cos(a)
-				// lookAtX = lookAtX + u * Math.sin(a)
-				// lookAtZ = lookAtZ - u * Math.cos(a)
 				renderer.camera.move(0,0,1)
 				break;
 			case 84: // t
