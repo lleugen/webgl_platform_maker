@@ -16,6 +16,8 @@ class staticObjectRenderer{
         vertexBuffer = gl.createBuffer();
         let indexBuffer;
         indexBuffer = gl.createBuffer();
+        let normalBuffer;
+        normalBuffer = gl.createBuffer();
     
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
@@ -24,11 +26,16 @@ class staticObjectRenderer{
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
 
+        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.normalBuffer), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(program.normalPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+
         let newModel = {'name': name,
                         'model': model,
                         'program': program,
                         'vertexBuffer': vertexBuffer,
-                        'indexBuffer': indexBuffer};
+                        'indexBuffer': indexBuffer,
+                        'normalBuffer': normalBuffer};
         this.models.push(newModel);
         inputElementsManager.drawCreateButton(name)   
     }
@@ -256,25 +263,20 @@ class staticObjectRenderer{
     
     drawModel(model, worldMatrix, program){
         gl.useProgram(program);
-        // do buffers and data for every model
-        // create vertex buffer
-        // let vertexBuffer = gl.createBuffer();
-        // // index buffer
-        // let indexBuffer = gl.createBuffer();
-        // console.log(model)
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
-        // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objectMesh.vertices), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-    
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
-        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(objectMesh.indices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(program.normalPositionAttribute, 3, gl.FLOAT, false, 0, 0);
     
     
-        let s45 = 0.707106781186548;
-        let gLightDir1 = [ 0.0, s45, s45, 1.0];
-        gl.uniform4f(program.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
+        // let s45 = 0.707106781186548;
+        // let gLightDir1 = [ 0.0, s45, s45, 1.0];
+        // gl.uniform4f(program.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
         let colors = [1, 0, 0]
         gl.uniform4f(program.matcol, colors[0], colors[1], colors[2], 1.0);
+
+        let reverseLight = [0.5, 0.7, 1];
+        gl.uniform3fv(program2.reverseLightLocation, utils.normalizeVector3(reverseLight));
     
         //##############################################################
         // update W matrix
@@ -291,6 +293,7 @@ class staticObjectRenderer{
     
     
         gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_2));
+        gl.uniformMatrix4fv(program.worldUniformLocation, false, utils.invertMatrix(worldMatrix));
         gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
     }
 }

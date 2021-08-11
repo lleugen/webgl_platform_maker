@@ -28,10 +28,14 @@ function main() {
   program.projection_uniform_location = gl.getUniformLocation(program, "projection");
   program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
   program2.projection_uniform_location = gl.getUniformLocation(program2, "projection");
+  program2.worldUniformLocation = gl.getUniformLocation(program2, "u_world");
+  program2.reverseLightLocation = gl.getUniformLocation(program2, "u_reverseLightDirection")  
   program2.vertexPositionAttribute = gl.getAttribLocation(program2, "a_position");
+  program2.normalPositionAttribute = gl.getAttribLocation(program2, "in_normal");
   gl.enableVertexAttribArray(program2.vertexPositionAttribute);
   gl.enableVertexAttribArray(program.vertexPositionAttribute);
-  program2.light = gl.getUniformLocation(program2, "light");
+  gl.enableVertexAttribArray(program2.normalPositionAttribute);
+  // program2.light = gl.getUniformLocation(program2, "light");
   program2.matcol = gl.getUniformLocation(program2, "matcol");
   webglUtils.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
