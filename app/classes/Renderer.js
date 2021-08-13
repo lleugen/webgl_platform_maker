@@ -1,4 +1,4 @@
-class staticObjectRenderer{
+class Renderer{
     constructor(){
         this.sprite;
         this.objects = [];

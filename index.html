@@ -2,24 +2,25 @@
 <html>
     <head>
         <title>title</title>
-        <script src="app/globalVariables.js"></script>
+        <script src="app/Scripts/globalVariables.js"></script>
+        <script src="app/Scripts/input_events.js"></script>
+        <script src="app/Scripts/draw_objects.js"></script>
+        <script src='app/Scripts/app.js'></script>
+
+        <script src="app/Classes/InputElementsManager.js"></script>
+        <script src="app/Classes/Camera.js"></script>
+        <script src="app/Classes/Sprite.js"></script>
+        <script src="app/Classes/Renderer.js"></script>
+
         <script src="libraries/webgl-lint.js"></script>
         <script src="libraries/utils.js"></script>
         <script src="libraries/webgl-obj-loader.min.js"></script>
-        <script src="assets/model_ghost.js"></script>
-        <script src="libraries/create_shader_and_program.js"></script>
-        <script src="app/input_events.js"></script>
-        <!-- <script src="vertex-shader-2d.glsl" id="vertex-shader-2d" type="notjs"></script> -->
-        <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
-        <script src="app/draw_objects.js"></script>
-        <script src="app/staticObjectRenderer.js"></script>
         <script src="libraries/quaternion.min.js"></script>
-        <script src="app/inputElementsManager.js"></script>
-        <script src="app/camera.js"></script>
-        <script src="app/sprite.js"></script>
+        <script src="libraries/create_shader_and_program.js"></script>
+        <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
     </head>
 
-    <body onload="main()">
+    <body>
         
         <canvas id='canvas', width='1000', height='500', style="border:1px solid #000000;"></canvas>
         <table>
@@ -155,5 +156,5 @@
         </div>
     </body>
 
-    <script src='app/app.js'></script>
+    
 </html>
