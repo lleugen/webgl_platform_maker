@@ -44,8 +44,9 @@ class staticObjectRenderer{
 
     addObject(name, type, position=[0,0,0], orientation=new Quaternion(), orientationDeg=[0,0,0], scale=1){
         if(type == "ghost"){
-            if(renderer.objects.filter(item => item.name == "ghost_0").length > 0){
-                this.updateObjectPosition("ghost_0", position[0], position[2]);
+            let ghosts = renderer.objects.filter(item => item.name.includes("ghost"));
+            if(ghosts.length > 0){
+                this.updateObjectPosition(ghosts[0].name, position[0], position[2]);
             }
             else{
                 let newObject = {
@@ -98,10 +99,6 @@ class staticObjectRenderer{
             let q = this.objects[i].orientation
             let rotation_matrix;
             if(document.getElementById("quaternionRotation").checked){
-                // rotation_matrix = [1.0 - 2.0*q.y*q.y - 2.0*q.z*q.z,     2.0*q.x*q.y + 2.0*q.w*q.z,          2.0*q.x*q.z - 2.0*q.w*q.y,   0.0,
-                //                    2.0*q.x*q.y - 2.0*q.w*q.z,           1.0 - 2.0*q.x*q.x - 2.0*q.z*q.z,    2.0*q.y*q.z + 2.0*q.w*q.x,   0.0,
-                //                    2.0*q.x*q.z + 2.0*q.w*q.y,           2.0*q.y*q.z - 2.0*q.w*q.x,          1.0 - 2.0*q.x*q.x - q.y*q.y, 0.0,	
-                //                    0.0,                                 0.0,                                0.0,                         1.0];
                 rotation_matrix = q.toMatrix4();
             }
             else{
@@ -172,8 +169,9 @@ class staticObjectRenderer{
     }
 
 
-    updateOrientation(rvx, rvy, rvz){
-        let object = renderer.objects.filter(i=>i.name==focusedObjectName)[0];
+    updateOrientation(o, rvx, rvy, rvz){
+
+        let object = renderer.objects.filter(i=>i.name==o)[0];
         if(document.getElementById("quaternionRotation").checked){
             let dq1 = new Quaternion(Math.cos(rvx/2/180*Math.PI),
                                     Math.sin(rvx/2/180*Math.PI)*1,

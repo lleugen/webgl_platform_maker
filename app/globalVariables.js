@@ -79,3 +79,5 @@ var color = [52/256, 232/256, 235/256];
 var light = [0.5, 0.7, 1];
 
 var play_state = false;
+
+var spriteOrientation = 0;

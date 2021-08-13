@@ -292,6 +292,12 @@ function onSliderChangeFov(value){
 }
 
 
+function onSliderChangeSpriteOrientation(value){
+	console.log("Slider value changed to "+value);
+	spriteOrientation = value;
+}
+
+
 function raycast(x, y){
 	let invProjection;
 	let cameraSpaceRay, worldSpaceRay;
@@ -351,22 +357,22 @@ function doKeyDown(e){
 			if(document.getElementById("quaternionRotation").checked){
 				switch(e.keyCode) {// object rotation
 					case 81://q
-						renderer.updateOrientation(-10,0,0)
+						renderer.updateOrientation(focusedObjectName, -10,0,0)
 						break;
 					case 87://w
-						renderer.updateOrientation(10,0,0)
+						renderer.updateOrientation(focusedObjectName,10,0,0)
 						break;
 					case 65://a
-						renderer.updateOrientation(0,-10,0)
+						renderer.updateOrientation(focusedObjectName,0,-10,0)
 						break;
 					case 83://s
-						renderer.updateOrientation(0,10,0)
+						renderer.updateOrientation(focusedObjectName,0,10,0)
 						break;
 					case 90://z
-						renderer.updateOrientation(0,0,-10)
+						renderer.updateOrientation(focusedObjectName,0,0,-10)
 						break;
 					case 88://x
-						renderer.updateOrientation(0,0,10)
+						renderer.updateOrientation(focusedObjectName,0,0,10)
 						break;
 				}
 			}
