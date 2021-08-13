@@ -16,6 +16,7 @@
         <script src="libraries/quaternion.min.js"></script>
         <script src="app/inputElementsManager.js"></script>
         <script src="app/camera.js"></script>
+        <script src="app/sprite.js"></script>
     </head>
 
     <body onload="main()">
@@ -35,7 +36,7 @@
                     <label for="quaternionRotation">Enable quaternion rotation</label>
                     <input type="checkbox", id="xz_plane">
                     <label for="xz_plane">Draw xz plane</label>
-                    <input type="checkbox", id="draw_axis">
+                    <input type="checkbox", id="draw_axis", checked>
                     <label for="draw_axis">Draw axis</label>
                 </div>
             </tr>
@@ -99,12 +100,12 @@
                     <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeAngle(this.value);"/> 360 <br/>	
                 </div>
             </tr> -->
-            <p><b> projection type </b></p>
+            <!-- <p><b> projection type </b></p>
 			<form>
 				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="orthogonal"> orthogonal <br/>
 				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="isometric" > isometric <br/>
 				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="perspective" checked> perspective <br/>
-			</form>	
+			</form>	 -->
             <p><b> camera type </b></p>
 			<form>
 				<input type="radio" name="light" onchange="onRadioButtonChangeCamera(this.value);" value="lookAt1" checked> look at origin <br/>
@@ -113,6 +114,20 @@
             <tr>
                 <div id="slider1"> fov 10 
                     <input id="slide1" type="range" min="10" max="180" step="1" value="45" onchange="onSliderChangeFov(this.value);"/> 180 <br/>	
+                </div>
+            </tr>
+            <tr>
+                <div id="slider1"> colors RGB 
+                    <input id="slide1" type="range" min="0" max="1" step="0.05" value="1" onchange="onSliderChangeColor1(this.value);"/>
+                    <input id="slide1" type="range" min="0" max="1" step="0.05" value="1" onchange="onSliderChangeColor2(this.value);"/>
+                    <input id="slide1" type="range" min="0" max="1" step="0.05" value="1" onchange="onSliderChangeColor3(this.value);"/>	
+                </div>
+            </tr>
+            <tr>
+                <div id="slider1"> light dir 
+                    <input id="slide1" type="range" min="-5" max="5" step="0.05" value="1" onchange="onSliderChangeLight1(this.value);"/>
+                    <input id="slide1" type="range" min="-5" max="5" step="0.05" value="1" onchange="onSliderChangeLight2(this.value);"/>
+                    <input id="slide1" type="range" min="-5" max="5" step="0.05" value="1" onchange="onSliderChangeLight3(this.value);"/>	
                 </div>
             </tr>
 
@@ -129,6 +144,10 @@
         </table>
         <div id="buttons(object control)"></div>
         <div style="position: absolute;right:0%;top:0%"><ul id='list2'><li>select objects to create</li></ul></div>
+        <div style="position: absolute;left:0%;top:0%">
+            <button type="play_button" onclick="play();">Play</button>
+            <button type="create_button" onclick="create();">Create</button>
+        </div>
     </body>
 
     <script src='app/app.js'></script>

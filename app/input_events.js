@@ -13,54 +13,56 @@ function doMouseDown(event) {
 	lastMouseX = event.pageX;
 	lastMouseY = event.pageY;
 	mouseState = true;
-	if(toggleCreate != 'none' && toggleCreate != 'delete'){
-		let x, y;
-		// raycast event.x and .y to y plane to find the new position of the object
-		// canvas coordinates -> normalized screen coordinates
-		x = event.pageX * 2 / gl.canvas.width - 1;
-		y = event.pageY * 2 / gl.canvas.height - 1;
-		y = -y;
-		let projection_coordinates = projectPointer(x, y);
-		plane_x = projection_coordinates[0];
-		plane_z = projection_coordinates[1];
-		renderer.addObject(toggleCreate+'_'+renderer.objects.length, // object name
-							toggleCreate, // model name
-							[plane_x,0, plane_z], // position
-							new Quaternion()); // orientation
-	}
-	else if(toggleCreate == 'none'){
-		// select focused object by clicking on it
-		// raycast and select the first object that intersects, if none then select world
-		let i;
-		let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
-		let hit = false;
-		for(i=0; i<renderer.objects.length; i++){
-			if(renderer.objects[i].name != 'triangle_0'){
-				if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
-					focusedObjectName = renderer.objects[i].name;
-					hit = true;
-					console.log(focusedObjectName)
-					break;
+	if(!play_state){
+		if(toggleCreate != 'none' && toggleCreate != 'delete'){
+			let x, y;
+			// raycast event.x and .y to y plane to find the new position of the object
+			// canvas coordinates -> normalized screen coordinates
+			x = event.pageX * 2 / gl.canvas.width - 1;
+			y = event.pageY * 2 / gl.canvas.height - 1;
+			y = -y;
+			let projection_coordinates = projectPointer(x, y);
+			plane_x = projection_coordinates[0];
+			plane_z = projection_coordinates[1];
+			renderer.addObject(toggleCreate+'_'+renderer.objects.length, // object name
+								toggleCreate, // model name
+								[plane_x,0, plane_z], // position
+								new Quaternion()); // orientation
+		}
+		else if(toggleCreate == 'none'){
+			// select focused object by clicking on it
+			// raycast and select the first object that intersects, if none then select world
+			let i;
+			let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
+			let hit = false;
+			for(i=0; i<renderer.objects.length; i++){
+				if(renderer.objects[i].name != 'triangle_0'){
+					if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
+						focusedObjectName = renderer.objects[i].name;
+						hit = true;
+						console.log(focusedObjectName)
+						break;
+					}
 				}
 			}
+			if(!hit){
+				focusedObjectName='world';
+				console.log('no hit, reset')
+			}
 		}
-		if(!hit){
-			focusedObjectName='world';
-			console.log('no hit, reset')
-		}
-	}
-	else{
-		// delete clicked objects
-		let i;
-		let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
-		let hit = false;
-		for(i=0; i<renderer.objects.length; i++){
-			if(renderer.objects[i].name != 'triangle_0'){
-				if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
-					console.log('deleting', renderer.objects[i].name)
-					renderer.deleteObject(renderer.objects[i].name)
-					focusedObjectName = 'world'
-					break;
+		else{
+			// delete clicked objects
+			let i;
+			let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
+			let hit = false;
+			for(i=0; i<renderer.objects.length; i++){
+				if(renderer.objects[i].name != 'triangle_0'){
+					if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
+						console.log('deleting', renderer.objects[i].name)
+						renderer.deleteObject(renderer.objects[i].name)
+						focusedObjectName = 'world'
+						break;
+					}
 				}
 			}
 		}
@@ -201,6 +203,53 @@ function onSliderChangeAngle(value){
 }
 
 
+function onSliderChangeColor1(value){
+    console.log("Slider value changed to "+value);
+    color[0] = parseFloat(value);
+}
+
+
+function onSliderChangeColor2(value){
+    console.log("Slider value changed to "+value);
+    color[1] = parseFloat(value);
+}
+
+
+function onSliderChangeColor3(value){
+    console.log("Slider value changed to "+value);
+    color[2] = parseFloat(value);
+}
+
+
+function onSliderChangeLight1(value){
+    console.log("Slider value changed to "+value);
+    light[0] = parseFloat(value);
+}
+
+
+function onSliderChangeLight2(value){
+    console.log("Slider value changed to "+value);
+    light[1] = parseFloat(value);
+}
+
+
+function onSliderChangeLight3(value){
+    console.log("Slider value changed to "+value);
+    light[2] = parseFloat(value);
+}
+
+
+function play(){
+	focusedObjectName = 'world';
+	play_state = true;
+}
+
+
+function create(){
+	play_state = false;
+}
+
+
 function onRadioButtonChange(value){
   console.log("Radio button value changed to "+value);
   projectionType = value;
@@ -298,85 +347,131 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
 function doKeyDown(e){
 	let lookAtVectorLength, cosx, cosy, cosz;
 	
-		if(document.getElementById("quaternionRotation").checked){
-			switch(e.keyCode) {// object rotation
-				case 81://q
-					renderer.updateOrientation(-10,0,0)
+		if(!play_state){
+			if(document.getElementById("quaternionRotation").checked){
+				switch(e.keyCode) {// object rotation
+					case 81://q
+						renderer.updateOrientation(-10,0,0)
+						break;
+					case 87://w
+						renderer.updateOrientation(10,0,0)
+						break;
+					case 65://a
+						renderer.updateOrientation(0,-10,0)
+						break;
+					case 83://s
+						renderer.updateOrientation(0,10,0)
+						break;
+					case 90://z
+						renderer.updateOrientation(0,0,-10)
+						break;
+					case 88://x
+						renderer.updateOrientation(0,0,10)
+						break;
+				}
+			}
+			else{
+				switch(e.keyCode) {// object rotation but with world axis
+					case 81://q
+						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] -= 10
+						break;
+					case 87://w
+						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] += 10
+						break;
+					case 65://a
+						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] -= 10
+						break;
+					case 83://s
+						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] += 10
+						break;
+					case 90://z
+						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] -= 10
+						break;
+					case 88://x
+						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] += 10
+						break;
+				}
+			}
+			switch(e.keyCode){// camera control
+				case 39: // right arrow move right
+					renderer.camera.move(1,0,0)
 					break;
-				case 87://w
-					renderer.updateOrientation(10,0,0)
+				case 37: // left arrow move left
+					renderer.camera.move(-1,0,0)
 					break;
-				case 65://a
-					renderer.updateOrientation(0,-10,0)
+				case 33: // page up move up
+					renderer.camera.move(0,1,0)
 					break;
-				case 83://s
-					renderer.updateOrientation(0,10,0)
+				case 34: // page down move down
+					renderer.camera.move(0,-1,0)
 					break;
-				case 90://z
-					renderer.updateOrientation(0,0,-10)
+				case 38: // forward/up arrow move closer, forward
+					renderer.camera.move(0,0,-1)
 					break;
-				case 88://x
-					renderer.updateOrientation(0,0,10)
+				case 40: // down arrow move back
+					renderer.camera.move(0,0,1)
+					break;
+				case 84: // t
+					renderer.camera.elevation -= 1;
+					break;
+				case 89: // y
+					renderer.camera.elevation += 1;
+					break;
+				case 71: // g
+					renderer.camera.angle -= 1;
+					break;
+				case 72: // h
+					renderer.camera.angle += 1;
 					break;
 			}
 		}
 		else{
-			switch(e.keyCode) {// object rotation but with world axis
-				case 81://q
-					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] -= 10
+			if(!pressedKeys[e.keyCode]){
+				pressedKeys[e.keyCode] = true;
+				switch(e.keyCode){
+					case 87: // w
+						renderer.sprite.forwardSpeed += 1;
+						// renderer.sprite.startMove(0,0,-1);
 					break;
-				case 87://w
-					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] += 10
+					case 65: // a
+						renderer.sprite.rightSpeed -= 1;
+						// renderer.sprite.startMove(-1,0,0);
 					break;
-				case 65://a
-					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] -= 10
+					case 83: // s
+						renderer.sprite.forwardSpeed -= 1;
+						// renderer.sprite.startMove(0,0,1);
 					break;
-				case 83://s
-					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] += 10
+					case 68: // d
+						renderer.sprite.rightSpeed += 1;
+						// renderer.sprite.startMove(1,0,0);
 					break;
-				case 90://z
-					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] -= 10
-					break;
-				case 88://x
-					renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] += 10
-					break;
+				}
 			}
 		}
+}
 
-
-
-		switch(e.keyCode){// camera control
-			case 39: // right arrow move right
-				renderer.camera.move(1,0,0)
-				break;
-			case 37: // left arrow move left
-				renderer.camera.move(-1,0,0)
-				break;
-			case 33: // page up move up
-				renderer.camera.move(0,1,0)
-				break;
-			case 34: // page down move down
-				renderer.camera.move(0,-1,0)
-				break;
-			case 38: // forward/up arrow move closer, forward
-				renderer.camera.move(0,0,-1)
-				break;
-			case 40: // down arrow move back
-				renderer.camera.move(0,0,1)
-				break;
-			case 84: // t
-				renderer.camera.elevation -= 1;
-				break;
-			case 89: // y
-				renderer.camera.elevation += 1;
-				break;
-			case 71: // g
-				renderer.camera.angle -= 1;
-				break;
-			case 72: // h
-				renderer.camera.angle += 1;
-				break;
+function doKeyUp(e){
+	if(pressedKeys[e.keyCode]){
+		pressedKeys[e.keyCode] = false;
+		switch(e.keyCode){
+			case 87: // w
+				renderer.sprite.forwardSpeed -= 1;
+				// renderer.sprite.stopMove(0,0,-1);
+			break;
+			case 65: // a
+				renderer.sprite.rightSpeed += 1;
+				// renderer.sprite.stopMove(-1,0,0);
+			break;
+			case 83: // s
+				renderer.sprite.forwardSpeed += 1;
+				// renderer.sprite.stopMove(0,0,1);
+			break;
+			case 68: // d
+				renderer.sprite.rightSpeed -= 1;
+				// renderer.sprite.stopMove(1,0,0);
+			break;
 		}
+	}
 }
 
 
@@ -387,4 +482,5 @@ function addListeners(canvas){
 	canvas.addEventListener("wheel", doWheelRotate, false);
 	// window.addEventListener("keyup", keyFunctionUp, false);
 	window.addEventListener("keydown", doKeyDown, false);
+	window.addEventListener("keyup", doKeyUp, false);
 }

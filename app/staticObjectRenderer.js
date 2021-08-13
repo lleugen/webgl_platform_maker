@@ -1,5 +1,6 @@
 class staticObjectRenderer{
     constructor(){
+        this.sprite;
         this.objects = [];
         this.models = [];
         this.camera = new Camera();
@@ -42,19 +43,42 @@ class staticObjectRenderer{
 
 
     addObject(name, type, position=[0,0,0], orientation=new Quaternion(), orientationDeg=[0,0,0], scale=1){
-        let newObject = {
-            'name': name,
-            'type': type, // model name
-            'position': position,
-            'orientation': orientation,
-            'orientationDeg': orientationDeg,
-            'scale': scale
+        if(type == "ghost"){
+            if(renderer.objects.filter(item => item.name == "ghost_0").length > 0){
+                this.updateObjectPosition("ghost_0", position[0], position[2]);
+            }
+            else{
+                let newObject = {
+                    'name': name,
+                    'type': type, // model name
+                    'position': position,
+                    'orientation': orientation,
+                    'orientationDeg': orientationDeg,
+                    'scale': scale
+                }
+                this.objects.push(newObject);
+                inputElementsManager.drawSelectButton(newObject.name);
+                inputElementsManager.drawDeleteButton(newObject.name);
+                focusedObjectName = name;
+                console.log('created new object', name)
+                renderer.sprite = new Sprite(position);
+            }
         }
-        this.objects.push(newObject);
-        inputElementsManager.drawSelectButton(newObject.name);
-        inputElementsManager.drawDeleteButton(newObject.name);
-        focusedObjectName = name;
-        console.log('created new object', name)
+        else{
+            let newObject = {
+                'name': name,
+                'type': type, // model name
+                'position': position,
+                'orientation': orientation,
+                'orientationDeg': orientationDeg,
+                'scale': scale
+            }
+            this.objects.push(newObject);
+            inputElementsManager.drawSelectButton(newObject.name);
+            inputElementsManager.drawDeleteButton(newObject.name);
+            focusedObjectName = name;
+            console.log('created new object', name)
+        }
     }
 
 
@@ -109,6 +133,9 @@ class staticObjectRenderer{
         }
         if(document.getElementById('draw_axis').checked){
             renderer.drawAxisLines();
+        }
+        if(play_state){
+            renderer.sprite.triggerMove();
         }
         renderer.drawObjects();
         
@@ -272,10 +299,10 @@ class staticObjectRenderer{
         // let s45 = 0.707106781186548;
         // let gLightDir1 = [ 0.0, s45, s45, 1.0];
         // gl.uniform4f(program.light, gLightDir1[0], gLightDir1[1], gLightDir1[2], gLightDir1[3]);
-        let colors = [1, 0, 0]
+        let colors = color;
         gl.uniform4f(program.matcol, colors[0], colors[1], colors[2], 1.0);
 
-        let reverseLight = [0.5, 0.7, 1];
+        let reverseLight = light;
         gl.uniform3fv(program2.reverseLightLocation, utils.normalizeVector3(reverseLight));
     
         //##############################################################

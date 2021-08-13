@@ -72,3 +72,10 @@ var fov = 45;
 var lookAtX = 0;
 var lookAtY = 0;
 var lookAtZ = 0;
+
+var pressedKeys = [];
+
+var color = [52/256, 232/256, 235/256];
+var light = [0.5, 0.7, 1];
+
+var play_state = false;
