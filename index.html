@@ -2,15 +2,15 @@
 <html>
     <head>
         <title>title</title>
-        <script src="app/Scripts/globalVariables.js"></script>
-        <script src="app/Scripts/input_events.js"></script>
-        <script src="app/Scripts/draw_objects.js"></script>
-        <script src='app/Scripts/app.js'></script>
+        <script src="app/scripts/globalVariables.js"></script>
+        <script src="app/scripts/input_events.js"></script>
+        <script src="app/scripts/draw_objects.js"></script>
+        <script src='app/scripts/app.js'></script>
 
-        <script src="app/Classes/InputElementsManager.js"></script>
-        <script src="app/Classes/Camera.js"></script>
-        <script src="app/Classes/Sprite.js"></script>
-        <script src="app/Classes/Renderer.js"></script>
+        <script src="app/classes/InputElementsManager.js"></script>
+        <script src="app/classes/Camera.js"></script>
+        <script src="app/classes/Sprite.js"></script>
+        <script src="app/classes/Renderer.js"></script>
 
         <script src="libraries/webgl-lint.js"></script>
         <script src="libraries/utils.js"></script>
@@ -20,7 +20,7 @@
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
     </head>
 
-    <body>
+    <body onload="main();">
         
         <canvas id='canvas', width='1000', height='500', style="border:1px solid #000000;"></canvas>
         <table>
