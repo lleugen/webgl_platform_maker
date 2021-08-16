@@ -1,3 +1,4 @@
+var useLinter = false;
 var gl = null;
 var canvas = null;
 var program = null;

@@ -11,7 +11,10 @@ function main() {
     return;
   }
   // this is a linter which helps to get more information when errors occur
-  const ext = gl.getExtension('GMAN_debug_helper');
+  if(useLinter){
+    const ext = gl.getExtension('GMAN_debug_helper');
+  }
+  
   // create shaders from sources loaded above
   fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
   vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
@@ -21,9 +24,11 @@ function main() {
   // tag the programs with a name so the linter can tell us where errors come from
   // todo make program for every model
   program2 = createProgram(gl, vertexShader_2, fancyFragmentShader);
-  ext.tagObject(program2, "program2");
   program = createProgram(gl, vertexShader, fragmentShader);
-  ext.tagObject(program, "program");
+  if(useLinter){
+    ext.tagObject(program2, "program2");
+    ext.tagObject(program, "program");
+  }
   // get uniform locations inside the programs 
   program.projection_uniform_location = gl.getUniformLocation(program, "projection");
   program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
