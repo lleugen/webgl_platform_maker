@@ -1,14 +1,15 @@
 #version 300 es
-// an attribute will receive data from a buffer
+precision highp float;
+
 in vec3 a_position;
-in vec3 in_normal;
-uniform mat4 projection;
-uniform mat4 u_world;
+in vec3 a_normal;
 
-flat out vec3 var_normal;
+uniform mat4 u_worldViewProjectionMatrix;
+uniform mat4 u_inverseTransposeWorldMatrix;
 
-// all shaders have a main function
+out vec3 var_normal;
+
 void main() {
-    gl_Position = projection * vec4(a_position, 1);
-    var_normal = mat3(u_world) * in_normal;
+    gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1);
+    var_normal = mat3(u_inverseTransposeWorldMatrix) * a_normal;
 }

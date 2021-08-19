@@ -10,10 +10,6 @@ function main() {
   if (!gl) {
     return;
   }
-  // this is a linter which helps to get more information when errors occur
-  if(useLinter){
-    const ext = gl.getExtension('GMAN_debug_helper');
-  }
   
   // create shaders from sources loaded above
   fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
@@ -26,22 +22,13 @@ function main() {
   program2 = createProgram(gl, vertexShader_2, fancyFragmentShader);
   program = createProgram(gl, vertexShader, fragmentShader);
   if(useLinter){
+    ext = gl.getExtension('GMAN_debug_helper');
     ext.tagObject(program2, "program2");
     ext.tagObject(program, "program");
   }
-  // get uniform locations inside the programs 
-  program.projection_uniform_location = gl.getUniformLocation(program, "projection");
-  program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
-  program2.projection_uniform_location = gl.getUniformLocation(program2, "projection");
-  program2.worldUniformLocation = gl.getUniformLocation(program2, "u_world");
-  program2.reverseLightLocation = gl.getUniformLocation(program2, "u_reverseLightDirection")  
-  program2.vertexPositionAttribute = gl.getAttribLocation(program2, "a_position");
-  program2.normalPositionAttribute = gl.getAttribLocation(program2, "in_normal");
-  gl.enableVertexAttribArray(program2.vertexPositionAttribute);
-  gl.enableVertexAttribArray(program.vertexPositionAttribute);
-  gl.enableVertexAttribArray(program2.normalPositionAttribute);
-  // program2.light = gl.getUniformLocation(program2, "light");
-  program2.matcol = gl.getUniformLocation(program2, "matcol");
+  
+  getLocations();
+
   webglUtils.resizeCanvasToDisplaySize(gl.canvas);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   // add model created buffers and puts the data inside, it need to have the locations already set
@@ -68,6 +55,7 @@ function main() {
   renderer.addModel('sphere', createSphere(), program2);
   renderer.addModel('triangle', createTriangle(), program2);
   renderer.addModel('ghost', ghost, program2);
+  renderer.addModel('F', createF(), program2);
   // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
   gl.clearColor(0, 0, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
@@ -111,4 +99,32 @@ async function loadShaders(){
     fragmentShaderSource = shaderText[2];
     fancyFragmentShaderSource = shaderText[3];
   });
+}
+
+
+function getLocations(){
+  // get uniform locations inside the programs 
+  program.projection_uniform_location = gl.getUniformLocation(program, "projection");
+  program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
+  gl.enableVertexAttribArray(program.vertexPositionAttribute);
+
+  program2.u_worldViewProjectionMatrix = gl.getUniformLocation(program2, "u_worldViewProjectionMatrix");
+  program2.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program2, "u_inverseTransposeWorldMatrix");
+  program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection")
+  program2.u_color = gl.getUniformLocation(program2, "u_color");
+  
+  program2.a_position = gl.getAttribLocation(program2, "a_position");
+  program2.a_normal = gl.getAttribLocation(program2, "a_normal");
+  gl.enableVertexAttribArray(program2.a_position);
+  gl.enableVertexAttribArray(program2.a_normal);
+  
+  
+  // program2.a_position = gl.getAttribLocation(program2, "a_position");
+  // program2.a_normal = gl.getAttribLocation(program2, "a_normal");
+  // program2.u_worldViewProjection = gl.getUniformLocation(program2, "u_worldViewProjection");
+  // program2.u_worldInverseTranspose = gl.getUniformLocation(program2, "u_worldInverseTranspose");
+  // program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection");
+  // program2.u_color = gl.getUniformLocation(program2, "u_color");
+  
+
 }

@@ -30,14 +30,14 @@ class InputElementsManager{
     
     
     drawCreateButton(name){
+        // commented code is old functionality which allows to give objects custom names at creation
         let button;
-        let text;
         let space = document.getElementById("list2");
-        // let keys = Object.keys(this.models);
         let item;
-        // console.log(keys)
         button = document.createElement("button");
         button.innerHTML = name;
+        // let text;
+        // let keys = Object.keys(this.models);
         // text = document.createElement("INPUT");
         // text.size = 7;
         // if(renderer == null){

@@ -1,10 +1,10 @@
 class Camera{
     constructor(){
         this.x = 50;
-        this.y = 10;
+        this.y = 50;
         this.z = 50;
-        this.elevation = 0;
-        this.angle = 45;
+        this.elevation = -45;
+        this.angle = -45;
         this.viewMatrix = [];
     }
     view(){
@@ -16,7 +16,7 @@ class Camera{
                     renderer.camera.y = lookRadius * Math.sin(utils.degToRad(-renderer.camera.elevation)) + lookAtY;
                     this.viewMatrix = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, renderer.camera.elevation, -renderer.camera.angle);
                     break;
-                case 'lookDirection':
+                case 'lookDirection': // first person camera view
                     this.viewMatrix = utils.MakeView(this.x, this.y, this.z, this.elevation, this.angle);
                     break;
             }
@@ -50,5 +50,50 @@ class Camera{
     changeOrientation(de, da){
         this.elevation += de;
         this.angle += da;
+    }
+
+    createProjection(projectionType){
+        // Make projection matrix
+        if(projectionType == "orthogonal"){
+          let w = cameraWindowWidth;
+          let a = 2;
+          let n = nearPlane;
+          let f = farPlane;
+          let orthogonal_projection =  [1/w,	0.0,		0.0,		0.0,
+                                  0.0,		a/w,		0.0,		0.0,
+                                  0.0,		0.0,		-2/(f-n),		-(f+n)/(f-n),
+                                  0.0,		0.0,		0.0,		1.0];
+          projectionMatrix = orthogonal_projection;
+        }
+        else if(projectionType == "isometric"){
+          let w = cameraWindowWidth;
+          let a = 2;
+          let n = nearPlane;
+          let f = farPlane;
+          let orthogonal_projection =  [1/w,	0.0,		0.0,		0.0,
+                                  0.0,		a/w,		0.0,		0.0,
+                                  0.0,		0.0,		-2/(f-n),		-(f+n)/(f-n),
+                                  0.0,		0.0,		0.0,		1.0];
+          let cos_45 = Math.cos(45/180*Math.PI)
+          let sin_45 = Math.sin(45/180*Math.PI)
+          let cos_35 = Math.cos(-35.26/180*Math.PI)
+          let sin_35 = Math.sin(-35.26/180*Math.PI)
+          let x_rotation = [1, 0, 0, 0,
+                    0, cos_35, sin_35, 0,
+                    0, -sin_35, cos_35, 0,
+                    0, 0, 0, 1];
+          
+          let y_rotation = [cos_45, 0, sin_45, 0,
+                    0, 1, 0, 0,
+                    -sin_45, 0, cos_45, 0,
+                    0, 0, 0, 1];
+          var A1 =  utils.multiplyMatrices(orthogonal_projection, x_rotation)
+          projectionMatrix = utils.multiplyMatrices(A1, y_rotation)
+        }
+        else if(projectionType == "perspective"){
+          // console.log(nearPlane, farPlane)
+          projectionMatrix = utils.MakePerspective(fov,2,nearPlane,farPlane);
+        }
+        return projectionMatrix;
     }
 }

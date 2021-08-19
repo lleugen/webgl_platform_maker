@@ -1,4 +1,4 @@
-var useLinter = false;
+var useLinter = true;
 var gl = null;
 var canvas = null;
 var program = null;
@@ -76,9 +76,11 @@ var lookAtZ = 0;
 
 var pressedKeys = [];
 
-var color = [52/256, 232/256, 235/256];
-var light = [0.5, 0.7, 1];
+var color = [52/256, 232/256, 235/256, 1.0];
+var light = m4.normalize([0.5, 0.7, 1]);
 
 var play_state = false;
 
 var spriteOrientation = 0;
+var pointLightPosition = [0,0,0];
+var ext;

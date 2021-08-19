@@ -4,51 +4,49 @@ class Sprite{
         this.forwardSpeed = 0;
         this.rightSpeed = 0;
     }
-    // startMove(direction){
-    //     this.moving = direction;
-    // }
-    // stopMove(){
-    //     this.moving = 'stop';
-    // }
     triggerMove(){
-        // renderer.updateOrientation(renderer.objects.filter(item => item.name.includes('ghost'))[0], 0, 90, 0)
-        // let camSpaceOrientation = Quatertion.fromEuler(90, 0, 0);
-        
-        
-
         let len = Math.sqrt(this.forwardSpeed**2 + this.rightSpeed**2);
         if(len != 0){
-            let rvy = this.rightSpeed > 0 ? Math.asin(this.forwardSpeed / len)+ Math.PI : -Math.asin(this.forwardSpeed / len);
-            rvy = rvy / Math.PI * 180;
-            console.log(rvy)
-            let dq2 = new Quaternion(Math.cos(rvy/2/180*Math.PI),
-                                        Math.sin(rvy/2/180*Math.PI)*0,
-                                        Math.sin(rvy/2/180*Math.PI)*1,
-                                        Math.sin(rvy/2/180*Math.PI)*0);
-            dq2.normalize();
-
+            let moveDirection = this.rightSpeed > 0 ? Math.asin(this.forwardSpeed / len)+ Math.PI : -Math.asin(this.forwardSpeed / len);
+            moveDirection = moveDirection / Math.PI * 180;
+            let moveDirectionQuaternion = new Quaternion(Math.cos(moveDirection/2/180*Math.PI),
+                                                        Math.sin(moveDirection/2/180*Math.PI)*0,
+                                                        Math.sin(moveDirection/2/180*Math.PI)*1,
+                                                        Math.sin(moveDirection/2/180*Math.PI)*0);
+            moveDirectionQuaternion.normalize();
             let viewMatrixWithAlignedUp = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, 0, -renderer.camera.angle);
             let camera_matrix = utils.invertMatrix(viewMatrixWithAlignedUp);
-
-            // let worldSpaceOrientation = utils.multiplyMatrices(camera_matrix, rotation);
-
-            let worldrot = utils.multiplyMatrices(camera_matrix, dq2.toMatrix4());
-            // console.log(camera_matrix, dq2.toMatrix4(), worldrot);
-            let w = Math.sqrt(1 + worldrot[0] + worldrot[5] + worldrot[10]) / 2;
-            let x = (worldrot[9] + worldrot[6]) / (4 * w);
-            let y = (worldrot[2] - worldrot[8]) / (4 * w);
-            let z = (worldrot[4] - worldrot[1]) / (4 * w);
-            let worldquatrot = new Quaternion(w, x, y, z);
-            console.log(w, x, y, z);
+            let rotation_worldSpace = utils.multiplyMatrices(camera_matrix, moveDirectionQuaternion.toMatrix4());
+            console.log('rot',rotation_worldSpace)
+            let w = Math.sqrt(1 + rotation_worldSpace[0] + rotation_worldSpace[5] + rotation_worldSpace[10]) / 2;
+            let x, y, z;
+            if(w != 0){
+                x = (rotation_worldSpace[9] + rotation_worldSpace[6]) / (4 * w);
+                y = (rotation_worldSpace[2] - rotation_worldSpace[8]) / (4 * w);
+                z = (rotation_worldSpace[4] - rotation_worldSpace[1]) / (4 * w);
+            }
+            else{
+                x = (rotation_worldSpace[9] + rotation_worldSpace[6]) / (4 * 1);
+                y = (rotation_worldSpace[2] - rotation_worldSpace[8]) / (4 * 1);
+                z = (rotation_worldSpace[4] - rotation_worldSpace[1]) / (4 * 1);
+            }
+            let rotation_worldSpace_quaternion = new Quaternion(w, x, y, z);
             let spriteobj = renderer.objects.filter(item => item.name.includes("ghost"))[0];
-            // spriteobj.orientation = dq2.normalize();
-            spriteobj.orientation = worldquatrot;
+            // console.log(w, rotation_worldSpace_quaternion);
+            spriteobj.orientation = rotation_worldSpace_quaternion;
         }
-        
         
         this.move(this.rightSpeed, 0, -this.forwardSpeed);
     }
+
+
     move(dx, dy, dz){
+        if(dx != 0 || dy != 0 || dz != 0){
+            let normalizedSpeed = utils.normalizeVector3([dx,dy,dz]);
+            dx = normalizedSpeed[0];
+            dy = normalizedSpeed[1];
+            dz = normalizedSpeed[2];
+        }
         // camera position in world space -> view matrix -> position in camera space -> transformation -> camera matrix (inverse view matrix) -> position in world space
         let world_position = [this.position[0], this.position[1], this.position[2], 1];
         let viewMatrixWithAlignedUp = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, 0, -renderer.camera.angle)
