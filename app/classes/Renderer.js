@@ -144,18 +144,17 @@ class Renderer{
     drawModel(model, worldMatrix, program){
         gl.useProgram(program);
 
-        // gl.enableVertexAttribArray(program.a_position);
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
         gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
 
-        // gl.enableVertexAttribArray(program.a_normal);
         gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
         gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
 
         gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
         let reverseLight = light;
+
         gl.uniform3fv(program2.u_reverseLightDirection, utils.normalizeVector3(reverseLight));
         //here we need to put the transforms: local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
         let viewProjectionMatrix = utils.multiplyMatrices(projectionMatrix, viewMatrix);
@@ -168,6 +167,19 @@ class Renderer{
         
         gl.uniformMatrix4fv(program.u_worldViewProjectionMatrix, true, worldViewProjectionMatrix);
         gl.uniformMatrix4fv(program.u_inverseTransposeWorldMatrix, true, inverseTransposeWorldMatrix);
+
+        gl.uniform3fv(program.u_lightWorldPosition, pointLightPosition);
+        gl.uniform3fv(program.u_cameraWorldPosition, [renderer.camera.x, renderer.camera.y, renderer.camera.z])
+        gl.uniformMatrix4fv(program.u_worldMatrix, true, worldMatrix);
+        gl.uniform3fv(program.u_uniformLightColor, uniformLightColor);
+        gl.uniform3fv(program.u_pointLightColor, pointLightColor);
+        gl.uniform3fv(program.u_spotlightPosition, spotlightPosition);
+        
+        gl.uniform3fv(program.u_spotlightDirection, spotlightDirection);
+        gl.uniform1f(program.u_spotlightInnerLimit, spotlightInnerLimit);
+        gl.uniform1f(program.u_spotlightOuterLimit, spotlightOuterLimit);
+
+
         gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
     }
 

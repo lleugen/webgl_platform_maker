@@ -12,15 +12,22 @@ function main() {
   }
   
   // create shaders from sources loaded above
-  fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-  vertexShader_2 = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource_2);
-  vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-  fancyFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fancyFragmentShaderSource);
+  let axisFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, axisFragmentShaderSource);
+  let uniformLightVertexShader = createShader(gl, gl.VERTEX_SHADER, uniformLightVertexShaderSource);
+  let axisVertexShader = createShader(gl, gl.VERTEX_SHADER, axisVertexShaderSource);
+  let uniformLightFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, uniformLightFragmentShaderSource);
+  // console.log(pointLightFragmentShaderSource);
+  let pointLightVertexShader = createShader(gl, gl.VERTEX_SHADER, pointLightVertexShaderSource);
+  let pointLightFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, pointLightFragmentShaderSource);
   // create programs with a vertex shader and a fragment shader
   // tag the programs with a name so the linter can tell us where errors come from
   // todo make program for every model
-  program2 = createProgram(gl, vertexShader_2, fancyFragmentShader);
-  program = createProgram(gl, vertexShader, fragmentShader);
+  program2 = createProgram(gl, uniformLightVertexShader, uniformLightFragmentShader);
+  program = createProgram(gl, axisVertexShader, axisFragmentShader);
+  program3 = createProgram(gl, pointLightVertexShader, pointLightFragmentShader);
+  programs.push(program);
+  programs.push(program2);
+  programs.push(program3);
   if(useLinter){
     ext = gl.getExtension('GMAN_debug_helper');
     ext.tagObject(program2, "program2");
@@ -90,14 +97,18 @@ async function loadModels(){
 
 
 async function loadShaders(){
-  await utils.loadFiles(['shaders/vertex-shader-2d.glsl',
-                        'shaders/vertex-shader-2d_2.glsl',
+  await utils.loadFiles(['shaders/axisVertexShader.glsl',
+                        'shaders/uniformLightVertexShader.glsl',
                         'shaders/axisFragmentShader.glsl',
-                        'shaders/fancyFragmentShader.glsl'], function (shaderText) {
-    vertexShaderSource = shaderText[0];
-    vertexShaderSource_2 = shaderText[1];
-    fragmentShaderSource = shaderText[2];
-    fancyFragmentShaderSource = shaderText[3];
+                        'shaders/uniformLightFragmentShader.glsl',
+                      'shaders/pointLightVertexShader.glsl',
+                    'shaders/pointLightFragmentShader.glsl'], function (shaderText) {
+    axisVertexShaderSource = shaderText[0];
+    uniformLightVertexShaderSource = shaderText[1];
+    axisFragmentShaderSource = shaderText[2];
+    uniformLightFragmentShaderSource = shaderText[3];
+    pointLightVertexShaderSource = shaderText[4];
+    pointLightFragmentShaderSource = shaderText[5];
   });
 }
 
@@ -112,11 +123,33 @@ function getLocations(){
   program2.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program2, "u_inverseTransposeWorldMatrix");
   program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection")
   program2.u_color = gl.getUniformLocation(program2, "u_color");
+  program2.u_worldMatrix = gl.getUniformLocation(program2, "u_worldMatrix");
+  program2.u_lightWorldPosition = gl.getUniformLocation(program2, "u_lightWorldPosition");
+  program2.u_cameraWorldPosition = gl.getUniformLocation(program2, "u_cameraWorldPosition");
+  program2.u_uniformLightColor = gl.getUniformLocation(program2, "u_uniformLightColor");
+  program2.u_pointLightColor = gl.getUniformLocation(program2, "u_pointLightColor");
+  program2.u_spotlightDirection = gl.getUniformLocation(program2, "u_spotlightDirection");
+  program2.u_spotlightInnerLimit = gl.getUniformLocation(program2, "u_spotlightInnerLimit");
+  program2.u_spotlightOuterLimit = gl.getUniformLocation(program2, "u_spotlightOuterLimit");
+  program2.u_spotlightPosition = gl.getUniformLocation(program2, "u_spotlightPosition");
+
+
+  program3.u_worldMatrix = gl.getUniformLocation(program3, "u_worldMatrix");
+  program3.u_lightWorldPosition = gl.getUniformLocation(program3, "u_lightWorldPosition");
+  program3.u_worldViewProjectionMatrix = gl.getUniformLocation(program3, "u_worldViewProjectionMatrix");
+  program3.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program3, "u_inverseTransposeWorldMatrix");
+  program3.u_color = gl.getUniformLocation(program3, "u_color");
   
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");
   gl.enableVertexAttribArray(program2.a_position);
   gl.enableVertexAttribArray(program2.a_normal);
+
+  program3.a_position = gl.getAttribLocation(program3, "a_position");
+  program3.a_normal = gl.getAttribLocation(program3, "a_normal");
+  gl.enableVertexAttribArray(program2.a_position);
+  gl.enableVertexAttribArray(program2.a_normal);
+
   
   
   // program2.a_position = gl.getAttribLocation(program2, "a_position");

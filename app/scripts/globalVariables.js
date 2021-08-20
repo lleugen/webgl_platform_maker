@@ -3,12 +3,17 @@ var gl = null;
 var canvas = null;
 var program = null;
 var program2 = null;
+var program3 = null;
 var objectMesh = null;
+var programs = [];
 
-var vertexShaderSource;
-var vertexShaderSource_2;
-var fragmentShaderSource;
-var fancyFragmentShaderSource;
+
+var axisVertexShaderSource;
+var uniformLightVertexShaderSource;
+var axisFragmentShaderSource;
+var uniformLightFragmentShaderSource;
+var pointLightVertexShaderSource;
+var pointLightFragmentShaderSource;
 
 var vertexShader;
 var vertexShader_2;
@@ -83,4 +88,12 @@ var play_state = false;
 
 var spriteOrientation = 0;
 var pointLightPosition = [0,0,0];
+var spotlightPosition = [0,0,0];
+var spotlightInnerLimit = 0.9;
+var spotlightOuterLimit = 0.8;
+var spotlightDirection = [0,-1,0];
 var ext;
+
+var uniformLightColor = [1,1,0];
+var pointLightColor = [0,1,0];
+var spotlightColor = [1,1,1];

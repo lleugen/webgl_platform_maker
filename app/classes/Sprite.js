@@ -9,6 +9,7 @@ class Sprite{
         if(len != 0){
             let moveDirection = this.rightSpeed > 0 ? Math.asin(this.forwardSpeed / len)+ Math.PI : -Math.asin(this.forwardSpeed / len);
             moveDirection = moveDirection / Math.PI * 180;
+            
             let moveDirectionQuaternion = new Quaternion(Math.cos(moveDirection/2/180*Math.PI),
                                                         Math.sin(moveDirection/2/180*Math.PI)*0,
                                                         Math.sin(moveDirection/2/180*Math.PI)*1,
@@ -17,7 +18,7 @@ class Sprite{
             let viewMatrixWithAlignedUp = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, 0, -renderer.camera.angle);
             let camera_matrix = utils.invertMatrix(viewMatrixWithAlignedUp);
             let rotation_worldSpace = utils.multiplyMatrices(camera_matrix, moveDirectionQuaternion.toMatrix4());
-            console.log('rot',rotation_worldSpace)
+            // console.log('rot',rotation_worldSpace)
             let w = Math.sqrt(1 + rotation_worldSpace[0] + rotation_worldSpace[5] + rotation_worldSpace[10]) / 2;
             let x, y, z;
             if(w != 0){
@@ -34,6 +35,15 @@ class Sprite{
             let spriteobj = renderer.objects.filter(item => item.name.includes("ghost"))[0];
             // console.log(w, rotation_worldSpace_quaternion);
             spriteobj.orientation = rotation_worldSpace_quaternion;
+
+
+
+            // facing direction in camera space
+            spotlightDirection = utils.normalizeVector3([-Math.cos(moveDirection / 180 * Math.PI), 0, Math.sin(moveDirection / 180 * Math.PI)])
+            // facing direction in world space
+            let spotlightDirectionHomogeneous = utils.multiplyMatrixVector(utils.transposeMatrix(utils.invertMatrix(camera_matrix)), [spotlightDirection[0], spotlightDirection[1], spotlightDirection[2], 1]);
+            spotlightDirection = utils.normalizeVector3(spotlightDirectionHomogeneous.slice(0,3));
+            spotlightPosition = this.position;
         }
         
         this.move(this.rightSpeed, 0, -this.forwardSpeed);
