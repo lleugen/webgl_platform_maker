@@ -31,16 +31,21 @@ void main() {
     // point light
     vec3 surfaceToLightDirection = normalize(var_surfaceToLightDirection);
     float pointLight = clamp(dot(normal, surfaceToLightDirection), 0.0, 1.0);
+    // add decay
+    float len = sqrt(pow(var_surfaceToLightDirection.x, 2.0) + pow(var_surfaceToLightDirection.y, 2.0) + pow(var_surfaceToLightDirection.z, 2.0));
+    pointLight *= pow((10.0 / len), 2.0);
 
     //spotlight
     vec3 surfaceToSpotlightDirection = normalize(var_surfacetoSpotlightDirection);
     float dotFromDir = dot(surfaceToSpotlightDirection, -u_spotlightDirection);
-
     float spotlight = smoothstep(u_spotlightOuterLimit, u_spotlightInnerLimit, dotFromDir) * clamp(dot(normal, surfaceToSpotlightDirection), 0.0, 1.0);
     vec3 halfVectorSpotlight = normalize(surfaceToSpotlightDirection + surfaceToCameraDirection);
     float specularSpotlight = smoothstep(u_spotlightOuterLimit, u_spotlightInnerLimit, dotFromDir) * pow(clamp(dot(normal, halfVectorSpotlight), 0.0, 1.0), 10.0);
+    // add decay
+    len = sqrt(pow(var_surfacetoSpotlightDirection.x, 2.0) + pow(var_surfacetoSpotlightDirection.y, 2.0) + pow(var_surfacetoSpotlightDirection.z, 2.0));
+    spotlight *= pow((10.0 / len), 2.0);
 
-    vec3 light = (spotlight*vec3(1,1,1)) + (pointLight * u_pointLightColor) + (uniformLight * u_uniformLightColor);
+    vec3 light = (spotlight*vec3(1,1,1)) + (pointLight * u_pointLightColor);// + (uniformLight * u_uniformLightColor);
     color.rgb *= light;
 
     // shiny
@@ -49,7 +54,7 @@ void main() {
     vec3 halfVectorUniformLight = normalize(u_reverseLightDirection + surfaceToCameraDirection);
     float specularUniformLight = pow(clamp(dot(normal, halfVectorUniformLight), 0.0, 1.0), 10.0);
 
-    float specular = specularSpotlight + specularPointLight + specularUniformLight;
+    float specular = specularSpotlight + specularPointLight;// + specularUniformLight;
     color.rgb += specular;
     
 
