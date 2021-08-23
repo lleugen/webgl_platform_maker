@@ -50,12 +50,18 @@ function main() {
   var ghost = new OBJ.Mesh(ghostStr);
   inputElementsManager = new InputElementsManager();
   renderer = new Renderer();
+  loadTexture("./assets/Terrain-Texture_2.png");
+  loadTexture("./assets/cloud2.png");
+  loadTexture("./assets/brick1.png");
+
+
+
 
   renderer.addModel('tree', tree, program2);
   renderer.addModel('hedge', hedge, program2);
   renderer.addModel('rock', rock, program2);
-  renderer.addModel('brick', brick, program2);
-  renderer.addModel('cloud', cloud, program2);
+  renderer.addModel('brick', brick, program2, 2);
+  renderer.addModel('cloud', cloud, program2, 1);
   renderer.addModel('cylinder', cylinder, program2);
   renderer.addModel('mountain', mountain, program2);
   renderer.addModel('square', square, program2);
@@ -132,6 +138,7 @@ function getLocations(){
   program2.u_spotlightInnerLimit = gl.getUniformLocation(program2, "u_spotlightInnerLimit");
   program2.u_spotlightOuterLimit = gl.getUniformLocation(program2, "u_spotlightOuterLimit");
   program2.u_spotlightPosition = gl.getUniformLocation(program2, "u_spotlightPosition");
+  program2.u_texture = gl.getUniformLocation(program2, "u_texture");
 
 
   program3.u_worldMatrix = gl.getUniformLocation(program3, "u_worldMatrix");
@@ -142,8 +149,10 @@ function getLocations(){
   
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");
+  program2.a_textureCoordinates = gl.getAttribLocation(program2, "a_textureCoordinates");
   gl.enableVertexAttribArray(program2.a_position);
   gl.enableVertexAttribArray(program2.a_normal);
+  gl.enableVertexAttribArray(program2.a_textureCoordinates);
 
   program3.a_position = gl.getAttribLocation(program3, "a_position");
   program3.a_normal = gl.getAttribLocation(program3, "a_normal");
@@ -160,4 +169,47 @@ function getLocations(){
   // program2.u_color = gl.getUniformLocation(program2, "u_color");
   
 
+}
+
+
+async function loadTexture(pathToTextureImage){
+
+  // Create a texture.
+  let texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  
+  // Fill the texture with a 1x1 blue pixel.
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+                  new Uint8Array([0, 0, 255, 255]));
+  
+  let textureImage = new Image();
+  textureImage.src = pathToTextureImage;
+
+  textureImage.addEventListener('load', function() {
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, textureImage);
+      gl.generateMipmap(gl.TEXTURE_2D);
+  });
+
+  renderer.textures.push(texture);
+
+
+  // renderer.textureCloud = gl.createTexture();
+  // gl.bindTexture(gl.TEXTURE_2D, renderer.textureCloud);
+  
+  // // Fill the texture with a 1x1 blue pixel.
+  // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+  //                 new Uint8Array([0, 0, 255, 255]));
+  
+  // // Asynchronously load an image
+  // textureImageCloud = new Image();
+  // // textureImage.src = "./assets/Terrain-Texture_2.png";
+  // textureImageCloud.src = "./assets/cloud2.png";
+
+  // textureImageCloud.addEventListener('load', function() {
+  //     // Now that the image has loaded make copy it to the texture.
+  //     gl.bindTexture(gl.TEXTURE_2D, renderer.textureCloud);
+  //     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, textureImageCloud);
+  //     gl.generateMipmap(gl.TEXTURE_2D);
+  // });
 }

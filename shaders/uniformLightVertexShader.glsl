@@ -3,6 +3,7 @@ precision highp float;
 
 in vec3 a_position;
 in vec3 a_normal;
+in vec2 a_textureCoordinates;
 
 uniform mat4 u_worldViewProjectionMatrix;
 uniform mat4 u_inverseTransposeWorldMatrix;
@@ -16,6 +17,7 @@ out vec3 var_normal;
 out vec3 var_surfaceToLightDirection; // point light
 out vec3 var_surfacetoSpotlightDirection; // for spotlight
 out vec3 var_surfaceToCameraDirection;
+out vec2 var_textureCoordinates;
 
 void main() {
     gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1);
@@ -29,4 +31,8 @@ void main() {
     var_surfacetoSpotlightDirection = u_spotlightPosition - pointWorldPosition;
     // for shininess
     var_surfaceToCameraDirection = u_cameraWorldPosition - pointWorldPosition;
+
+    // texture
+    var_textureCoordinates = a_textureCoordinates;
+    var_textureCoordinates.y -= 0.5;
 }

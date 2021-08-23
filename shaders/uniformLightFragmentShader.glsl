@@ -5,6 +5,7 @@ in vec3 var_normal;
 in vec3 var_surfaceToLightDirection;
 in vec3 var_surfaceToCameraDirection;
 in vec3 var_surfacetoSpotlightDirection;
+in vec2 var_textureCoordinates;
 
 uniform vec4 u_color;
 uniform vec3 u_reverseLightDirection;
@@ -13,12 +14,14 @@ uniform vec3 u_pointLightColor;
 uniform vec3 u_spotlightDirection;
 uniform float u_spotlightInnerLimit;
 uniform float u_spotlightOuterLimit;
+uniform sampler2D u_texture;
 
 
 out vec4 color;
 
 void main() {
-    color = u_color;
+    // color = u_color;
+    color = texture(u_texture, var_textureCoordinates);
     
 
     // uniform light
@@ -45,7 +48,7 @@ void main() {
     len = sqrt(pow(var_surfacetoSpotlightDirection.x, 2.0) + pow(var_surfacetoSpotlightDirection.y, 2.0) + pow(var_surfacetoSpotlightDirection.z, 2.0));
     spotlight *= pow((10.0 / len), 2.0);
 
-    vec3 light = (spotlight*vec3(1,1,1)) + (pointLight * u_pointLightColor);// + (uniformLight * u_uniformLightColor);
+    vec3 light = (spotlight*vec3(1,1,1)) + (pointLight * u_pointLightColor) + (uniformLight * u_uniformLightColor);
     color.rgb *= light;
 
     // shiny
@@ -54,8 +57,8 @@ void main() {
     vec3 halfVectorUniformLight = normalize(u_reverseLightDirection + surfaceToCameraDirection);
     float specularUniformLight = pow(clamp(dot(normal, halfVectorUniformLight), 0.0, 1.0), 10.0);
 
-    float specular = specularSpotlight + specularPointLight;// + specularUniformLight;
-    color.rgb += specular;
+    float specular = specularSpotlight + specularPointLight + specularUniformLight;
+    // color.rgb += specular;
     
 
     

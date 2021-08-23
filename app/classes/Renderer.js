@@ -9,17 +9,21 @@ class Renderer{
         inputElementsManager.drawCreateButton('none');
         console.log('renderer created');
         // this.addObject('triangle_0', 'triangle', [0,0,0], [0,0,0], [0,0,0], 1);
+        this.textures = [];
+
     }
 
 
-    addModel(name, model, program){
+    addModel(name, model, program, textureIndex = 0){
         let vertexBuffer = gl.createBuffer();
         let indexBuffer = gl.createBuffer();
         let normalBuffer = gl.createBuffer();
+        let textureBuffer = gl.createBuffer();
         if(useLinter){
             ext.tagObject(vertexBuffer, name+'vertexBuffer');
             ext.tagObject(indexBuffer, name+'indexBuffer');
             ext.tagObject(normalBuffer, name+'normalBuffer');
+            ext.tagObject(textureBuffer, name+'textureBuffer');
         }
     
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
@@ -33,12 +37,19 @@ class Renderer{
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertexNormals), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
 
+        gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textures), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(program.a_textureCoordinates, 2, gl.FLOAT, false, 0, 0);
+
+
         let newModel = {'name': name,
                         'model': model,
                         'program': program,
                         'vertexBuffer': vertexBuffer,
                         'indexBuffer': indexBuffer,
-                        'normalBuffer': normalBuffer};
+                        'normalBuffer': normalBuffer,
+                        'textureBuffer': textureBuffer,
+                        'textureIndex': textureIndex};
         this.models.push(newModel);
         inputElementsManager.drawCreateButton(name)   
     }
@@ -144,6 +155,7 @@ class Renderer{
     drawModel(model, worldMatrix, program){
         gl.useProgram(program);
 
+        // TODO: check if this is necessary, because it is already done in addModel();
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
         gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
 
@@ -151,6 +163,10 @@ class Renderer{
 
         gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
         gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, model.textureBuffer);
+        gl.vertexAttribPointer(program.a_textureCoordinates, 2, gl.FLOAT, false, 0, 0);
+
 
         gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
         let reverseLight = light;
@@ -179,6 +195,7 @@ class Renderer{
         gl.uniform1f(program.u_spotlightInnerLimit, spotlightInnerLimit);
         gl.uniform1f(program.u_spotlightOuterLimit, spotlightOuterLimit);
 
+        gl.bindTexture(gl.TEXTURE_2D, renderer.textures[model.textureIndex]);
 
         gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
     }

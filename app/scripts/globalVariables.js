@@ -94,6 +94,6 @@ var spotlightOuterLimit = 0.8;
 var spotlightDirection = [0,-1,0];
 var ext;
 
-var uniformLightColor = [1,1,0];
-var pointLightColor = [0,1,0];
+var uniformLightColor = [1,1,1];
+var pointLightColor = [1,1,1];
 var spotlightColor = [1,1,1];
