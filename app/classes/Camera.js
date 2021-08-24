@@ -6,6 +6,7 @@ class Camera{
         this.elevation = -45;
         this.angle = -45;
         this.viewMatrix = [];
+        this.projectionMatrix = [];
     }
     view(){
         if(!play_state){

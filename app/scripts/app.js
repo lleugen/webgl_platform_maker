@@ -19,15 +19,19 @@ function main() {
   // console.log(pointLightFragmentShaderSource);
   let pointLightVertexShader = createShader(gl, gl.VERTEX_SHADER, pointLightVertexShaderSource);
   let pointLightFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, pointLightFragmentShaderSource);
+  let simpleVertexShader = createShader(gl, gl.VERTEX_SHADER, simpleVertexShaderSource);
+  let simpleFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, simpleFragmentShaderSource);
   // create programs with a vertex shader and a fragment shader
   // tag the programs with a name so the linter can tell us where errors come from
   // todo make program for every model
   program2 = createProgram(gl, uniformLightVertexShader, uniformLightFragmentShader);
   program = createProgram(gl, axisVertexShader, axisFragmentShader);
-  program3 = createProgram(gl, pointLightVertexShader, pointLightFragmentShader);
+  // program3 = createProgram(gl, pointLightVertexShader, pointLightFragmentShader);
+  simpleProgram = createProgram(gl, simpleVertexShader, simpleFragmentShader);
   programs.push(program);
   programs.push(program2);
   programs.push(program3);
+  programs.push(simpleProgram);
   if(useLinter){
     ext = gl.getExtension('GMAN_debug_helper');
     ext.tagObject(program2, "program2");
@@ -75,7 +79,10 @@ function main() {
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
   gl.cullFace(gl.BACK);
-  renderer.draw();
+
+  renderer.camera.view();
+  renderer.camera.createProjection(projectionType);
+  renderer.newFrame();
 }
 
 
@@ -108,13 +115,17 @@ async function loadShaders(){
                         'shaders/axisFragmentShader.glsl',
                         'shaders/uniformLightFragmentShader.glsl',
                       'shaders/pointLightVertexShader.glsl',
-                    'shaders/pointLightFragmentShader.glsl'], function (shaderText) {
+                    'shaders/pointLightFragmentShader.glsl',
+                  'shaders/simpleVertexShader.glsl',
+                'shaders/simpleFragmentShader.glsl'], function (shaderText) {
     axisVertexShaderSource = shaderText[0];
     uniformLightVertexShaderSource = shaderText[1];
     axisFragmentShaderSource = shaderText[2];
     uniformLightFragmentShaderSource = shaderText[3];
     pointLightVertexShaderSource = shaderText[4];
     pointLightFragmentShaderSource = shaderText[5];
+    simpleVertexShaderSource = shaderText[6];
+    simpleFragmentShaderSource = shaderText[7];
   });
 }
 
@@ -140,13 +151,6 @@ function getLocations(){
   program2.u_spotlightPosition = gl.getUniformLocation(program2, "u_spotlightPosition");
   program2.u_texture = gl.getUniformLocation(program2, "u_texture");
 
-
-  program3.u_worldMatrix = gl.getUniformLocation(program3, "u_worldMatrix");
-  program3.u_lightWorldPosition = gl.getUniformLocation(program3, "u_lightWorldPosition");
-  program3.u_worldViewProjectionMatrix = gl.getUniformLocation(program3, "u_worldViewProjectionMatrix");
-  program3.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program3, "u_inverseTransposeWorldMatrix");
-  program3.u_color = gl.getUniformLocation(program3, "u_color");
-  
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");
   program2.a_textureCoordinates = gl.getAttribLocation(program2, "a_textureCoordinates");
@@ -154,10 +158,18 @@ function getLocations(){
   gl.enableVertexAttribArray(program2.a_normal);
   gl.enableVertexAttribArray(program2.a_textureCoordinates);
 
-  program3.a_position = gl.getAttribLocation(program3, "a_position");
-  program3.a_normal = gl.getAttribLocation(program3, "a_normal");
-  gl.enableVertexAttribArray(program2.a_position);
-  gl.enableVertexAttribArray(program2.a_normal);
+  // program3.u_worldMatrix = gl.getUniformLocation(program3, "u_worldMatrix");
+  // program3.u_lightWorldPosition = gl.getUniformLocation(program3, "u_lightWorldPosition");
+  // program3.u_worldViewProjectionMatrix = gl.getUniformLocation(program3, "u_worldViewProjectionMatrix");
+  // program3.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program3, "u_inverseTransposeWorldMatrix");
+  // program3.u_color = gl.getUniformLocation(program3, "u_color");
+  
+  
+
+  // program3.a_position = gl.getAttribLocation(program3, "a_position");
+  // program3.a_normal = gl.getAttribLocation(program3, "a_normal");
+  // gl.enableVertexAttribArray(program2.a_position);
+  // gl.enableVertexAttribArray(program2.a_normal);
 
   
   
@@ -168,7 +180,27 @@ function getLocations(){
   // program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection");
   // program2.u_color = gl.getUniformLocation(program2, "u_color");
   
+  simpleProgram.u_worldViewProjectionMatrix = gl.getUniformLocation(simpleProgram, "u_worldViewProjectionMatrix");
+  simpleProgram.u_inverseTransposeWorldMatrix = gl.getUniformLocation(simpleProgram, "u_inverseTransposeWorldMatrix");
+  simpleProgram.u_reverseLightDirection = gl.getUniformLocation(simpleProgram, "u_reverseLightDirection")
+  simpleProgram.u_color = gl.getUniformLocation(simpleProgram, "u_color");
+  simpleProgram.u_worldMatrix = gl.getUniformLocation(simpleProgram, "u_worldMatrix");
+  simpleProgram.u_lightWorldPosition = gl.getUniformLocation(simpleProgram, "u_lightWorldPosition");
+  simpleProgram.u_cameraWorldPosition = gl.getUniformLocation(simpleProgram, "u_cameraWorldPosition");
+  simpleProgram.u_uniformLightColor = gl.getUniformLocation(simpleProgram, "u_uniformLightColor");
+  simpleProgram.u_pointLightColor = gl.getUniformLocation(simpleProgram, "u_pointLightColor");
+  simpleProgram.u_spotlightDirection = gl.getUniformLocation(simpleProgram, "u_spotlightDirection");
+  simpleProgram.u_spotlightInnerLimit = gl.getUniformLocation(simpleProgram, "u_spotlightInnerLimit");
+  simpleProgram.u_spotlightOuterLimit = gl.getUniformLocation(simpleProgram, "u_spotlightOuterLimit");
+  simpleProgram.u_spotlightPosition = gl.getUniformLocation(simpleProgram, "u_spotlightPosition");
+  simpleProgram.u_texture = gl.getUniformLocation(simpleProgram, "u_texture");
 
+  simpleProgram.a_position = gl.getAttribLocation(simpleProgram, "a_position");
+  simpleProgram.a_normal = gl.getAttribLocation(simpleProgram, "a_normal");
+  simpleProgram.a_textureCoordinates = gl.getAttribLocation(simpleProgram, "a_textureCoordinates");
+  gl.enableVertexAttribArray(simpleProgram.a_position);
+  // gl.enableVertexAttribArray(simpleProgram.a_normal);
+  // gl.enableVertexAttribArray(simpleProgram.a_textureCoordinates);
 }
 
 

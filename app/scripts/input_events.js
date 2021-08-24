@@ -5,6 +5,7 @@ function projectPointer(x, y, h=0){
 	let height = h;
 	plane_x = (height-cameraCoordinates[1]) / worldSpaceRay[1] * worldSpaceRay[0] + cameraCoordinates[0];
 	plane_z = (height-cameraCoordinates[1]) / worldSpaceRay[1] * worldSpaceRay[2] + cameraCoordinates[2];
+
 	return [plane_x, plane_z];
 }
 
@@ -302,18 +303,13 @@ function raycast(x, y){
 	let invProjection;
 	let cameraSpaceRay, worldSpaceRay;
 	let invView;
-	invProjection = utils.invertMatrix(projectionMatrix);
-	invView = utils.invertMatrix(viewMatrix)
+	invProjection = utils.invertMatrix(renderer.camera.createProjection(projectionType));
+	invView = utils.invertMatrix(renderer.camera.view())
 	cameraSpaceRay = utils.multiplyMatrixVector(invProjection, [x, y, -1, 1]);
 	cameraSpaceRay[3] = 0;
-	// console.log('cam',cameraSpaceRay)
 	worldSpaceRay = utils.multiplyMatrixVector(invView, cameraSpaceRay);
-	// console.log('world',worldSpaceRay)
-	// worldSpaceRay[0] = worldSpaceRay[0]/worldSpaceRay[2]
-	// worldSpaceRay[1] = worldSpaceRay[1]/worldSpaceRay[2]
-	// worldSpaceRay[2] = worldSpaceRay[2]/worldSpaceRay[2]
-	// console.log('norm world',worldSpaceRay)
 	worldSpaceRay = utils.normalizeVector3(worldSpaceRay)
+
 	return worldSpaceRay;
 }
 
