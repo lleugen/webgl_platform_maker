@@ -1,10 +1,10 @@
 class Camera{
     constructor(){
-        this.x = 50;
-        this.y = 50;
-        this.z = 50;
-        this.elevation = -45;
-        this.angle = -45;
+        this.x = cameraParameters['x'];
+        this.y = cameraParameters['y'];
+        this.z = cameraParameters['z'];
+        this.elevation = cameraParameters['elevation'];
+        this.angle = cameraParameters['angle'];
         this.viewMatrix = [];
         this.projectionMatrix = [];
     }
@@ -12,9 +12,9 @@ class Camera{
         if(!play_state){
             switch(cameraType){
                 case 'lookAt1': // look at point from fixed distance, control camera position
-                    renderer.camera.z = lookRadius * Math.cos(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + lookAtZ;
-                    renderer.camera.x = lookRadius * Math.sin(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + lookAtX;
-                    renderer.camera.y = lookRadius * Math.sin(utils.degToRad(-renderer.camera.elevation)) + lookAtY;
+                    renderer.camera.z = cameraParameters['radius'] * Math.cos(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + lookAtZ;
+                    renderer.camera.x = cameraParameters['radius'] * Math.sin(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + lookAtX;
+                    renderer.camera.y = cameraParameters['radius'] * Math.sin(utils.degToRad(-renderer.camera.elevation)) + lookAtY;
                     this.viewMatrix = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, renderer.camera.elevation, -renderer.camera.angle);
                     break;
                 case 'lookDirection': // first person camera view
@@ -23,9 +23,9 @@ class Camera{
             }
         }
         else{
-            renderer.camera.z = lookRadius * Math.cos(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[2];
-            renderer.camera.x = lookRadius * Math.sin(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[0];
-            renderer.camera.y = lookRadius * Math.sin(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[1];
+            renderer.camera.z = cameraParameters['radius'] * Math.cos(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[2];
+            renderer.camera.x = cameraParameters['radius'] * Math.sin(utils.degToRad(-renderer.camera.angle)) * Math.cos(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[0];
+            renderer.camera.y = cameraParameters['radius'] * Math.sin(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[1];
             this.viewMatrix = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, renderer.camera.elevation, -renderer.camera.angle);
         }
         

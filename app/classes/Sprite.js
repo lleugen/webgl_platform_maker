@@ -3,6 +3,7 @@ class Sprite{
         this.position = p;
         this.forwardSpeed = 0;
         this.rightSpeed = 0;
+        this.object = renderer.objects.filter(item => item.name.includes("ghost"))[0];
     }
 
 
@@ -48,7 +49,16 @@ class Sprite{
             spotlightPosition = this.position;
         }
         
-        this.move(this.rightSpeed, 0, -this.forwardSpeed);
+        if(this.rightSpeed != 0 || this.forwardSpeed != 0){
+            this.move(this.rightSpeed, 0, -this.forwardSpeed);
+
+            let objects = renderer.objects.filter(item=>!(item.name.includes('ghost')));
+            let collisions1D;
+            for(let i=0; i<objects.length; i++){
+                collisions1D = this.calculateCollision(this.object, objects[i]);
+            }
+        }
+        
     }
 
 
@@ -59,6 +69,10 @@ class Sprite{
             dy = normalizedSpeed[1];
             dz = normalizedSpeed[2];
         }
+        dx *= this.object.scale /4;
+        dy *= this.object.scale /4;
+        dz *= this.object.scale /4;
+
         // camera position in world space -> view matrix -> position in camera space -> transformation -> camera matrix (inverse view matrix) -> position in world space
         let world_position = [this.position[0], this.position[1], this.position[2], 1];
         let viewMatrixWithAlignedUp = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, 0, -renderer.camera.angle)
@@ -70,5 +84,60 @@ class Sprite{
         this.position[0] = new_camera_position[0];
         this.position[1] = new_camera_position[1];
         this.position[2] = new_camera_position[2];
+    }
+
+    // a and b are objects
+    calculateCollision(a, b){
+        let model_a = renderer.models.filter(item=>item.name == a.type)[0];
+        let model_b = renderer.models.filter(item=>item.name == b.type)[0];
+        let collisions1D = [];
+        collisions1D[0] = Math.abs((model_a['collisionData'][3][0] + a.position[0]) - (model_b['collisionData'][3][0] + b.position[0])) < (model_a['collisionData'][0]*a.scale/2 + model_b['collisionData'][0]*b.scale/2);
+        // collisions1D[1] = Math.abs((model_a['collisionData'][3][1] + a.position[1] + model_a['collisionData'][1]*a.scale) - (model_b['collisionData'][3][1] + b.position[1] + model_b['collisionData'][1]*b.scale)) < (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2);
+        collisions1D[1] = Math.abs(a.position[1] - b.position[1]) < (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2);
+        collisions1D[2] = Math.abs((model_a['collisionData'][3][2] + a.position[2]) - (model_b['collisionData'][3][2] + b.position[2])) < (model_a['collisionData'][2]*a.scale/2 + model_b['collisionData'][2]*b.scale/2);
+        
+        if(collisions1D[0]&&collisions1D[1]&&collisions1D[2]){
+            let violation_x = - Math.abs((model_a['collisionData'][3][0] + a.position[0]) - (model_b['collisionData'][3][0] + b.position[0])) + (model_a['collisionData'][0]*a.scale/2 + model_b['collisionData'][0]*b.scale/2);
+            let violation_y = (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2) - Math.abs(a.position[1] - b.position[1]);
+            let violation_z = (model_a['collisionData'][2]*a.scale/2 + model_b['collisionData'][2]*b.scale/2) - Math.abs((model_a['collisionData'][3][2] + a.position[2]) - (model_b['collisionData'][3][2] + b.position[2]));
+            let min = Math.min(violation_x, violation_y, violation_z);
+            switch(min){
+                case violation_x:
+                    if(renderer.sprite.position[0] < b.position[0]){
+                        renderer.sprite.position[0] -= violation_x;
+                    }
+                    else{
+                        renderer.sprite.position[0] += violation_x;
+                    }
+                    break;
+                case violation_y:
+                    if(renderer.sprite.position[1] < b.position[1]){
+                        renderer.sprite.position[1] -= violation_y;
+                    }
+                    else{
+                        renderer.sprite.position[1] += violation_y;
+                    }
+                    break;
+                case violation_z:
+                    if(renderer.sprite.position[2] < b.position[2]){
+                        renderer.sprite.position[2] -= violation_z;
+                    }
+                    else{
+                        renderer.sprite.position[2] += violation_z;
+                    }
+                    break;
+            }
+        }
+        // for(let i=0; i<3; i++){
+        //     let temp = Math.abs((model_a['collisionData'][3][i] + a.position[i])
+        //             - (model_b['collisionData'][3][i] + b.position[i])) 
+        //                 < (model_a['collisionData'][i]*a.scale/2
+        //                 + model_b['collisionData'][i]*b.scale/2);
+        //     console.log(Math.abs((model_a['collisionData'][3][i] + a.position[i]) - (model_b['collisionData'][3][i] + b.position[i])),
+        //      (model_a['collisionData'][i]*a.scale/2 + model_b['collisionData'][i]*b.scale/2))
+        //     collisions1D.push(temp)
+        // }
+        console.log(collisions1D)
+        return(collisions1D);
     }
 }

@@ -30,6 +30,7 @@ function main() {
   programs.push(program3);
   programs.push(simpleProgram);
   if(useLinter){
+    console.log('using linter')
     ext = gl.getExtension('GMAN_debug_helper');
     ext.tagObject(program2, "program2");
     ext.tagObject(program, "program");
@@ -37,7 +38,6 @@ function main() {
   
   getLocations();
 
-  // add model created buffers and puts the data inside, it need to have the locations already set
   var brick = new OBJ.Mesh(brickStr);
   var cloud = new OBJ.Mesh(cloudStr);
   var cylinder = new OBJ.Mesh(cylinderStr);
@@ -56,7 +56,7 @@ function main() {
   loadTexture("./assets/Terrain-Texture_2.png");
   loadTexture("./assets/cloud2.png");
   loadTexture("./assets/brick1.png");
-  // add models
+  // add models (also set vaos for each one)
   renderer.addModel('tree', tree, program2);
   renderer.addModel('hedge', hedge, program2);
   renderer.addModel('rock', rock, program2);
@@ -80,7 +80,7 @@ function main() {
 
   // setup shadow texture
   depthTexture = gl.createTexture();
-  depthTextureSize = 512;
+  depthTextureSize = 256;
   gl.activeTexture(gl.TEXTURE0 + depthTextureIndex);
   gl.bindTexture(gl.TEXTURE_2D, depthTexture);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT32F,depthTextureSize,depthTextureSize,0,gl.DEPTH_COMPONENT,gl.FLOAT,null);              // data

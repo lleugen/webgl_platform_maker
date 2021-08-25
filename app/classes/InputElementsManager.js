@@ -3,6 +3,16 @@ class InputElementsManager{
         
     }
 
+    drawButton(name, func){
+        let button;
+        let buttonSpace = document.getElementById("list2");
+    
+        button = document.createElement("button");
+        button.innerHTML = name;
+        button.id = name;
+        button.onclick = func;
+        buttonSpace.appendChild(button);
+    }
 
     drawSelectButton(name){
         let button;

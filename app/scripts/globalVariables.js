@@ -1,4 +1,4 @@
-var useLinter = true;
+var useLinter = false;
 var gl = null;
 var canvas = null;
 var program = null;
@@ -35,6 +35,7 @@ var rockStr;
 var squareStr;
 var treeStr;
 var ghostStr;
+var modelNames = ['brick', 'cloud', 'cylinder', 'hedge', 'mountain', 'rock', 'square', 'tree']
 
 var objectStrings = [];
 
@@ -43,7 +44,6 @@ var focusedObjectName = 'world';
 var renderer;
 var inputElementsManager;
 
-var lookRadius = 100;
 var elevation = -15.0;
 var angle = 0.0;
 var cx = 100.0;
@@ -118,8 +118,32 @@ var objectTextureIndex = 1;
 var lightFov = 45;
 
 var u_bias = -0.01;
-var uniformLightPosition = [100,100,100]
+var uniformLightPosition = [30,30,30]
 
 
 
 var lineVao;
+
+// settings
+var defaultSizes = {
+    'tree': 2,
+    'hedge': 1,
+    'rock': 1,
+    'brick': 1,
+    'cloud': 3,
+    'cylinder': 5,
+    'mountain': 10,
+    'square': 5,
+    'sphere': 1,
+    'triangle': 1,
+    'ghost': 1
+}
+
+var cameraParameters = {
+    'x': 20,
+    'y': 20,
+    'z': 20,
+    'elevation': -45,
+    'angle': -45,
+    'radius': 20
+}

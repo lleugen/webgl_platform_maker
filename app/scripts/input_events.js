@@ -38,7 +38,7 @@ function doMouseDown(event) {
 			let hit = false;
 			for(i=0; i<renderer.objects.length; i++){
 				if(renderer.objects[i].name != 'triangle_0'){
-					if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
+					if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 2)){
 						focusedObjectName = renderer.objects[i].name;
 						hit = true;
 						console.log(focusedObjectName)
@@ -81,7 +81,7 @@ function doMouseUp(event) {
 function doWheelRotate(event){
 	if(focusedObjectName == 'world'){
 		// console.log(event.deltaX, event.deltaY, event.deltaZ);
-		lookRadius += event.deltaY * wheelSensitivity;
+		cameraParameters['radius'] += event.deltaY * wheelSensitivity;
 	}
 	else{
 		renderer.updateObjectHeight(focusedObjectName, event.deltaY * wheelSensitivity);

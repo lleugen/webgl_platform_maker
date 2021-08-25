@@ -7,6 +7,8 @@ class Renderer{
         inputElementsManager.drawSelectButton('world');
         inputElementsManager.drawCreateButton('delete');
         inputElementsManager.drawCreateButton('none');
+        inputElementsManager.drawButton('delete everythin', this.deleteEverything);
+        inputElementsManager.drawButton('create things', function(){renderer.makeRandom(modelNames[Math.floor(Math.random() * modelNames.length)], Math.ceil(Math.random() * 4))})
         console.log('renderer created');
         // this.addObject('triangle_0', 'triangle', [0,0,0], [0,0,0], [0,0,0], 1);
         this.textures = [];  
@@ -43,6 +45,28 @@ class Renderer{
         gl.enableVertexAttribArray(program.a_textureCoordinates);
         gl.bindVertexArray(null);
 
+        // read vertices to build the appropriate collision box
+        let minx = 100
+        let miny= 100
+        let minz= 100
+        let maxx= -100
+        let maxy= -100
+        let maxz= -100
+        for(let i=0; i<model.vertices.length; i+=3){
+            // console.log(rock.vertices[i], rock.vertices[i+1], rock.vertices[i+2]);
+            minx = model.vertices[i] < minx ?  model.vertices[i] : minx
+            miny = model.vertices[i+1] < miny ?  model.vertices[i+1] : miny
+            minz = model.vertices[i+2] < minz ?  model.vertices[i+2] : minz
+            maxx = model.vertices[i] > maxx ?  model.vertices[i] : maxx
+            maxy = model.vertices[i+1] > maxy ?  model.vertices[i+1] : maxy
+            maxz = model.vertices[i+2] > maxz ?  model.vertices[i+2] : maxz
+        }
+        let centre = [(maxx + minx)/2, (maxy + miny)/2, (maxz + minz)/2];
+        let sizex = maxx - minx;
+        let sizey = maxy - miny;
+        let sizez = maxz - minz;
+        let collisionData = [sizex, sizey, sizez, centre];
+
         let newModel = {'name': name,
                         'model': model,
                         'program': program,
@@ -51,7 +75,8 @@ class Renderer{
                         'normalBuffer': normalBuffer,
                         'textureBuffer': textureBuffer,
                         'textureIndex': textureIndex,
-                        'vao' : vao};
+                        'vao' : vao,
+                        'collisionData': collisionData};
         this.models.push(newModel);
         inputElementsManager.drawCreateButton(name)   
     }
@@ -65,6 +90,13 @@ class Renderer{
                 this.updateObjectPosition(ghosts[0].name, position[0], position[2]);
             }
             else{
+                // adjust object size
+                let model = renderer.models.filter(item=>item.name==type);
+                if(model.length != 0){
+                    model = model[0];
+                    let bigSide = Math.max(model.collisionData[0], model.collisionData[1], model.collisionData[2]);
+                    scale = defaultSizes[model.name] / bigSide;
+                }
                 let newObject = {
                     'name': name,
                     'type': type, // model name
@@ -82,6 +114,13 @@ class Renderer{
             }
         }
         else{
+            // adjust object size
+            let model = renderer.models.filter(item=>item.name==type);
+            if(model.length != 0){
+                model = model[0];
+                let bigSide = Math.max(model.collisionData[0], model.collisionData[1], model.collisionData[2]);
+                scale = defaultSizes[model.name] / bigSide;
+            }
             let newObject = {
                 'name': name,
                 'type': type, // model name
@@ -108,12 +147,15 @@ class Renderer{
 
 
     newFrame(timeNow){
+        if(play_state){
+            renderer.sprite.triggerMove();
+        }
         //first render everything with a simple shader to create the shadowmap
         let view, projection, lightViewProjection, lightViewProjectionTextureMatrix;
         view = utils.MakeView(spotlightPosition[0], spotlightPosition[1], spotlightPosition[2], lightElevation, lightAngle);
         view = utils.MakeLookAt(uniformLightPosition, [0,0,0], [0,1,0])
         // projection = utils.MakePerspective(lightFov, 1, 1, 1000);
-        projection = utils.MakeParallel(Math.sqrt(2)*50, 1, 1, 2*Math.sqrt(2)*100);
+        projection = utils.MakeParallel(50, 1, 1, 100);
         lightViewProjection = utils.multiplyMatrices(projection, view);
         lightViewProjectionTextureMatrix = utils.multiplyMatrices(utils.MakeTranslateMatrix(0.5,0.5,0.5), utils.multiplyMatrices(utils.MakeScaleMatrix(0.5), lightViewProjection))
         gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
@@ -254,5 +296,24 @@ class Renderer{
             object.orientationDeg[1] += rvy;
             object.orientationDeg[2] += rvz;
         }
-    }  
+    }
+
+
+    makeRandom(type, number, randomHeight=false){
+        for(let i=0; i<number; i++){
+            renderer.addObject(type+'_'+renderer.objects.length,
+            type,
+            [Math.random()*10, randomHeight ? Math.random()*10 : 0, Math.random()*10]);
+        }
+    }
+
+    deleteEverything(){
+        let names = [];
+        for(let i=0; i<renderer.objects.length; i++){
+            names.push(renderer.objects[i].name);
+        }
+        for(let i=0; i<names.length; i++){
+            renderer.deleteObject(names[i]);
+        } 
+    }
 }
