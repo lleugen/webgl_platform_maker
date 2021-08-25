@@ -4,12 +4,15 @@ class Sprite{
         this.forwardSpeed = 0;
         this.rightSpeed = 0;
     }
+
+
     triggerMove(){
+        // total speed
         let len = Math.sqrt(this.forwardSpeed**2 + this.rightSpeed**2);
+        // calculate movement direction and rotate the model to face forward
         if(len != 0){
-            let moveDirection = this.rightSpeed > 0 ? Math.asin(this.forwardSpeed / len)+ Math.PI : -Math.asin(this.forwardSpeed / len);
+            let moveDirection = this.rightSpeed > 0 ? Math.asin(this.forwardSpeed / len) + Math.PI : -Math.asin(this.forwardSpeed / len);
             moveDirection = moveDirection / Math.PI * 180;
-            
             let moveDirectionQuaternion = new Quaternion(Math.cos(moveDirection/2/180*Math.PI),
                                                         Math.sin(moveDirection/2/180*Math.PI)*0,
                                                         Math.sin(moveDirection/2/180*Math.PI)*1,
@@ -18,7 +21,7 @@ class Sprite{
             let viewMatrixWithAlignedUp = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, 0, -renderer.camera.angle);
             let camera_matrix = utils.invertMatrix(viewMatrixWithAlignedUp);
             let rotation_worldSpace = utils.multiplyMatrices(camera_matrix, moveDirectionQuaternion.toMatrix4());
-            // console.log('rot',rotation_worldSpace)
+            // convert matrix to quaternion
             let w = Math.sqrt(1 + rotation_worldSpace[0] + rotation_worldSpace[5] + rotation_worldSpace[10]) / 2;
             let x, y, z;
             if(w != 0){
@@ -33,11 +36,10 @@ class Sprite{
             }
             let rotation_worldSpace_quaternion = new Quaternion(w, x, y, z);
             let spriteobj = renderer.objects.filter(item => item.name.includes("ghost"))[0];
-            // console.log(w, rotation_worldSpace_quaternion);
             spriteobj.orientation = rotation_worldSpace_quaternion;
 
 
-
+            // the ghost has a spotlight
             // facing direction in camera space
             spotlightDirection = utils.normalizeVector3([-Math.cos(moveDirection / 180 * Math.PI), 0, Math.sin(moveDirection / 180 * Math.PI)])
             // facing direction in world space
@@ -68,6 +70,5 @@ class Sprite{
         this.position[0] = new_camera_position[0];
         this.position[1] = new_camera_position[1];
         this.position[2] = new_camera_position[2];
-        // console.log(world_position, camera_position, translation, new_camera_position)
     }
 }

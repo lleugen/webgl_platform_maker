@@ -101,10 +101,25 @@ var ext;
 
 var uniformLightColor = [1,1,1];
 var pointLightColor = [1,1,1];
-var spotlightColor = [1,1,1];
+var spotlightColor = [0,0,0];
 
 function debug(args){
     for(let i=0; i<args.length; i++){
         console.log('debug', i, args[i])
     }
 }
+
+var depthTexture;
+var depthTextureSize;
+var depthFramebuffer;
+var depthTextureIndex = 0;
+var objectTextureIndex = 1;
+
+var lightFov = 45;
+
+var u_bias = -0.01;
+var uniformLightPosition = [100,100,100]
+
+
+
+var lineVao;

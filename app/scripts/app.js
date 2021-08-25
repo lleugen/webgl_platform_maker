@@ -3,9 +3,7 @@ function main() {
   loadShaders();
   loadModels();
   canvas = document.querySelector("#canvas");
-  // add input event listeners to the canvas, functions are defined in input_events.js
-  addListeners(canvas);
-  // get webgl2 context, we must use webgl2 in order to have glsl 300 es version
+  addListeners(canvas);  // defined in input_events.js
   gl = canvas.getContext("webgl2");
   if (!gl) {
     return;
@@ -23,11 +21,10 @@ function main() {
   let simpleFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, simpleFragmentShaderSource);
   // create programs with a vertex shader and a fragment shader
   // tag the programs with a name so the linter can tell us where errors come from
-  // todo make program for every model
   program2 = createProgram(gl, uniformLightVertexShader, uniformLightFragmentShader);
   program = createProgram(gl, axisVertexShader, axisFragmentShader);
   // program3 = createProgram(gl, pointLightVertexShader, pointLightFragmentShader);
-  simpleProgram = createProgram(gl, simpleVertexShader, simpleFragmentShader);
+  simpleProgram = createProgram(gl, simpleVertexShader, simpleFragmentShader);  // used for rendering the depth map for shadows
   programs.push(program);
   programs.push(program2);
   programs.push(program3);
@@ -40,8 +37,6 @@ function main() {
   
   getLocations();
 
-  webglUtils.resizeCanvasToDisplaySize(gl.canvas);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
   // add model created buffers and puts the data inside, it need to have the locations already set
   var brick = new OBJ.Mesh(brickStr);
   var cloud = new OBJ.Mesh(cloudStr);
@@ -52,15 +47,16 @@ function main() {
   var square = new OBJ.Mesh(squareStr);
   var tree = new OBJ.Mesh(treeStr);
   var ghost = new OBJ.Mesh(ghostStr);
+
+  // input elements manager draws all the buttons on the page
   inputElementsManager = new InputElementsManager();
+  // the renderer registers all the objects and models and does the rendering loop
   renderer = new Renderer();
+  // load textures and register them in the renderer
   loadTexture("./assets/Terrain-Texture_2.png");
   loadTexture("./assets/cloud2.png");
   loadTexture("./assets/brick1.png");
-
-
-
-
+  // add models
   renderer.addModel('tree', tree, program2);
   renderer.addModel('hedge', hedge, program2);
   renderer.addModel('rock', rock, program2);
@@ -72,27 +68,51 @@ function main() {
   renderer.addModel('sphere', createSphere(), program2);
   renderer.addModel('triangle', createTriangle(), program2);
   renderer.addModel('ghost', ghost, program2);
-  renderer.addModel('F', createF(), program2);
-  // Clear the canvas: when should this be done? probably in the drawing loop, but it works even without clearing
-  gl.clearColor(0, 0, 0, 0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  
+  // enable important settings
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
   gl.cullFace(gl.BACK);
 
+  // initialize camera
   renderer.camera.view();
   renderer.camera.createProjection(projectionType);
 
-  
+  // setup shadow texture
+  depthTexture = gl.createTexture();
+  depthTextureSize = 512;
+  gl.activeTexture(gl.TEXTURE0 + depthTextureIndex);
+  gl.bindTexture(gl.TEXTURE_2D, depthTexture);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT32F,depthTextureSize,depthTextureSize,0,gl.DEPTH_COMPONENT,gl.FLOAT,null);              // data
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  depthFramebuffer = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,depthTexture,0);
 
+  // setup axis vao
+  let lines = [
+    0,0,0,
+    10,0,0,
+    0,0,0,
+    0,10,0,
+    0,0,0,
+    0,0,10,
+  ]
+  let lineBuffer = gl.createBuffer()
+  lineVao = gl.createVertexArray();
+  gl.bindVertexArray(lineVao);
+  gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+  gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(program.a_position);
+  gl.bindVertexArray(null);
+
+  // start rendering
   renderer.newFrame();
 }
-
-
-
-
-
-
 
 
 async function loadModels(){
@@ -135,9 +155,9 @@ async function loadShaders(){
 
 function getLocations(){
   // get uniform locations inside the programs 
-  program.projection_uniform_location = gl.getUniformLocation(program, "projection");
-  program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
-  gl.enableVertexAttribArray(program.vertexPositionAttribute);
+  program.u_worldViewProjectionMatrix = gl.getUniformLocation(program, "u_worldViewProjectionMatrix");
+  program.a_position = gl.getAttribLocation(program, "a_position");
+  gl.enableVertexAttribArray(program.a_position);
 
   program2.u_worldViewProjectionMatrix = gl.getUniformLocation(program2, "u_worldViewProjectionMatrix");
   program2.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program2, "u_inverseTransposeWorldMatrix");
@@ -155,6 +175,7 @@ function getLocations(){
   program2.u_texture = gl.getUniformLocation(program2, "u_texture");
   program2.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix");
   program2.u_depthTexture = gl.getUniformLocation(program2, "u_depthTexture");
+  program2.u_bias = gl.getUniformLocation(program2, "u_bias");
 
 
   program2.a_position = gl.getAttribLocation(program2, "a_position");
@@ -200,6 +221,8 @@ function getLocations(){
   simpleProgram.u_spotlightOuterLimit = gl.getUniformLocation(simpleProgram, "u_spotlightOuterLimit");
   simpleProgram.u_spotlightPosition = gl.getUniformLocation(simpleProgram, "u_spotlightPosition");
   simpleProgram.u_texture = gl.getUniformLocation(simpleProgram, "u_texture");
+  simpleProgram.u_depthTexture = gl.getUniformLocation(simpleProgram, "u_depthTexture");
+
 
   simpleProgram.a_position = gl.getAttribLocation(simpleProgram, "a_position");
   simpleProgram.a_normal = gl.getAttribLocation(simpleProgram, "a_normal");
@@ -214,6 +237,7 @@ async function loadTexture(pathToTextureImage){
 
   // Create a texture.
   let texture = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0 + objectTextureIndex);
   gl.bindTexture(gl.TEXTURE_2D, texture);
   
   // Fill the texture with a 1x1 blue pixel.
@@ -230,24 +254,4 @@ async function loadTexture(pathToTextureImage){
   });
 
   renderer.textures.push(texture);
-
-
-  // renderer.textureCloud = gl.createTexture();
-  // gl.bindTexture(gl.TEXTURE_2D, renderer.textureCloud);
-  
-  // // Fill the texture with a 1x1 blue pixel.
-  // gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-  //                 new Uint8Array([0, 0, 255, 255]));
-  
-  // // Asynchronously load an image
-  // textureImageCloud = new Image();
-  // // textureImage.src = "./assets/Terrain-Texture_2.png";
-  // textureImageCloud.src = "./assets/cloud2.png";
-
-  // textureImageCloud.addEventListener('load', function() {
-  //     // Now that the image has loaded make copy it to the texture.
-  //     gl.bindTexture(gl.TEXTURE_2D, renderer.textureCloud);
-  //     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,gl.UNSIGNED_BYTE, textureImageCloud);
-  //     gl.generateMipmap(gl.TEXTURE_2D);
-  // });
 }
