@@ -90,7 +90,7 @@ var light = m4.normalize([0.5, 0.7, 1]);
 var play_state = false;
 
 var spriteOrientation = 0;
-var pointLightPosition = [0,0,0];
+var pointLightPosition = [20,0,0];
 var spotlightPosition = [20,20,20];
 var spotlightInnerLimit = 0.9;
 var spotlightOuterLimit = 0.8;

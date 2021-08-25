@@ -11,6 +11,7 @@ uniform vec3 u_lightWorldPosition;
 uniform mat4 u_worldMatrix;
 uniform vec3 u_cameraWorldPosition;
 uniform vec3 u_spotlightPosition;
+uniform mat4 u_lightViewProjectionTextureMatrix;
 
 
 out vec3 var_normal;
@@ -18,11 +19,12 @@ out vec3 var_surfaceToLightDirection; // point light
 out vec3 var_surfacetoSpotlightDirection; // for spotlight
 out vec3 var_surfaceToCameraDirection;
 out vec2 var_textureCoordinates;
+out vec4 var_projectedTexcoord;
 
 void main() {
-    gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1);
+    gl_Position = u_worldViewProjectionMatrix * vec4(a_position, 1.0);
     var_normal = mat3(u_inverseTransposeWorldMatrix) * a_normal;
-
+    vec4 worldPosition = u_worldMatrix * vec4(a_position, 1.0);
     // for point light
     vec3 pointWorldPosition = (u_worldMatrix * vec4(a_position, 1)).xyz;
     var_surfaceToLightDirection = u_lightWorldPosition - pointWorldPosition;
@@ -35,4 +37,5 @@ void main() {
     // texture
     var_textureCoordinates = a_textureCoordinates;
     var_textureCoordinates.y -= 0.5;
+    var_projectedTexcoord = u_lightViewProjectionTextureMatrix * worldPosition;
 }

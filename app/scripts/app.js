@@ -82,6 +82,9 @@ function main() {
 
   renderer.camera.view();
   renderer.camera.createProjection(projectionType);
+
+  
+
   renderer.newFrame();
 }
 
@@ -150,6 +153,9 @@ function getLocations(){
   program2.u_spotlightOuterLimit = gl.getUniformLocation(program2, "u_spotlightOuterLimit");
   program2.u_spotlightPosition = gl.getUniformLocation(program2, "u_spotlightPosition");
   program2.u_texture = gl.getUniformLocation(program2, "u_texture");
+  program2.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix");
+  program2.u_depthTexture = gl.getUniformLocation(program2, "u_depthTexture");
+
 
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");

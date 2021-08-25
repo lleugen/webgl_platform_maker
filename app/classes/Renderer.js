@@ -11,6 +11,33 @@ class Renderer{
         // this.addObject('triangle_0', 'triangle', [0,0,0], [0,0,0], [0,0,0], 1);
         this.textures = [];
 
+
+        this.depthTexture = gl.createTexture();
+        this.depthTextureSize = 512;
+        gl.bindTexture(gl.TEXTURE_2D, this.depthTexture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,      // target
+            0,                  // mip level
+            gl.DEPTH_COMPONENT32F, // internal format
+            this.depthTextureSize,   // width
+            this.depthTextureSize,   // height
+            0,                  // border
+            gl.DEPTH_COMPONENT, // format
+            gl.FLOAT,           // type
+            null);              // data
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        this.depthFramebuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.depthFramebuffer);
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,       // target
+            gl.DEPTH_ATTACHMENT,  // attachment point
+            gl.TEXTURE_2D,        // texture target
+            this.depthTexture,         // texture
+            0);                   // mip level
     }
 
 
@@ -25,22 +52,39 @@ class Renderer{
             ext.tagObject(normalBuffer, name+'normalBuffer');
             ext.tagObject(textureBuffer, name+'textureBuffer');
         }
-    
+
+        let vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
-
+        gl.enableVertexAttribArray(program.a_position);
         gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertexNormals), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
-
+        gl.enableVertexAttribArray(program.a_normal);
         gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textures), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program.a_textureCoordinates, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(program.a_textureCoordinates);
+        gl.bindVertexArray(null);
 
+        // gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+        // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertices), gl.STATIC_DRAW);
+        // gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
+
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(model.indices), gl.STATIC_DRAW);
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+        // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.vertexNormals), gl.STATIC_DRAW);
+        // gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
+
+        // gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+        // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(model.textures), gl.STATIC_DRAW);
+        // gl.vertexAttribPointer(program.a_textureCoordinates, 2, gl.FLOAT, false, 0, 0);
 
         let newModel = {'name': name,
                         'model': model,
@@ -49,7 +93,8 @@ class Renderer{
                         'indexBuffer': indexBuffer,
                         'normalBuffer': normalBuffer,
                         'textureBuffer': textureBuffer,
-                        'textureIndex': textureIndex};
+                        'textureIndex': textureIndex,
+                        'vao' : vao};
         this.models.push(newModel);
         inputElementsManager.drawCreateButton(name)   
     }
@@ -105,27 +150,36 @@ class Renderer{
 
 
     newFrame(timeNow){
-        let view, projection;
-        // this commented code is for later
+        let view, projection, lightViewProjection, lightViewProjectionTextureMatrix;
         // view = utils.MakeView(spotlightPosition[0], spotlightPosition[1], spotlightPosition[2], lightElevation, lightAngle);
-        // view = utils.MakeLookAt(spotlightPosition, [0,0,0], [0,1,0])
-        // projection = utils.MakePerspective(60, 2, 1, 100);
-        // renderer.drawRegisteredObjects(view, projection, simpleProgram);
+        view = utils.MakeLookAt(pointLightPosition, [0,0,0], [0,1,0])
+        projection = utils.MakePerspective(fov, 2, 1, 100);
+        lightViewProjection = utils.multiplyMatrices(projection, view);
+        lightViewProjectionTextureMatrix = utils.multiplyMatrices(utils.multiplyMatrices(lightViewProjection, utils.MakeTranslateMatrix(0.5,0.5,0.5)), utils.MakeScaleMatrix(0.5))
+        gl.bindFramebuffer(gl.FRAMEBUFFER, renderer.depthFramebuffer);
+        gl.viewport(0, 0, renderer.depthTextureSize, renderer.depthTextureSize);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        renderer.drawRegisteredObjects(view, projection, simpleProgram, utils.identityMatrix());
 
 
 
-
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         view = renderer.camera.view();
         projection = renderer.camera.createProjection(projectionType);
-        if(document.getElementById('draw_axis').checked){
-            renderer.drawAxisLines(view, projection);
-        }
-        renderer.drawRegisteredObjects(view, projection, program2);
+
+        
+        // if(document.getElementById('draw_axis').checked){
+        //     renderer.drawAxisLines(view, projection);
+        // }
+        renderer.drawRegisteredObjects(view, projection, program2, lightViewProjectionTextureMatrix);
         window.requestAnimationFrame(renderer.newFrame);
 
     }
-    drawRegisteredObjects(view, projection, program){
+    drawRegisteredObjects(view, projection, program, lightViewProjectionTextureMatrix){
         // local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
         for(i=0; i<this.objects.length; i++){
             let rotation_matrix, translation_matrix, scale_matrix, worldMatrix;
@@ -143,23 +197,23 @@ class Renderer{
             model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
 
             gl.useProgram(program);
-            gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
-            gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
-            try{
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
-                gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
-                gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
-                gl.bindBuffer(gl.ARRAY_BUFFER, model.textureBuffer);
-                gl.vertexAttribPointer(program.a_textureCoordinates, 2, gl.FLOAT, false, 0, 0);
-            }catch(error){
-                console.log('could not set normal or texture buffers')
-            }
+            // gl.bindBuffer(gl.ARRAY_BUFFER, model.vertexBuffer);
+            // gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
+            // try{
+            //     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.indexBuffer);
+            //     gl.bindBuffer(gl.ARRAY_BUFFER, model.normalBuffer);
+            //     gl.vertexAttribPointer(program.a_normal, 3, gl.FLOAT, false, 0, 0);
+            //     gl.bindBuffer(gl.ARRAY_BUFFER, model.textureBuffer);
+            //     gl.vertexAttribPointer(program.a_textureCoordinates, 2, gl.FLOAT, false, 0, 0);
+            // }catch(error){
+            //     console.log('could not set normal or texture buffers')
+            // }
             
             gl.uniformMatrix4fv(program.u_worldViewProjectionMatrix, true, worldViewProjectionMatrix);
 
             try{
                 gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
-                gl.uniform3fv(program2.u_reverseLightDirection, utils.normalizeVector3(light));
+                gl.uniform3fv(program.u_reverseLightDirection, utils.normalizeVector3(light));
                 gl.uniformMatrix4fv(program.u_inverseTransposeWorldMatrix, true, inverseTransposeWorldMatrix);
                 gl.uniform3fv(program.u_lightWorldPosition, pointLightPosition);
                 gl.uniform3fv(program.u_cameraWorldPosition, [renderer.camera.x, renderer.camera.y, renderer.camera.z])
@@ -170,15 +224,17 @@ class Renderer{
                 gl.uniform3fv(program.u_spotlightDirection, spotlightDirection);
                 gl.uniform1f(program.u_spotlightInnerLimit, spotlightInnerLimit);
                 gl.uniform1f(program.u_spotlightOuterLimit, spotlightOuterLimit);
+                gl.uniformMatrix4fv(program.u_lightViewProjectionTextureMatrix, true, lightViewProjectionTextureMatrix);
             }catch(error){
                 console.log('something bad happened when setting uniforms and attributes')
             }
             
 
-            gl.bindTexture(gl.TEXTURE_2D, renderer.textures[model.textureIndex]);
+            // gl.bindTexture(gl.TEXTURE_2D, renderer.textures[model.textureIndex]);
             var primitiveType = gl.TRIANGLES;
             var offset = 0;
             var count = model.model.indices.length;
+            gl.bindVertexArray(model.vao);
             gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
         }
     }  
@@ -246,8 +302,6 @@ class Renderer{
         gl.useProgram(program);
         var wvpMatrix_1 = utils.multiplyMatrices(projection, view); // for program 1, used by plane and axis
         gl.uniformMatrix4fv(program.projection_uniform_location, false, utils.transposeMatrix(wvpMatrix_1));
-    
-
         var lines = [
             0,0,0,
             10,0,0,
@@ -256,9 +310,10 @@ class Renderer{
             0,0,0,
             0,0,10,
         ]
-
-        
         var lineBuffer = gl.createBuffer()
+
+        // program.vertexPositionAttribute = gl.getAttribLocation(program, "a_position");
+        // gl.enableVertexAttribArray(program.vertexPositionAttribute);
         gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
         gl.vertexAttribPointer(program2.a_position, 3, gl.FLOAT, false, 0, 0);
