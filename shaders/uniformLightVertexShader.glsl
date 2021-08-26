@@ -12,6 +12,7 @@ uniform mat4 u_worldMatrix;
 uniform vec3 u_cameraWorldPosition;
 uniform vec3 u_spotlightPosition;
 uniform mat4 u_lightViewProjectionTextureMatrix;
+uniform mat4 u_textureAnimationMatrix;
 
 
 out vec3 var_normal;
@@ -35,7 +36,7 @@ void main() {
     var_surfaceToCameraDirection = u_cameraWorldPosition - pointWorldPosition;
 
     // texture
-    var_textureCoordinates = a_textureCoordinates;
+    var_textureCoordinates = (u_textureAnimationMatrix * vec4(a_textureCoordinates, 0.0, 1.0)).xy;
     var_textureCoordinates.y -= 0.5;
     var_projectedTexcoord = u_lightViewProjectionTextureMatrix * worldPosition;
 }

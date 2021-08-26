@@ -48,13 +48,15 @@ function main() {
   var tree = new OBJ.Mesh(treeStr);
   var ghost = new OBJ.Mesh(ghostStr);
 
+  console.log(cloud.textures)
+
   // input elements manager draws all the buttons on the page
   inputElementsManager = new InputElementsManager();
   // the renderer registers all the objects and models and does the rendering loop
   renderer = new Renderer();
   // load textures and register them in the renderer
   loadTexture("./assets/Terrain-Texture_2.png");
-  loadTexture("./assets/cloud2.png");
+  loadTexture("./assets/cloud animation texture1.png");
   loadTexture("./assets/brick1.png");
   // add models (also set vaos for each one)
   renderer.addModel('tree', tree, program2);
@@ -176,7 +178,7 @@ function getLocations(){
   program2.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix");
   program2.u_depthTexture = gl.getUniformLocation(program2, "u_depthTexture");
   program2.u_bias = gl.getUniformLocation(program2, "u_bias");
-
+  program2.u_textureAnimationMatrix = gl.getUniformLocation(program2, "u_textureAnimationMatrix");
 
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");
@@ -222,6 +224,8 @@ function getLocations(){
   simpleProgram.u_spotlightPosition = gl.getUniformLocation(simpleProgram, "u_spotlightPosition");
   simpleProgram.u_texture = gl.getUniformLocation(simpleProgram, "u_texture");
   simpleProgram.u_depthTexture = gl.getUniformLocation(simpleProgram, "u_depthTexture");
+  simpleProgram.u_textureAnimationMatrix = gl.getUniformLocation(simpleProgram, "u_textureAnimationMatrix");
+
 
 
   simpleProgram.a_position = gl.getAttribLocation(simpleProgram, "a_position");

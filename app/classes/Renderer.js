@@ -7,11 +7,14 @@ class Renderer{
         inputElementsManager.drawSelectButton('world');
         inputElementsManager.drawCreateButton('delete');
         inputElementsManager.drawCreateButton('none');
-        inputElementsManager.drawButton('delete everythin', this.deleteEverything);
+        inputElementsManager.drawButton('delete everything', this.deleteEverything);
         inputElementsManager.drawButton('create things', function(){renderer.makeRandom(modelNames[Math.floor(Math.random() * modelNames.length)], Math.ceil(Math.random() * 4))})
         console.log('renderer created');
         // this.addObject('triangle_0', 'triangle', [0,0,0], [0,0,0], [0,0,0], 1);
         this.textures = [];  
+
+        this.lastUpdateTime;
+        this.g_time = 0;
     }
 
 
@@ -173,6 +176,7 @@ class Renderer{
         if(document.getElementById('draw_axis').checked){
             renderer.drawAxisLines(view, projection);
         }
+
         renderer.drawRegisteredObjects(view, projection, program2, lightViewProjectionTextureMatrix);
         // loop
         window.requestAnimationFrame(renderer.newFrame);
@@ -197,6 +201,25 @@ class Renderer{
             model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
 
             gl.useProgram(program);
+
+            var currentTime = (new Date).getTime();
+            var deltaT;
+            if(renderer.lastUpdateTime){
+                deltaT = (currentTime - renderer.lastUpdateTime) / 1000.0;
+            } else {
+                deltaT = 1/50;
+            }
+            renderer.lastUpdateTime = currentTime;
+            renderer.g_time += deltaT;
+            let time = (renderer.g_time - 5 * Math.floor(renderer.g_time/5)) / 5;
+
+            if(this.objects[i].type == 'cloud'){
+                let textureAnimationMatrix = this.animateCloud(time);
+                gl.uniformMatrix4fv(program.u_textureAnimationMatrix, true, textureAnimationMatrix);
+            }
+            else{
+                gl.uniformMatrix4fv(program.u_textureAnimationMatrix, true, utils.identityMatrix());
+            }
             gl.uniformMatrix4fv(program.u_worldViewProjectionMatrix, true, worldViewProjectionMatrix);
             try{
                 gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
@@ -307,6 +330,7 @@ class Renderer{
         }
     }
 
+
     deleteEverything(){
         let names = [];
         for(let i=0; i<renderer.objects.length; i++){
@@ -315,5 +339,21 @@ class Renderer{
         for(let i=0; i<names.length; i++){
             renderer.deleteObject(names[i]);
         } 
+    }
+
+
+    animateCloud(time){
+	    var out = utils.identityMatrix();
+	    let frameDuration = 2 / 98;
+	    let currentFrame = Math.floor(time / frameDuration);
+	    // console.log(currentFrame);
+	    let yt = Math.floor(currentFrame / 14);
+	    let xt = Math.floor(currentFrame % 14);
+	    let scale = utils.MakeScaleMatrix(1/14);
+	    let translate = utils.MakeTranslateMatrix(xt * 1/14, (1 - 1/7) - yt * 1/7, 0);
+	    out = utils.multiplyMatrices(translate, scale)
+	    // console.log(currentFrame, xt, yt)
+
+	    return out;
     }
 }
