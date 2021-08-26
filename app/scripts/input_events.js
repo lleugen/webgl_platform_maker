@@ -325,7 +325,7 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
         console.log("ray origin inside sphere");
         return true;
     }
-    //Projection of l onto the ray direction 
+    //Projection of l onto the ray direction
     var s = l[0] * rayNormalisedDir[0] + l[1] * rayNormalisedDir[1] + l[2] * rayNormalisedDir[2];
     //The spere is behind the ray origin so no intersection
     if(s < 0){
@@ -339,16 +339,16 @@ function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sp
         console.log("m squared > r squared");
         return false;
     }
-    //Now we can say that the ray will hit the sphere 
+    //Now we can say that the ray will hit the sphere
     console.log("hit");
     return true;
-    
+
 }
 
 
 function doKeyDown(e){
 	let lookAtVectorLength, cosx, cosy, cosz;
-	
+
 		if(!play_state){
 			if(document.getElementById("quaternionRotation").checked){
 				switch(e.keyCode) {// object rotation
@@ -447,10 +447,22 @@ function doKeyDown(e){
 						renderer.sprite.rightSpeed += 1;
 						// renderer.sprite.startMove(1,0,0);
 					break;
+
+					case 32: //spacebar
+
+					let obj = renderer.objects.filter(item => item.name.includes("ghost"))[0];
+					console.log("position ghost y=" +obj.position[1])
+
+					//if((obj.position[1]==0 && renderer.sprite.upSpeed==0)||(obj.position[1]<10 && renderer.sprite.upSpeed==1)){
+						if(renderer.sprite.upSpeed==0){
+
+						renderer.sprite.upSpeed =1;}
+					break;
 				}
 			}
 		}
 }
+
 
 function doKeyUp(e){
 	if(pressedKeys[e.keyCode]){
@@ -472,6 +484,10 @@ function doKeyUp(e){
 				renderer.sprite.rightSpeed -= 1;
 				// renderer.sprite.stopMove(1,0,0);
 			break;
+			case 32: // d
+
+			break;
+
 		}
 	}
 }
