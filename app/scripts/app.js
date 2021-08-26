@@ -82,7 +82,7 @@ function main() {
 
   // setup shadow texture
   depthTexture = gl.createTexture();
-  depthTextureSize = 256;
+  depthTextureSize = 1024;
   gl.activeTexture(gl.TEXTURE0 + depthTextureIndex);
   gl.bindTexture(gl.TEXTURE_2D, depthTexture);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT32F,depthTextureSize,depthTextureSize,0,gl.DEPTH_COMPONENT,gl.FLOAT,null);              // data

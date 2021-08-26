@@ -201,7 +201,7 @@ class Renderer{
             model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
 
             gl.useProgram(program);
-
+            // animation code
             var currentTime = (new Date).getTime();
             var deltaT;
             if(renderer.lastUpdateTime){
@@ -212,14 +212,21 @@ class Renderer{
             renderer.lastUpdateTime = currentTime;
             renderer.g_time += deltaT;
             let time = (renderer.g_time - 5 * Math.floor(renderer.g_time/5)) / 5;
-
+            // animate cloud
             if(this.objects[i].type == 'cloud'){
                 let textureAnimationMatrix = this.animateCloud(time);
                 gl.uniformMatrix4fv(program.u_textureAnimationMatrix, true, textureAnimationMatrix);
             }
+            
             else{
                 gl.uniformMatrix4fv(program.u_textureAnimationMatrix, true, utils.identityMatrix());
             }
+            // animate rock
+            if(this.objects[i].type == 'rock'){
+                this.objects[i].orientation = this.objects[i].orientation.mul(Quaternion.fromEuler(0,0,1/180*Math.PI))
+            }
+            
+
             gl.uniformMatrix4fv(program.u_worldViewProjectionMatrix, true, worldViewProjectionMatrix);
             try{
                 gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
@@ -355,5 +362,10 @@ class Renderer{
 	    // console.log(currentFrame, xt, yt)
 
 	    return out;
+    }
+
+
+    animateRotation(time){
+        return new Quaternion.fromEuler(0, 0, time);
     }
 }
