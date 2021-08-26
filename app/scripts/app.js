@@ -14,26 +14,30 @@ function main() {
   let uniformLightVertexShader = createShader(gl, gl.VERTEX_SHADER, uniformLightVertexShaderSource);
   let axisVertexShader = createShader(gl, gl.VERTEX_SHADER, axisVertexShaderSource);
   let uniformLightFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, uniformLightFragmentShaderSource);
-  // console.log(pointLightFragmentShaderSource);
   let pointLightVertexShader = createShader(gl, gl.VERTEX_SHADER, pointLightVertexShaderSource);
   let pointLightFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, pointLightFragmentShaderSource);
   let simpleVertexShader = createShader(gl, gl.VERTEX_SHADER, simpleVertexShaderSource);
   let simpleFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, simpleFragmentShaderSource);
+  let skyboxVertexShader = createShader(gl, gl.VERTEX_SHADER, skyboxVertexShaderSource);
+  let skyboxFragmentShader = createShader(gl, gl.FRAGMENT_SHADER, skyboxFragmentShaderSource);
   // create programs with a vertex shader and a fragment shader
   // tag the programs with a name so the linter can tell us where errors come from
   program2 = createProgram(gl, uniformLightVertexShader, uniformLightFragmentShader);
   program = createProgram(gl, axisVertexShader, axisFragmentShader);
   // program3 = createProgram(gl, pointLightVertexShader, pointLightFragmentShader);
   simpleProgram = createProgram(gl, simpleVertexShader, simpleFragmentShader);  // used for rendering the depth map for shadows
+  skyboxProgram = createProgram(gl, skyboxVertexShader, skyboxFragmentShader);
   programs.push(program);
   programs.push(program2);
   programs.push(program3);
   programs.push(simpleProgram);
+  programs.push(skyboxProgram);
   if(useLinter){
     console.log('using linter')
     ext = gl.getExtension('GMAN_debug_helper');
     ext.tagObject(program2, "program2");
     ext.tagObject(program, "program");
+    ext.tagObject(skyboxProgram, "skyboxProgram")
   }
   
   getLocations();
@@ -47,8 +51,6 @@ function main() {
   var square = new OBJ.Mesh(squareStr);
   var tree = new OBJ.Mesh(treeStr);
   var ghost = new OBJ.Mesh(ghostStr);
-
-  console.log(cloud.textures)
 
   // input elements manager draws all the buttons on the page
   inputElementsManager = new InputElementsManager();
@@ -94,6 +96,59 @@ function main() {
   gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
   gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,depthTexture,0);
 
+  // setup cube texture
+  cubeTexture = gl.createTexture();
+  gl.activeTexture(gl.TEXTURE0 + cubeTextureIndex);
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeTexture);
+  const cubeFaces = [
+    {
+      face: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+      imagePath: 'assets/cube/posX.png',
+    },
+    {
+      face: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+      imagePath: 'assets/cube/negX.png',
+    },
+    {
+      face: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+      imagePath: 'assets/cube/posY.png',
+    },
+    {
+      face: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      imagePath: 'assets/cube/negY.png',
+    },
+    {
+      face: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+      imagePath: 'assets/cube/posZ.png',
+    },
+    {
+      face: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+      imagePath: 'assets/cube/negZ.png',
+    }
+  ];
+  cubeFaces.forEach((cubeFace)=>{
+    const {face, imagePath} = cubeFace;
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const width = 512;
+    const height = 512;
+    const format = gl.RGBA;
+    const type = gl.UNSIGNED_BYTE;
+    // setup each face so it's immediately renderable and load image asynchronously
+    gl.texImage2D(face, level, internalFormat, width, height, 0, format, type, null);
+    const image = new Image();
+    image.src = imagePath;
+    image.addEventListener('load', function() {
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeTexture);
+      gl.texImage2D(face, level, internalFormat, format, type, image);
+      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    });
+  });
+  gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+  
+
   // setup axis vao
   let lines = [
     0,0,0,
@@ -111,6 +166,28 @@ function main() {
   gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(program.a_position);
   gl.bindVertexArray(null);
+
+
+  // setup background
+  let positionsBackground = 
+    [
+        -1, -1,
+        1, -1,
+        -1,  1,
+        -1,  1,
+        1, -1,
+        1,  1,
+    ];
+  let backgroundPositionsBuffer = gl.createBuffer();
+  let backgroundVao = gl.createVertexArray();
+  gl.bindVertexArray(backgroundVao);
+  gl.bindBuffer(gl.ARRAY_BUFFER, backgroundPositionsBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positionsBackground), gl.STATIC_DRAW);
+  // debug([skyboxProgram.a_backgroundPosition])
+  gl.vertexAttribPointer(skyboxProgram.a_position, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(skyboxProgram.a_position);
+  gl.bindVertexArray(null);
+  renderer.backgroundVao = backgroundVao;
 
   // start rendering
   renderer.newFrame();
@@ -139,10 +216,12 @@ async function loadShaders(){
                         'shaders/uniformLightVertexShader.glsl',
                         'shaders/axisFragmentShader.glsl',
                         'shaders/uniformLightFragmentShader.glsl',
-                      'shaders/pointLightVertexShader.glsl',
-                    'shaders/pointLightFragmentShader.glsl',
-                  'shaders/simpleVertexShader.glsl',
-                'shaders/simpleFragmentShader.glsl'], function (shaderText) {
+                        'shaders/pointLightVertexShader.glsl',
+                        'shaders/pointLightFragmentShader.glsl',
+                        'shaders/simpleVertexShader.glsl',
+                        'shaders/simpleFragmentShader.glsl',
+                        'shaders/skyboxVertexShader.glsl',
+                        'shaders/skyboxFragmentShader.glsl'], function (shaderText) {
     axisVertexShaderSource = shaderText[0];
     uniformLightVertexShaderSource = shaderText[1];
     axisFragmentShaderSource = shaderText[2];
@@ -151,6 +230,8 @@ async function loadShaders(){
     pointLightFragmentShaderSource = shaderText[5];
     simpleVertexShaderSource = shaderText[6];
     simpleFragmentShaderSource = shaderText[7];
+    skyboxVertexShaderSource = shaderText[8];
+    skyboxFragmentShaderSource = shaderText[9];
   });
 }
 
@@ -179,13 +260,20 @@ function getLocations(){
   program2.u_depthTexture = gl.getUniformLocation(program2, "u_depthTexture");
   program2.u_bias = gl.getUniformLocation(program2, "u_bias");
   program2.u_textureAnimationMatrix = gl.getUniformLocation(program2, "u_textureAnimationMatrix");
+  program2.u_cubeTexture = gl.getUniformLocation(program2, "u_cubeTexture");
+
 
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");
   program2.a_textureCoordinates = gl.getAttribLocation(program2, "a_textureCoordinates");
-  gl.enableVertexAttribArray(program2.a_position);
-  gl.enableVertexAttribArray(program2.a_normal);
-  gl.enableVertexAttribArray(program2.a_textureCoordinates);
+  program2.a_backgroundPosition = gl.getAttribLocation(program2, "a_backgroundPosition");
+  debug([program2.a_position, program2.a_normal, program2.a_textureCoordinates, program2.a_backgroundPosition])
+
+  // gl.enableVertexAttribArray(program2.a_position);
+  // gl.enableVertexAttribArray(program2.a_normal);
+  // gl.enableVertexAttribArray(program2.a_textureCoordinates);
+  // gl.enableVertexAttribArray(program2.a_backgroundPosition);
+
 
   // program3.u_worldMatrix = gl.getUniformLocation(program3, "u_worldMatrix");
   // program3.u_lightWorldPosition = gl.getUniformLocation(program3, "u_lightWorldPosition");
@@ -225,15 +313,28 @@ function getLocations(){
   simpleProgram.u_texture = gl.getUniformLocation(simpleProgram, "u_texture");
   simpleProgram.u_depthTexture = gl.getUniformLocation(simpleProgram, "u_depthTexture");
   simpleProgram.u_textureAnimationMatrix = gl.getUniformLocation(simpleProgram, "u_textureAnimationMatrix");
+  simpleProgram.u_cubeTexture = gl.getUniformLocation(simpleProgram, "u_cubeTexture");
+  simpleProgram.u_bias = gl.getUniformLocation(simpleProgram, "u_bias");
+  simpleProgram.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(simpleProgram, "u_lightViewProjectionTextureMatrix");
+
+
 
 
 
   simpleProgram.a_position = gl.getAttribLocation(simpleProgram, "a_position");
   simpleProgram.a_normal = gl.getAttribLocation(simpleProgram, "a_normal");
   simpleProgram.a_textureCoordinates = gl.getAttribLocation(simpleProgram, "a_textureCoordinates");
+  simpleProgram.a_backgroundPosition = gl.getAttribLocation(simpleProgram, "a_backgroundPosition");
+
   gl.enableVertexAttribArray(simpleProgram.a_position);
   // gl.enableVertexAttribArray(simpleProgram.a_normal);
   // gl.enableVertexAttribArray(simpleProgram.a_textureCoordinates);
+
+
+  skyboxProgram.a_position= gl.getAttribLocation(skyboxProgram, "a_position");
+  gl.enableVertexAttribArray(skyboxProgram.a_position);
+  skyboxProgram.u_skybox= gl.getUniformLocation(skyboxProgram, "u_skybox");
+  skyboxProgram.u_inverseViewProjectionMatrix= gl.getUniformLocation(skyboxProgram, "u_inverseViewProjectionMatrix");
 }
 
 

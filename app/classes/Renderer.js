@@ -15,6 +15,8 @@ class Renderer{
 
         this.lastUpdateTime;
         this.g_time = 0;
+
+        this.backgroundVao = null;
     }
 
 
@@ -155,7 +157,7 @@ class Renderer{
         }
         //first render everything with a simple shader to create the shadowmap
         let view, projection, lightViewProjection, lightViewProjectionTextureMatrix;
-        view = utils.MakeView(spotlightPosition[0], spotlightPosition[1], spotlightPosition[2], lightElevation, lightAngle);
+        // view = utils.MakeView(spotlightPosition[0], spotlightPosition[1], spotlightPosition[2], lightElevation, lightAngle);
         view = utils.MakeLookAt(uniformLightPosition, [0,0,0], [0,1,0])
         // projection = utils.MakePerspective(lightFov, 1, 1, 1000);
         projection = utils.MakeParallel(50, 1, 1, 100);
@@ -184,82 +186,110 @@ class Renderer{
 
 
     drawRegisteredObjects(view, projection, program, lightViewProjectionTextureMatrix){
+        gl.depthFunc(gl.LESS);
         // local coordinates -> world coordinates -> view coordinates -> screen coordinates -> normalize -> clip
+        gl.useProgram(program);
+
+        // set uniforms common to all objects
+        gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
+        gl.uniform1f(program.u_bias, u_bias);
+        gl.uniform3fv(program.u_reverseLightDirection, utils.normalizeVector3(light));
+        gl.uniform3fv(program.u_lightWorldPosition, pointLightPosition);
+        gl.uniform3fv(program.u_cameraWorldPosition, [renderer.camera.x, renderer.camera.y, renderer.camera.z])
+        gl.uniform3fv(program.u_uniformLightColor, uniformLightColor);
+        gl.uniform3fv(program.u_pointLightColor, pointLightColor);
+        gl.uniform3fv(program.u_spotlightPosition, spotlightPosition);
+        gl.uniform3fv(program.u_spotlightDirection, spotlightDirection);
+        gl.uniform1f(program.u_spotlightInnerLimit, spotlightInnerLimit);
+        gl.uniform1f(program.u_spotlightOuterLimit, spotlightOuterLimit);
+        gl.uniformMatrix4fv(program.u_lightViewProjectionTextureMatrix, true, lightViewProjectionTextureMatrix);
+
+        // calculate matrices common to all objects in the scene
+        let viewProjectionMatrix = utils.multiplyMatrices(projection, view);
+
+        // calculate time for animations
+        var currentTime = (new Date).getTime();
+        var deltaT;
+        if(renderer.lastUpdateTime){
+            deltaT = (currentTime - renderer.lastUpdateTime) / 1000.0;
+        } else {
+            deltaT = 1/50;
+        }
+        renderer.lastUpdateTime = currentTime;
+        renderer.g_time += deltaT;
+        let time = (renderer.g_time - 5 * Math.floor(renderer.g_time/5)) / 5;
+
+        // draw every registered object
         for(i=0; i<this.objects.length; i++){
             let rotation_matrix, translation_matrix, scale_matrix, worldMatrix;
-            let viewProjectionMatrix, worldViewProjectionMatrix, inverseTransposeWorldMatrix;
-            let model;
+            let worldViewProjectionMatrix, inverseTransposeWorldMatrix;
+            let model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
 
+            // calculate object specific matrices
             rotation_matrix = this.objects[i].orientation.toMatrix4();
             translation_matrix = utils.MakeTranslateMatrix(this.objects[i].position[0],this.objects[i].position[1],this.objects[i].position[2])
             scale_matrix = utils.MakeScaleMatrix(this.objects[i].scale);
             worldMatrix = utils.multiplyMatrices(translation_matrix, utils.multiplyMatrices(rotation_matrix, scale_matrix));
-            viewProjectionMatrix = utils.multiplyMatrices(projection, view);
             worldViewProjectionMatrix = utils.multiplyMatrices(viewProjectionMatrix, worldMatrix);
             inverseTransposeWorldMatrix = utils.transposeMatrix(utils.invertMatrix(worldMatrix));
 
-            model = this.models.filter(item => item.name == renderer.objects[i].type)[0];
-
-            gl.useProgram(program);
-            // animation code
-            var currentTime = (new Date).getTime();
-            var deltaT;
-            if(renderer.lastUpdateTime){
-                deltaT = (currentTime - renderer.lastUpdateTime) / 1000.0;
-            } else {
-                deltaT = 1/50;
+            // set object specific uniforms
+            gl.uniformMatrix4fv(program.u_worldViewProjectionMatrix, true, worldViewProjectionMatrix);
+            gl.uniformMatrix4fv(program.u_inverseTransposeWorldMatrix, true, inverseTransposeWorldMatrix);
+            gl.uniformMatrix4fv(program.u_worldMatrix, true, worldMatrix);
+            try{
+                gl.uniform1i(program.u_depthTexture, depthTextureIndex);
+                gl.uniform1i(program.u_texture, objectTextureIndex);
+                gl.uniform1i(program.u_cubeTexture, cubeTextureIndex);
+            }catch(error){
+                console.log('this is fine'); // simpleProgram doesn't have textures, but it doesn't need them
             }
-            renderer.lastUpdateTime = currentTime;
-            renderer.g_time += deltaT;
-            let time = (renderer.g_time - 5 * Math.floor(renderer.g_time/5)) / 5;
-            // animate cloud
+
+            // animate cloud texture
             if(this.objects[i].type == 'cloud'){
                 let textureAnimationMatrix = this.animateCloud(time);
                 gl.uniformMatrix4fv(program.u_textureAnimationMatrix, true, textureAnimationMatrix);
             }
-            
+            // don't animate everything else
             else{
                 gl.uniformMatrix4fv(program.u_textureAnimationMatrix, true, utils.identityMatrix());
             }
-            // animate rock
+            // animate rock rotation
             if(this.objects[i].type == 'rock'){
                 this.objects[i].orientation = this.objects[i].orientation.mul(Quaternion.fromEuler(0,0,1/180*Math.PI))
             }
-            
 
-            gl.uniformMatrix4fv(program.u_worldViewProjectionMatrix, true, worldViewProjectionMatrix);
-            try{
-                gl.uniform4f(program.u_color, color[0], color[1], color[2], color[3]);
-                gl.uniform3fv(program.u_reverseLightDirection, utils.normalizeVector3(light));
-                gl.uniformMatrix4fv(program.u_inverseTransposeWorldMatrix, true, inverseTransposeWorldMatrix);
-                gl.uniform3fv(program.u_lightWorldPosition, pointLightPosition);
-                gl.uniform3fv(program.u_cameraWorldPosition, [renderer.camera.x, renderer.camera.y, renderer.camera.z])
-                gl.uniformMatrix4fv(program.u_worldMatrix, true, worldMatrix);
-                gl.uniform3fv(program.u_uniformLightColor, uniformLightColor);
-                gl.uniform3fv(program.u_pointLightColor, pointLightColor);
-                gl.uniform3fv(program.u_spotlightPosition, spotlightPosition);
-                gl.uniform3fv(program.u_spotlightDirection, spotlightDirection);
-                gl.uniform1f(program.u_spotlightInnerLimit, spotlightInnerLimit);
-                gl.uniform1f(program.u_spotlightOuterLimit, spotlightOuterLimit);
-                gl.uniformMatrix4fv(program.u_lightViewProjectionTextureMatrix, true, lightViewProjectionTextureMatrix);
-                gl.uniform1i(program.u_depthTexture, depthTextureIndex);
-                gl.uniform1i(program.u_texture, objectTextureIndex);
-                gl.uniform1f(program.u_bias, u_bias);
-            }catch(error){
-                console.log('something bad happened when setting uniforms and attributes')
-            }
+            // set textures
             gl.activeTexture(gl.TEXTURE0 + depthTextureIndex);
             gl.bindTexture(gl.TEXTURE_2D, depthTexture);
             gl.activeTexture(gl.TEXTURE0 + objectTextureIndex);
             gl.bindTexture(gl.TEXTURE_2D, renderer.textures[model.textureIndex]);
-            var primitiveType = gl.TRIANGLES;
-            var offset = 0;
-            var count = model.model.indices.length;
+            gl.activeTexture(gl.TEXTURE0 + cubeTextureIndex);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeTexture);
+
+            // draw
             gl.bindVertexArray(model.vao);
-            gl.drawElements(primitiveType, count, gl.UNSIGNED_SHORT, offset);
+            gl.drawElements(gl.TRIANGLES, model.model.indices.length, gl.UNSIGNED_SHORT, 0);
             gl.bindVertexArray(null);
         }
+        this.drawBackground(viewProjectionMatrix);
+
     }  
+
+
+    drawBackground(viewProjectionMatrix){
+        gl.depthFunc(gl.LEQUAL);
+        gl.useProgram(skyboxProgram);
+        // set uniforms
+        gl.uniformMatrix4fv(skyboxProgram.u_inverseViewProjectionMatrix, true, utils.invertMatrix(viewProjectionMatrix));
+        gl.uniform1i(skyboxProgram.u_skybox, cubeTextureIndex);
+        gl.activeTexture(gl.TEXTURE0 + cubeTextureIndex);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeTexture);
+        // draw
+        gl.bindVertexArray(renderer.backgroundVao);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl.bindVertexArray(null);
+    }
 
 
     drawAxisLines(view, projection){
@@ -368,4 +398,7 @@ class Renderer{
     animateRotation(time){
         return new Quaternion.fromEuler(0, 0, time);
     }
+
+
+    
 }

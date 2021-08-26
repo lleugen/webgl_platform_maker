@@ -18,6 +18,7 @@ uniform float u_spotlightOuterLimit;
 uniform sampler2D u_texture;
 uniform sampler2D u_depthTexture;
 uniform float u_bias;
+uniform samplerCube u_cubeTexture;
 
 
 out vec4 color;
@@ -87,8 +88,14 @@ void main() {
       // color.rgb = vec3(1,0,0);
     }
   }
+  
+
+  // environment map
+  vec3 direction = reflect(-var_surfaceToCameraDirection, normal);
+  vec4 ambient = texture(u_cubeTexture, direction);
+
   // sum all light contributions
   vec3 light = (pointLight * u_pointLightColor) + (uniformLight * u_uniformLightColor) + (spotlight * vec3(1,1,1));
-
+  light += ambient.rgb * 0.1;
   color.rgb *= light;
 }

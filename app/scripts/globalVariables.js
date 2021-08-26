@@ -4,6 +4,7 @@ var canvas = null;
 var program = null;
 var program2 = null;
 var program3 = null;
+var skyboxProgram = null;
 var simpleProgram = null;
 var objectMesh = null;
 var programs = [];
@@ -17,6 +18,8 @@ var pointLightVertexShaderSource;
 var pointLightFragmentShaderSource;
 var simpleVertexShaderSource;
 var simpleFragmentShaderSource;
+var skyboxVertexShaderSource;
+var skyboxFragmentShaderSource;
 
 var vertexShader;
 var vertexShader_2;
@@ -85,7 +88,7 @@ var lookAtZ = 0;
 var pressedKeys = [];
 
 var color = [52/256, 232/256, 235/256, 1.0];
-var light = m4.normalize([0.5, 0.7, 1]);
+var light = m4.normalize([1, 1, 1]);
 
 var play_state = false;
 
@@ -114,6 +117,9 @@ var depthTextureSize;
 var depthFramebuffer;
 var depthTextureIndex = 0;
 var objectTextureIndex = 1;
+var cubeTextureIndex = 2;
+
+var cubeTexture;
 
 var lightFov = 45;
 
@@ -145,5 +151,6 @@ var cameraParameters = {
     'z': 20,
     'elevation': -45,
     'angle': -45,
-    'radius': 20
+    'radius': 20,
+    'sensitivity': 0.2
 }
