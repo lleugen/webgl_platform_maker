@@ -3,11 +3,19 @@ class Sprite{
         this.position = p;
         this.forwardSpeed = 0;
         this.rightSpeed = 0;
+        this.upSpeed=0;
         this.object = renderer.objects.filter(item => item.name.includes("ghost"))[0];
     }
 
 
     triggerMove(){
+
+      if(this.object.position[1]<=0 && this.upSpeed==-1){
+          this.object.position[1]=0;
+					this.upSpeed =0;
+				}else if((this.object.position[1]>=3 && this.upSpeed==1)||(this.object.position[1]<3 && this.upSpeed==-1)){
+					this.upSpeed = -1;}
+
         // total speed
         let len = Math.sqrt(this.forwardSpeed**2 + this.rightSpeed**2);
         // calculate movement direction and rotate the model to face forward
@@ -48,9 +56,9 @@ class Sprite{
             spotlightDirection = utils.normalizeVector3(spotlightDirectionHomogeneous.slice(0,3));
             spotlightPosition = this.position;
         }
-        
-        if(this.rightSpeed != 0 || this.forwardSpeed != 0){
-            this.move(this.rightSpeed, 0, -this.forwardSpeed);
+
+        if(this.rightSpeed != 0 || this.forwardSpeed != 0 || this.upSpeed != 0){
+            this.move(this.rightSpeed, this.upSpeed*2, -this.forwardSpeed);
 
             let objects = renderer.objects.filter(item=>!(item.name.includes('ghost')));
             let collisions1D;
@@ -58,7 +66,7 @@ class Sprite{
                 collisions1D = this.calculateCollision(this.object, objects[i]);
             }
         }
-        
+
     }
 
 
@@ -95,7 +103,7 @@ class Sprite{
         // collisions1D[1] = Math.abs((model_a['collisionData'][3][1] + a.position[1] + model_a['collisionData'][1]*a.scale) - (model_b['collisionData'][3][1] + b.position[1] + model_b['collisionData'][1]*b.scale)) < (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2);
         collisions1D[1] = Math.abs(a.position[1] - b.position[1]) < (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2);
         collisions1D[2] = Math.abs((model_a['collisionData'][3][2] + a.position[2]) - (model_b['collisionData'][3][2] + b.position[2])) < (model_a['collisionData'][2]*a.scale/2 + model_b['collisionData'][2]*b.scale/2);
-        
+
         if(collisions1D[0]&&collisions1D[1]&&collisions1D[2]){
             let violation_x = - Math.abs((model_a['collisionData'][3][0] + a.position[0]) - (model_b['collisionData'][3][0] + b.position[0])) + (model_a['collisionData'][0]*a.scale/2 + model_b['collisionData'][0]*b.scale/2);
             let violation_y = (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2) - Math.abs(a.position[1] - b.position[1]);
@@ -130,7 +138,7 @@ class Sprite{
         }
         // for(let i=0; i<3; i++){
         //     let temp = Math.abs((model_a['collisionData'][3][i] + a.position[i])
-        //             - (model_b['collisionData'][3][i] + b.position[i])) 
+        //             - (model_b['collisionData'][3][i] + b.position[i]))
         //                 < (model_a['collisionData'][i]*a.scale/2
         //                 + model_b['collisionData'][i]*b.scale/2);
         //     console.log(Math.abs((model_a['collisionData'][3][i] + a.position[i]) - (model_b['collisionData'][3][i] + b.position[i])),
