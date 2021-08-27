@@ -455,7 +455,9 @@ function doKeyDown(e){
 					break;
 					case 32: // spacebar
 						renderer.sprite.upSpeed += worldSettings['jumpPower'];
-						renderer.sprite.jumpTime = renderer.g_time;
+						renderer.sprite.baseHeight = 0;
+						renderer.sprite.gravityTime = renderer.g_time;
+						renderer.sprite.jump = true;
 					break;
 				}
 			}

@@ -5,21 +5,24 @@ class Sprite{
         this.rightSpeed = 0;
         this.upSpeed = 0;
         this.object = renderer.objects.filter(item => item.name.includes("ghost"))[0];
-        this.jumpTime;
+        this.gravityTime;
         this.baseHeight = 0;
+        this.jump = false;
     }
 
 
     gravity(time){
-        if(this.jumpTime){
-            let deltaT = time - this.jumpTime;
-            // this.jumpTime = time;
+        if(this.gravityTime){
+            let deltaT = time - this.gravityTime;
             let deltaSpeed = deltaT**2 * worldSettings['gForce'];
-            this.upSpeed = worldSettings['jumpPower'] - deltaSpeed;
-            if(this.position[1] < this.baseHeight){
+
+            this.upSpeed = this.jump ? worldSettings['jumpPower'] - deltaSpeed : - deltaSpeed;
+
+            if(this.position[1] <= this.baseHeight){
                 this.upSpeed = 0;
-                this.jumpTime = null;
-                this.position[1] = this.baseHeight;
+                this.gravityTime = null;
+                this.jump = false;
+                // this.position[1] = this.baseHeight;
             }
         }
     }
@@ -72,8 +75,16 @@ class Sprite{
 
             let objects = renderer.objects.filter(item=>!(item.name.includes('ghost')));
             let collisions1D;
+            let hasSupport = false;
             for(let i=0; i<objects.length; i++){
                 collisions1D = this.calculateCollision(this.object, objects[i]);
+                if(collisions1D[0] && collisions1D[2]){ // if standing on the object
+                    hasSupport = true;
+                }
+            }
+            if(!hasSupport && this.baseHeight != 0){
+                this.baseHeight = 0;
+                if(!this.gravityTime){this.gravityTime = renderer.g_time;}
             }
         }
 
@@ -109,12 +120,12 @@ class Sprite{
         let model_a = renderer.models.filter(item=>item.name == a.type)[0];
         let model_b = renderer.models.filter(item=>item.name == b.type)[0];
         let collisions1D = [];
-        collisions1D[0] = Math.abs((model_a['collisionData'][3][0] + a.position[0]) - (model_b['collisionData'][3][0] + b.position[0])) < (model_a['collisionData'][0]*a.scale/2 + model_b['collisionData'][0]*b.scale/2);
+        collisions1D[0] = Math.abs((model_a['collisionData'][3][0] + a.position[0]) - (model_b['collisionData'][3][0] + b.position[0])) <= (model_a['collisionData'][0]*a.scale/2 + model_b['collisionData'][0]*b.scale/2);
         // collisions1D[1] = Math.abs(((model_a['collisionData'][3][1] + model_a['collisionData'][1]*a.scale/2) + a.position[1]) - ((model_b['collisionData'][3][1] + model_b['collisionData'][1]*b.scale/2) + b.position[1])) < (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2);
         let y_collision = false;
         let violation_y;
-        if(a.position[1] > b.position[1]){ // a is above b
-            if(model_b['collisionData'][1] * b.scale + b.position[1] > a.position[1] - model_a['collisionData'][1]*a.scale/2){
+        if(a.position[1] >= b.position[1]){ // a is above b
+            if(model_b['collisionData'][1] * b.scale + b.position[1] > a.position[1]){
                 y_collision = true;
                 violation_y = model_b['collisionData'][1] * b.scale + b.position[1] - (a.position[1] - model_a['collisionData'][1]*a.scale/2);
             }
@@ -125,7 +136,7 @@ class Sprite{
             }
         }
         collisions1D[1] = y_collision;
-        collisions1D[2] = Math.abs((model_a['collisionData'][3][2] + a.position[2]) - (model_b['collisionData'][3][2] + b.position[2])) < (model_a['collisionData'][2]*a.scale/2 + model_b['collisionData'][2]*b.scale/2);
+        collisions1D[2] = Math.abs((model_a['collisionData'][3][2] + a.position[2]) - (model_b['collisionData'][3][2] + b.position[2])) <= (model_a['collisionData'][2]*a.scale/2 + model_b['collisionData'][2]*b.scale/2);
         if(collisions1D.every(item=>item)){
             let violation_x = - Math.abs((model_a['collisionData'][3][0] + a.position[0]) - (model_b['collisionData'][3][0] + b.position[0])) + (model_a['collisionData'][0]*a.scale/2 + model_b['collisionData'][0]*b.scale/2);
             // let violation_y = (model_a['collisionData'][1]*a.scale/2 + model_b['collisionData'][1]*b.scale/2) - Math.abs(((model_a['collisionData'][3][1] + model_a['collisionData'][1]*a.scale/2) + a.position[1]) - ((model_b['collisionData'][3][1] + model_b['collisionData'][1]*b.scale/2) + b.position[1]));//Math.abs(a.position[1] - b.position[1]);
@@ -168,7 +179,10 @@ class Sprite{
         //     collisions1D.push(temp)
         // }
         if(collisions1D.every(item=>item)){
-            console.log('collision');
+            if(this.gravityTime){
+                renderer.sprite.baseHeight = FP_margin + model_b['collisionData'][1] * b.scale + b.position[1] + model_a['collisionData'][1]*a.scale/2;
+                renderer.sprite.position[1] = renderer.sprite.baseHeight;
+            }
         }
         return(collisions1D);
     }

@@ -159,3 +159,5 @@ var worldSettings = {
     'gForce': 10,
     'jumpPower': 2
 }
+
+var FP_margin = 0.01
