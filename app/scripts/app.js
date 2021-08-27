@@ -188,7 +188,8 @@ function main() {
   gl.enableVertexAttribArray(skyboxProgram.a_position);
   gl.bindVertexArray(null);
   renderer.backgroundVao = backgroundVao;
-
+  
+  
   // start rendering
   renderer.newFrame();
 }

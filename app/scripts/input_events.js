@@ -447,16 +447,15 @@ function doKeyDown(e){
 						renderer.sprite.rightSpeed += 1;
 						// renderer.sprite.startMove(1,0,0);
 					break;
-
-					case 32: //spacebar
-
-					let obj = renderer.objects.filter(item => item.name.includes("ghost"))[0];
-					console.log("position ghost y=" +obj.position[1])
-
-					//if((obj.position[1]==0 && renderer.sprite.upSpeed==0)||(obj.position[1]<10 && renderer.sprite.upSpeed==1)){
-						if(renderer.sprite.upSpeed==0){
-
-						renderer.sprite.upSpeed =1;}
+					case 82: // r
+						renderer.sprite.upSpeed += 1;
+					break;
+					case 70: // f
+						renderer.sprite.upSpeed -= 1;
+					break;
+					case 32: // spacebar
+						renderer.sprite.upSpeed += worldSettings['jumpPower'];
+						renderer.sprite.jumpTime = renderer.g_time;
 					break;
 				}
 			}
@@ -484,8 +483,11 @@ function doKeyUp(e){
 				renderer.sprite.rightSpeed -= 1;
 				// renderer.sprite.stopMove(1,0,0);
 			break;
-			case 32: // d
-
+			case 82: // r
+				renderer.sprite.upSpeed -= 1;
+			break;
+			case 70: // f
+				renderer.sprite.upSpeed += 1;
 			break;
 
 		}

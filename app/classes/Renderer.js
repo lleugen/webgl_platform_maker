@@ -116,6 +116,7 @@ class Renderer{
                 focusedObjectName = name;
                 console.log('created new object', name)
                 renderer.sprite = new Sprite(position);
+                debug([renderer.sprite])
             }
         }
         else{
@@ -219,6 +220,9 @@ class Renderer{
         renderer.g_time += deltaT;
         let time = (renderer.g_time - 5 * Math.floor(renderer.g_time/5)) / 5;
 
+        if(renderer.sprite){
+            renderer.sprite.gravity(renderer.g_time);
+        }
         // draw every registered object
         for(i=0; i<this.objects.length; i++){
             let rotation_matrix, translation_matrix, scale_matrix, worldMatrix;
@@ -264,8 +268,8 @@ class Renderer{
             gl.bindTexture(gl.TEXTURE_2D, depthTexture);
             gl.activeTexture(gl.TEXTURE0 + objectTextureIndex);
             gl.bindTexture(gl.TEXTURE_2D, renderer.textures[model.textureIndex]);
-            gl.activeTexture(gl.TEXTURE0 + cubeTextureIndex);
-            gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeTexture);
+            // gl.activeTexture(gl.TEXTURE0 + cubeTextureIndex);
+            // gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeTexture);
 
             // draw
             gl.bindVertexArray(model.vao);

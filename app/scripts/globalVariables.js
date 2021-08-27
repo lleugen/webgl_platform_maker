@@ -154,3 +154,8 @@ var cameraParameters = {
     'radius': 20,
     'sensitivity': 0.2
 }
+
+var worldSettings = {
+    'gForce': 10,
+    'jumpPower': 2
+}
