@@ -61,13 +61,14 @@ class Sprite{
             spriteobj.orientation = rotation_worldSpace_quaternion;
 
 
-            // the ghost has a spotlight
-            // facing direction in camera space
-            spotlightDirection = utils.normalizeVector3([-Math.cos(moveDirection / 180 * Math.PI), 0, Math.sin(moveDirection / 180 * Math.PI)])
-            // facing direction in world space
-            let spotlightDirectionHomogeneous = utils.multiplyMatrixVector(utils.transposeMatrix(utils.invertMatrix(camera_matrix)), [spotlightDirection[0], spotlightDirection[1], spotlightDirection[2], 1]);
-            spotlightDirection = utils.normalizeVector3(spotlightDirectionHomogeneous.slice(0,3));
-            spotlightPosition = this.position;
+            // // the ghost has a spotlight
+            // // facing direction in camera space
+            // spotlightDirection = utils.normalizeVector3([-Math.cos(moveDirection / 180 * Math.PI), 0, Math.sin(moveDirection / 180 * Math.PI)])
+            // // facing direction in world space
+            // let spotlightDirectionHomogeneous = utils.multiplyMatrixVector(utils.transposeMatrix(utils.invertMatrix(camera_matrix)), [spotlightDirection[0], spotlightDirection[1], spotlightDirection[2], 1]);
+            // spotlightDirection = utils.normalizeVector3(spotlightDirectionHomogeneous.slice(0,3));
+            // spotlightPosition = this.position.slice();
+            // spotlightPosition[1] += 5;
         }
 
         if(this.rightSpeed != 0 || this.forwardSpeed != 0 || this.upSpeed != 0){
@@ -125,7 +126,7 @@ class Sprite{
         let y_collision = false;
         let violation_y;
         if(a.position[1] >= b.position[1]){ // a is above b
-            if(model_b['collisionData'][1] * b.scale + b.position[1] > a.position[1]){
+            if(/*model_a['collisionData'][1] * a.scale +*/ a.position[1] < b.position[1] + model_b['collisionData'][1] * b.scale){
                 y_collision = true;
                 violation_y = model_b['collisionData'][1] * b.scale + b.position[1] - (a.position[1] - model_a['collisionData'][1]*a.scale/2);
             }
@@ -169,21 +170,24 @@ class Sprite{
                     break;
             }
         }
-        // for(let i=0; i<3; i++){
-        //     let temp = Math.abs((model_a['collisionData'][3][i] + a.position[i])
-        //             - (model_b['collisionData'][3][i] + b.position[i]))
-        //                 < (model_a['collisionData'][i]*a.scale/2
-        //                 + model_b['collisionData'][i]*b.scale/2);
-        //     console.log(Math.abs((model_a['collisionData'][3][i] + a.position[i]) - (model_b['collisionData'][3][i] + b.position[i])),
-        //      (model_a['collisionData'][i]*a.scale/2 + model_b['collisionData'][i]*b.scale/2))
-        //     collisions1D.push(temp)
-        // }
         if(collisions1D.every(item=>item)){
+            if(b.type == 'rock'){
+                renderer.deleteObject(b.name);
+                this.addLore();
+                color = [Math.random(), Math.random(), Math.random(), 1.0];
+            }
             if(this.gravityTime){
                 renderer.sprite.baseHeight = FP_margin + model_b['collisionData'][1] * b.scale + b.position[1] + model_a['collisionData'][1]*a.scale/2;
                 renderer.sprite.position[1] = renderer.sprite.baseHeight;
             }
+            
         }
         return(collisions1D);
+    }
+
+
+    addLore(){
+        let row = document.getElementById('loreRow');
+        row.innerHTML = loreItems[Math.floor(Math.random() * loreItems.length)];
     }
 }

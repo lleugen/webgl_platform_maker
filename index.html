@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>title</title>
+        <title>Rocks remember</title>
         <script src="https://webglfundamentals.org/webgl/resources/m4.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
         <script src="app/scripts/globalVariables.js"></script>
@@ -20,20 +20,47 @@
         <script src="libraries/quaternion.min.js"></script>
         <script src="libraries/create_shader_and_program.js"></script>
         <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
-        
     </head>
 
     <body onload="main();">
-        
-        <canvas id='canvas', width='1000', height='500', style="border:1px solid #000000;"></canvas>
+        <div style="position: absolute;left:0%;top:0%;background-color: lightblue">
+            <p id='titleParagraph'>Rocks remember. You are the ghost of a dead archeologist, collect rocks to discover the history of the development of this game.</p>
+            <table id='loreTable'>
+                <tr id='loreRow'></tr>
+            </table>
+        </div>
+        <div style="position:absolute;left:0%;bottom:0%;width:1300px;height:650px">
+            <canvas id='canvas', width=1300, height=650, style="border:1px solid #000000;"></canvas>
+        </div>
+        <div id = "settings" style="position: absolute;left:0%;bottom:0%;background-color: lightblue">
+            <p>settings table</p>
+            <div>
+                <input type="checkbox", id="draw_axis", checked>
+                <label for="draw_axis">Draw axis</label>
+                <input type="checkbox", id="draw_background", checked>
+                <label for="draw_background">Draw background</label>
+            </div>
+            <div id="slider1"> Wheel sensitivity 0
+                <input id="slide1" type="range" min="0.01" max="1" step="0.01" value="0.5" onchange="onSliderChangeWheelSensitivity(this.value);"/> 1.5 <br/>	
+            </div>
+            <div id="slider1"> fov 10 
+                <input id="slide1" type="range" min="10" max="180" step="1" value="45" onchange="onSliderChangeFov(this.value);"/> 180 <br/>	
+            </div>
+        </div>
+        <div id="instructions" style="position: absolute;left:50%;bottom:0%;background-color: lightblue">
+            <ul>
+                <li>create random level</li>
+                <li>use buttons to create individual items</li>
+                <li>click to place, delete, move objects</li>
+                <li>press play to start game</li>
+                <li>move with WASD, spacebar to jump (try double or triple jump)</li>
+                <li>R and F to fly up and down (cheating)</li>
+                <li>QWASZX to rotate objects in create mode</li>
+                <li>mouse wheel to control camera radius and object height</li>
+            </ul>
+        </div>
         <table>
-            <tr>
-                <div id="slider1"> object scale 0.01 
-                    <input id="slide1" type="range" min="0.05" max="10" step="0.05" value="1" onchange="onSliderChangeScale(this.value);"/> 10 <br/>	
-                </div>
-                <button onclick="renderer.updateObjectScale(focusedObjectName, renderer.objects.filter(item=>item.name==focusedObjectName)[0].scale - 0.05)">reduce</button>
-                <button onclick="renderer.updateObjectScale(focusedObjectName, renderer.objects.filter(item=>item.name==focusedObjectName)[0].scale + 0.05)">enlarge</button>
-            </tr>
+            <!-- <tr><p>settings table</p></tr>
             <tr>
                 <div>
                     <input type="checkbox", id="quaternionRotation", checked>
@@ -42,19 +69,40 @@
                     <label for="xz_plane">Draw xz plane</label>
                     <input type="checkbox", id="draw_axis", checked>
                     <label for="draw_axis">Draw axis</label>
+                    <input type="checkbox", id="draw_background", checked>
+                    <label for="draw_background">Draw background</label>
                 </div>
             </tr>
             <tr>
                 <div id="slider1"> Wheel sensitivity 0
-                    <input id="slide1" type="range" min="0" max="1.5" step="0.1" value="1" onchange="onSliderChangeWheelSensitivity(this.value);"/> 1.5 <br/>	
+                    <input id="slide1" type="range" min="0.01" max="1" step="0.01" value="0.5" onchange="onSliderChangeWheelSensitivity(this.value);"/> 1.5 <br/>	
                 </div>
             </tr>
+            <p><b> camera type (create mode)</b></p>
+			<form>
+				<input type="radio" name="light" onchange="onRadioButtonChangeCamera(this.value);" value="lookAt1" checked> look at point <br/>
+				<input type="radio" name="light" onchange="onRadioButtonChangeCamera(this.value);" value="lookDirection" > 1st person view <br/>
+			</form>	
+            <tr>
+                <div id="slider1"> fov 10 
+                    <input id="slide1" type="range" min="10" max="180" step="1" value="45" onchange="onSliderChangeFov(this.value);"/> 180 <br/>	
+                </div>
+            </tr> -->
+            <!-- <tr>
+                <div id="slider1"> object scale 0.01 
+                    <input id="slide1" type="range" min="0.05" max="10" step="0.05" value="1" onchange="onSliderChangeScale(this.value);"/> 10 <br/>	
+                </div>
+                <button onclick="renderer.updateObjectScale(focusedObjectName, renderer.objects.filter(item=>item.name==focusedObjectName)[0].scale - 0.05)">reduce</button>
+                <button onclick="renderer.updateObjectScale(focusedObjectName, renderer.objects.filter(item=>item.name==focusedObjectName)[0].scale + 0.05)">enlarge</button>
+            </tr>
+            
+            
             <tr>
                 <div id="slider1"> sprite rotation -50
                     <input id="slide1" type="range" min="-50" max="50" step="0.5" value="0" onchange="onSliderChangeSpriteOrientation(this.value);"/> 50 <br/>	
                 </div>
             </tr>
-            <!-- <tr>
+            <tr>
                 <div id="slider1"> object x -50 
                     <input id="slide1" type="range" min="-50" max="50" step="0.5" value="0" onchange="onSliderChangex(this.value);"/> 50 <br/>	
                 </div>
@@ -108,23 +156,13 @@
                 <div id="slider1"> camera angle -360 
                     <input id="slide1" type="range" min="-360" max="360" step="10" value="0" onchange="onSliderChangeAngle(this.value);"/> 360 <br/>	
                 </div>
-            </tr> -->
-            <!-- <p><b> projection type </b></p>
+            </tr>
+            <p><b> projection type </b></p>
 			<form>
 				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="orthogonal"> orthogonal <br/>
 				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="isometric" > isometric <br/>
 				<input type="radio" name="light" onchange="onRadioButtonChange(this.value);" value="perspective" checked> perspective <br/>
-			</form>	 -->
-            <p><b> camera type </b></p>
-			<form>
-				<input type="radio" name="light" onchange="onRadioButtonChangeCamera(this.value);" value="lookAt1" checked> look at origin <br/>
-				<input type="radio" name="light" onchange="onRadioButtonChangeCamera(this.value);" value="lookDirection" > look direction <br/>
 			</form>	
-            <tr>
-                <div id="slider1"> fov 10 
-                    <input id="slide1" type="range" min="10" max="180" step="1" value="45" onchange="onSliderChangeFov(this.value);"/> 180 <br/>	
-                </div>
-            </tr>
             <tr>
                 <div id="slider1"> colors RGB 
                     <input id="slide1" type="range" min="0" max="1" step="0.05" value="1" onchange="onSliderChangeColor1(this.value);"/>
@@ -139,8 +177,7 @@
                     <input id="slide1" type="range" min="-5" max="5" step="0.05" value="1" onchange="onSliderChangeLight3(this.value);"/>	
                 </div>
             </tr>
-
-            <!-- <div id="legend" style="position: absolute; z-index: 1; left: 400px; top: 400px; width:300px; height:165px; background-color: white; border-style: dashed; border-color: blue; opacity: 0.7; padding: 5px 10px 5px 10px; overflow:auto">
+            <div id="legend" style="position: absolute; z-index: 1; left: 400px; top: 400px; width:300px; height:165px; background-color: white; border-style: dashed; border-color: blue; opacity: 0.7; padding: 5px 10px 5px 10px; overflow:auto">
 				<p style="font-family: Courier New">
 					<b>GUI above canvas</b>			
 					<ul id="list", style="font-family: Courier New">
@@ -151,13 +188,16 @@
 				</p>
 			</div> -->
         </table>
-        <div id="buttons(object control)"></div>
-        <div style="position: absolute;right:0%;top:0%"><ul id='list2'><li>select objects to create</li></ul></div>
-        <div style="position: absolute;left:0%;top:0%">
-            <button type="play_button" onclick="play();">Play</button>
-            <button type="create_button" onclick="create();">Create</button>
+        <div id="buttons(object control)" style="visibility:hidden;">object control buttons (for debug mode)</div>
+        <div style="position: absolute;right:0%;top:0%;background-color: lightblue">
+            <ul id='list2'>
+                <p>creation menu</p>
+            </ul>
+            <div>
+                <button type="play_button" onclick="play();">Play</button>
+                <button type="create_button" onclick="create();">Create</button>
+                <button type="hide_menus" onclick="hideMenus();">Hide menus</button>
+            </div>
         </div>
     </body>
-
-    
 </html>

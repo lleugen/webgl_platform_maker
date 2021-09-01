@@ -11,7 +11,10 @@ class InputElementsManager{
         button.innerHTML = name;
         button.id = name;
         button.onclick = func;
-        buttonSpace.appendChild(button);
+
+        let item = document.createElement('li');
+        item.appendChild(button);
+        buttonSpace.appendChild(item);
     }
 
     drawSelectButton(name){
@@ -72,6 +75,8 @@ class InputElementsManager{
     
     deleteButton(name){
         let button = document.getElementById(name);
-        button.remove();
+        if(button){
+            button.remove();
+        }
     }
 }

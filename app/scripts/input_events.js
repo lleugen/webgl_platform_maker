@@ -37,13 +37,12 @@ function doMouseDown(event) {
 			let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
 			let hit = false;
 			for(i=0; i<renderer.objects.length; i++){
-				if(renderer.objects[i].name != 'triangle_0'){
-					if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 2)){
-						focusedObjectName = renderer.objects[i].name;
-						hit = true;
-						console.log(focusedObjectName)
-						break;
-					}
+				let centre = renderer.objects[i].position.slice();
+				if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, centre, 15)){
+					focusedObjectName = renderer.objects[i].name;
+					hit = true;
+					console.log(focusedObjectName)
+					break;
 				}
 			}
 			if(!hit){
@@ -55,7 +54,6 @@ function doMouseDown(event) {
 			// delete clicked objects
 			let i;
 			let ray = raycast(event.pageX*2/gl.canvas.width - 1, -(event.pageY*2/gl.canvas.height - 1))
-			let hit = false;
 			for(i=0; i<renderer.objects.length; i++){
 				if(renderer.objects[i].name != 'triangle_0'){
 					if(raySphereIntersection([renderer.camera.x,renderer.camera.y,renderer.camera.z], ray, renderer.objects[i].position, 10)){
@@ -107,7 +105,7 @@ function doMouseMove(event) {
 		// gl.bindBuffer(gl.ARRAY_BUFFER, triangleModel.vertexBuffer);
 		// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleModel.model.vertices), gl.STATIC_DRAW);
 		// gl.vertexAttribPointer(program2.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-		// // ##########################################
+		// // ####################################################################
 		if(focusedObjectName == 'world'){ // move camera view
 			var dx = event.pageX - lastMouseX;
 			var dy = lastMouseY - event.pageY;
@@ -129,7 +127,7 @@ function doMouseMove(event) {
 			let projection_coordinates = projectPointer(x, y, height);
 			plane_x = projection_coordinates[0]
 			plane_z = projection_coordinates[1]
-			if(focusedObjectName != 'triangle_0'){
+			if(focusedObjectName){
 				renderer.updateObjectPosition(focusedObjectName, plane_x, plane_z);
 			}
 		}
@@ -242,7 +240,25 @@ function onSliderChangeLight3(value){
 
 function play(){
 	focusedObjectName = 'world';
+	cameraParameters['radius'] = 50;
 	play_state = true;
+}
+
+function hideMenus(){
+	let instructions = document.getElementById("instructions");
+	let settings = document.getElementById("settings");
+	if(instructions.style.visibility=='visible'){
+		instructions.style.visibility='hidden'
+	}
+	else{
+		instructions.style.visibility='visible'
+	}
+	if(settings.style.visibility=='visible'){
+		settings.style.visibility='hidden'
+	}
+	else{
+		settings.style.visibility='visible'
+	}
 }
 
 
@@ -316,152 +332,147 @@ function raycast(x, y){
 
 //This algorithm is taken from the book Real Time Rendering fourth edition
 function raySphereIntersection(rayStartPoint, rayNormalisedDir, sphereCentre, sphereRadius){
-	console.log('ray start', rayStartPoint, 'direction',rayNormalisedDir, 'sphere centre',sphereCentre)
+	// console.log('ray start', rayStartPoint, 'direction',rayNormalisedDir, 'sphere centre',sphereCentre)
     //Distance between sphere origin and origin of ray
     var l = [sphereCentre[0] - rayStartPoint[0], sphereCentre[1] - rayStartPoint[1], sphereCentre[2] - rayStartPoint[2]];
     var l_squared = l[0] * l[0] + l[1] * l[1] + l[2] * l[2];
     //If this is true, the ray origin is inside the sphere so it collides with the sphere
     if(l_squared < (sphereRadius*sphereRadius)){
-        console.log("ray origin inside sphere");
+        // console.log("ray origin inside sphere");
         return true;
     }
     //Projection of l onto the ray direction
     var s = l[0] * rayNormalisedDir[0] + l[1] * rayNormalisedDir[1] + l[2] * rayNormalisedDir[2];
     //The spere is behind the ray origin so no intersection
     if(s < 0){
-        console.log("sphere behind ray origin");
+        // console.log("sphere behind ray origin");
         return false;
     }
     //Squared distance from sphere centre and projection s with Pythagorean theorem
     var m_squared = l_squared - (s*s);
-    //If this is true the ray will miss the sphere
+    // If this is true the ray will miss the sphere
     if(m_squared > (sphereRadius*sphereRadius)){
-        console.log("m squared > r squared");
+        // console.log("m squared > r squared");
         return false;
     }
     //Now we can say that the ray will hit the sphere
-    console.log("hit");
+    // console.log("hit");
     return true;
 
 }
 
 
 function doKeyDown(e){
-	let lookAtVectorLength, cosx, cosy, cosz;
-
-		if(!play_state){
-			if(document.getElementById("quaternionRotation").checked){
-				switch(e.keyCode) {// object rotation
-					case 81://q
-						renderer.updateOrientation(focusedObjectName, -10,0,0)
-						break;
-					case 87://w
-						renderer.updateOrientation(focusedObjectName,10,0,0)
-						break;
-					case 65://a
-						renderer.updateOrientation(focusedObjectName,0,-10,0)
-						break;
-					case 83://s
-						renderer.updateOrientation(focusedObjectName,0,10,0)
-						break;
-					case 90://z
-						renderer.updateOrientation(focusedObjectName,0,0,-10)
-						break;
-					case 88://x
-						renderer.updateOrientation(focusedObjectName,0,0,10)
-						break;
-				}
-			}
-			else{
-				switch(e.keyCode) {// object rotation but with world axis
-					case 81://q
-						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] -= 10
-						break;
-					case 87://w
-						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] += 10
-						break;
-					case 65://a
-						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] -= 10
-						break;
-					case 83://s
-						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] += 10
-						break;
-					case 90://z
-						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] -= 10
-						break;
-					case 88://x
-						renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] += 10
-						break;
-				}
-			}
-			switch(e.keyCode){// camera control
-				case 39: // right arrow move right
-					renderer.camera.move(1,0,0)
-					break;
-				case 37: // left arrow move left
-					renderer.camera.move(-1,0,0)
-					break;
-				case 33: // page up move up
-					renderer.camera.move(0,1,0)
-					break;
-				case 34: // page down move down
-					renderer.camera.move(0,-1,0)
-					break;
-				case 38: // forward/up arrow move closer, forward
-					renderer.camera.move(0,0,-1)
-					break;
-				case 40: // down arrow move back
-					renderer.camera.move(0,0,1)
-					break;
-				case 84: // t
-					renderer.camera.elevation -= 1;
-					break;
-				case 89: // y
-					renderer.camera.elevation += 1;
-					break;
-				case 71: // g
-					renderer.camera.angle -= 1;
-					break;
-				case 72: // h
-					renderer.camera.angle += 1;
-					break;
+	if(!play_state){
+		// commented non quaternion rotation because we don't use it
+		// if(document.getElementById("quaternionRotation").checked){ 
+		switch(e.keyCode) {// object rotation
+			case 81://q
+				renderer.updateOrientation(focusedObjectName, -10,0,0)
+				break;
+			case 87://w
+				renderer.updateOrientation(focusedObjectName,10,0,0)
+				break;
+			case 65://a
+				renderer.updateOrientation(focusedObjectName,0,-10,0)
+				break;
+			case 83://s
+				renderer.updateOrientation(focusedObjectName,0,10,0)
+				break;
+			case 90://z
+				renderer.updateOrientation(focusedObjectName,0,0,-10)
+				break;
+			case 88://x
+				renderer.updateOrientation(focusedObjectName,0,0,10)
+				break;
+		}
+		// }
+		// else{
+		// 	switch(e.keyCode) {// object rotation but with world axis
+		// 		case 81://q
+		// 			renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] -= 10
+		// 			break;
+		// 		case 87://w
+		// 			renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[0] += 10
+		// 			break;
+		// 		case 65://a
+		// 			renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] -= 10
+		// 			break;
+		// 		case 83://s
+		// 			renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[1] += 10
+		// 			break;
+		// 		case 90://z
+		// 			renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] -= 10
+		// 			break;
+		// 		case 88://x
+		// 			renderer.objects.filter(item=>item.name==focusedObjectName)[0].orientationDeg[2] += 10
+		// 			break;
+		// 	}
+		// }
+		switch(e.keyCode){// camera control
+			case 39: // right arrow move right
+				renderer.camera.move(1,0,0)
+				break;
+			case 37: // left arrow move left
+				renderer.camera.move(-1,0,0)
+				break;
+			case 33: // page up move up
+				renderer.camera.move(0,1,0)
+				break;
+			case 34: // page down move down
+				renderer.camera.move(0,-1,0)
+				break;
+			case 38: // forward/up arrow move closer, forward
+				renderer.camera.move(0,0,-1)
+				break;
+			case 40: // down arrow move back
+				renderer.camera.move(0,0,1)
+				break;
+			case 84: // t
+				renderer.camera.elevation -= 1;
+				break;
+			case 89: // y
+				renderer.camera.elevation += 1;
+				break;
+			case 71: // g
+				renderer.camera.angle -= 1;
+				break;
+			case 72: // h
+				renderer.camera.angle += 1;
+				break;
+		}
+	}
+	else{ // play state
+		if(!pressedKeys[e.keyCode]){
+			pressedKeys[e.keyCode] = true;
+			switch(e.keyCode){
+				case 87: // w
+					renderer.sprite.forwardSpeed += 1;
+				break;
+				case 65: // a
+					renderer.sprite.rightSpeed -= 1;
+				break;
+				case 83: // s
+					renderer.sprite.forwardSpeed -= 1;
+				break;
+				case 68: // d
+					renderer.sprite.rightSpeed += 1;
+				break;
+				case 82: // r
+					renderer.sprite.upSpeed += 1;
+				break;
+				case 70: // f
+					renderer.sprite.upSpeed -= 1;
+				break;
+				case 32: // spacebar
+					renderer.sprite.upSpeed += worldSettings['jumpPower'];
+					renderer.sprite.baseHeight = 0;
+					renderer.sprite.gravityTime = renderer.g_time;
+					renderer.sprite.jump = true;
+				break;
 			}
 		}
-		else{
-			if(!pressedKeys[e.keyCode]){
-				pressedKeys[e.keyCode] = true;
-				switch(e.keyCode){
-					case 87: // w
-						renderer.sprite.forwardSpeed += 1;
-						// renderer.sprite.startMove(0,0,-1);
-					break;
-					case 65: // a
-						renderer.sprite.rightSpeed -= 1;
-						// renderer.sprite.startMove(-1,0,0);
-					break;
-					case 83: // s
-						renderer.sprite.forwardSpeed -= 1;
-						// renderer.sprite.startMove(0,0,1);
-					break;
-					case 68: // d
-						renderer.sprite.rightSpeed += 1;
-						// renderer.sprite.startMove(1,0,0);
-					break;
-					case 82: // r
-						renderer.sprite.upSpeed += 1;
-					break;
-					case 70: // f
-						renderer.sprite.upSpeed -= 1;
-					break;
-					case 32: // spacebar
-						renderer.sprite.upSpeed += worldSettings['jumpPower'];
-						renderer.sprite.baseHeight = 0;
-						renderer.sprite.gravityTime = renderer.g_time;
-						renderer.sprite.jump = true;
-					break;
-				}
-			}
-		}
+	}
 }
 
 
@@ -471,19 +482,15 @@ function doKeyUp(e){
 		switch(e.keyCode){
 			case 87: // w
 				renderer.sprite.forwardSpeed -= 1;
-				// renderer.sprite.stopMove(0,0,-1);
 			break;
 			case 65: // a
 				renderer.sprite.rightSpeed += 1;
-				// renderer.sprite.stopMove(-1,0,0);
 			break;
 			case 83: // s
 				renderer.sprite.forwardSpeed += 1;
-				// renderer.sprite.stopMove(0,0,1);
 			break;
 			case 68: // d
 				renderer.sprite.rightSpeed -= 1;
-				// renderer.sprite.stopMove(1,0,0);
 			break;
 			case 82: // r
 				renderer.sprite.upSpeed -= 1;
@@ -491,7 +498,6 @@ function doKeyUp(e){
 			case 70: // f
 				renderer.sprite.upSpeed += 1;
 			break;
-
 		}
 	}
 }

@@ -28,7 +28,6 @@ class Camera{
             renderer.camera.y = cameraParameters['radius'] * Math.sin(utils.degToRad(-renderer.camera.elevation)) + renderer.sprite.position[1];
             this.viewMatrix = utils.MakeView(renderer.camera.x, renderer.camera.y, renderer.camera.z, renderer.camera.elevation, -renderer.camera.angle);
         }
-        
         return this.viewMatrix
     }
 

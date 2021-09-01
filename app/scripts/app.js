@@ -6,6 +6,7 @@ function main() {
   addListeners(canvas);  // defined in input_events.js
   gl = canvas.getContext("webgl2");
   if (!gl) {
+    console.log("could not manage to get context, exiting")
     return;
   }
   
@@ -58,19 +59,19 @@ function main() {
   renderer = new Renderer();
   // load textures and register them in the renderer
   loadTexture("./assets/Terrain-Texture_2.png");
-  loadTexture("./assets/cloud animation texture1.png");
+  loadTexture("./assets/cloud animation texture.png");
   loadTexture("./assets/brick1.png");
   // add models (also set vaos for each one)
-  renderer.addModel('tree', tree, program2);
-  renderer.addModel('hedge', hedge, program2);
-  renderer.addModel('rock', rock, program2);
+  renderer.addModel('tree', tree, program2, 0);
+  renderer.addModel('hedge', hedge, program2, 0);
+  renderer.addModel('rock', rock, program2, 0);
   renderer.addModel('brick', brick, program2, 2);
   renderer.addModel('cloud', cloud, program2, 1);
-  renderer.addModel('cylinder', cylinder, program2);
-  renderer.addModel('mountain', mountain, program2);
-  renderer.addModel('square', square, program2);
-  renderer.addModel('sphere', createSphere(), program2);
-  renderer.addModel('triangle', createTriangle(), program2);
+  renderer.addModel('cylinder', cylinder, program2, 0);
+  renderer.addModel('mountain', mountain, program2, 0);
+  renderer.addModel('square', square, program2, 0);
+  // renderer.addModel('sphere', createSphere(), program2);
+  // renderer.addModel('triangle', createTriangle(), program2);
   renderer.addModel('ghost', ghost, program2);
   
   // enable important settings
@@ -82,9 +83,9 @@ function main() {
   renderer.camera.view();
   renderer.camera.createProjection(projectionType);
 
-  // setup shadow texture
+  // setup shadow texture for main uniform light
   depthTexture = gl.createTexture();
-  depthTextureSize = 1024;
+  depthTextureSize = 2048;
   gl.activeTexture(gl.TEXTURE0 + depthTextureIndex);
   gl.bindTexture(gl.TEXTURE_2D, depthTexture);
   gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT32F,depthTextureSize,depthTextureSize,0,gl.DEPTH_COMPONENT,gl.FLOAT,null);              // data
@@ -96,6 +97,34 @@ function main() {
   gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer);
   gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,depthTexture,0);
 
+  // setup shadow texture for secondary uniform light
+  depthTexture2 = gl.createTexture();
+  depthTextureSize = 2048;
+  gl.activeTexture(gl.TEXTURE0 + depthTextureIndex2);
+  gl.bindTexture(gl.TEXTURE_2D, depthTexture2);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT32F,depthTextureSize,depthTextureSize,0,gl.DEPTH_COMPONENT,gl.FLOAT,null);              // data
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  depthFramebuffer2 = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer2);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,depthTexture2,0);
+
+  // setup shadow texture for spotlight
+  depthTexture3 = gl.createTexture();
+  depthTextureSize = 2048;
+  gl.activeTexture(gl.TEXTURE0 + depthTextureIndex3);
+  gl.bindTexture(gl.TEXTURE_2D, depthTexture3);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.DEPTH_COMPONENT32F,depthTextureSize,depthTextureSize,0,gl.DEPTH_COMPONENT,gl.FLOAT,null);              // data
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  depthFramebuffer3 = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, depthFramebuffer3);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.TEXTURE_2D,depthTexture3,0);
+
   // setup cube texture
   cubeTexture = gl.createTexture();
   gl.activeTexture(gl.TEXTURE0 + cubeTextureIndex);
@@ -103,27 +132,33 @@ function main() {
   const cubeFaces = [
     {
       face: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-      imagePath: 'assets/cube/posX.png',
+      // imagePath: 'assets/cube/posX.png',
+      imagePath: 'assets/cube2/water.right.png',
     },
     {
       face: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-      imagePath: 'assets/cube/negX.png',
+      // imagePath: 'assets/cube/negX.png',
+      imagePath: 'assets/cube2/water.left.png',
     },
     {
       face: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-      imagePath: 'assets/cube/posY.png',
+      // imagePath: 'assets/cube/posY.png',
+      imagePath: 'assets/cube2/water.up.png',
     },
     {
       face: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-      imagePath: 'assets/cube/negY.png',
+      // imagePath: 'assets/cube/negY.png',
+      imagePath: 'assets/cube2/water.down.png',
     },
     {
       face: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-      imagePath: 'assets/cube/posZ.png',
+      // imagePath: 'assets/cube/posZ.png',
+      imagePath: 'assets/cube2/water.back.png',
     },
     {
       face: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-      imagePath: 'assets/cube/negZ.png',
+      // imagePath: 'assets/cube/negZ.png',
+      imagePath: 'assets/cube2/water.front.png',
     }
   ];
   cubeFaces.forEach((cubeFace)=>{
@@ -150,22 +185,25 @@ function main() {
   
 
   // setup axis vao
-  let lines = [
+  lines = [
     0,0,0,
     10,0,0,
     0,0,0,
     0,10,0,
     0,0,0,
-    0,0,10,
+    0,0,10
   ]
-  let lineBuffer = gl.createBuffer()
+  lineBuffer = gl.createBuffer()
+  ext.tagObject(lineBuffer, 'axis line buffer')
   lineVao = gl.createVertexArray();
   gl.bindVertexArray(lineVao);
   gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
-  gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(program.a_position);
+  // gl.vertexAttribPointer(program.a_position, 3, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(program.a_cam_position, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(program.a_cam_position);
   gl.bindVertexArray(null);
+
 
 
   // setup background
@@ -189,7 +227,13 @@ function main() {
   gl.bindVertexArray(null);
   renderer.backgroundVao = backgroundVao;
   
-  
+  // TODO
+  inputElementsManager.drawButton('save 1', function(){renderer.saveGame(1)});
+  inputElementsManager.drawButton('save 2', function(){renderer.saveGame(2)});
+  inputElementsManager.drawButton('save 3', function(){renderer.saveGame(3)});
+  inputElementsManager.drawButton('load 1', function(){renderer.loadGame(1)});
+  inputElementsManager.drawButton('load 2', function(){renderer.loadGame(2)});
+  inputElementsManager.drawButton('load 3', function(){renderer.loadGame(3)});
   // start rendering
   renderer.newFrame();
 }
@@ -239,99 +283,96 @@ async function loadShaders(){
 
 function getLocations(){
   // get uniform locations inside the programs 
-  program.u_worldViewProjectionMatrix = gl.getUniformLocation(program, "u_worldViewProjectionMatrix");
-  program.a_position = gl.getAttribLocation(program, "a_position");
-  gl.enableVertexAttribArray(program.a_position);
+  // program for drawing axis
+  
+  // local space calculations
+  // program.u_worldViewProjectionMatrix = gl.getUniformLocation(program, "u_worldViewProjectionMatrix");
+  // program.a_position = gl.getAttribLocation(program, "a_position");
+  // gl.enableVertexAttribArray(program.a_position);
+  // uniforms for camera space calculations
+  program.u_projectionMatrix = gl.getUniformLocation(program, "u_projectionMatrix");
+  program.u_inverseViewMatrix = gl.getUniformLocation(program, "u_inverseViewMatrix");
+  program.a_cam_position = gl.getAttribLocation(program, "a_cam_position");
+  gl.enableVertexAttribArray(program.a_cam_position);
 
+  // program for drawing the scene
+  // calculations in local space
   program2.u_worldViewProjectionMatrix = gl.getUniformLocation(program2, "u_worldViewProjectionMatrix");
   program2.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program2, "u_inverseTransposeWorldMatrix");
   program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection")
   program2.u_color = gl.getUniformLocation(program2, "u_color");
   program2.u_worldMatrix = gl.getUniformLocation(program2, "u_worldMatrix");
-  program2.u_lightWorldPosition = gl.getUniformLocation(program2, "u_lightWorldPosition");
   program2.u_cameraWorldPosition = gl.getUniformLocation(program2, "u_cameraWorldPosition");
-  program2.u_uniformLightColor = gl.getUniformLocation(program2, "u_uniformLightColor");
-  program2.u_pointLightColor = gl.getUniformLocation(program2, "u_pointLightColor");
-  program2.u_spotlightDirection = gl.getUniformLocation(program2, "u_spotlightDirection");
-  program2.u_spotlightInnerLimit = gl.getUniformLocation(program2, "u_spotlightInnerLimit");
-  program2.u_spotlightOuterLimit = gl.getUniformLocation(program2, "u_spotlightOuterLimit");
-  program2.u_spotlightPosition = gl.getUniformLocation(program2, "u_spotlightPosition");
   program2.u_texture = gl.getUniformLocation(program2, "u_texture");
   program2.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix");
+  program2.u_lightViewProjectionTextureMatrix2 = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix2");
   program2.u_depthTexture = gl.getUniformLocation(program2, "u_depthTexture");
+  program2.u_depthTexture2 = gl.getUniformLocation(program2, "u_depthTexture2");
   program2.u_bias = gl.getUniformLocation(program2, "u_bias");
   program2.u_textureAnimationMatrix = gl.getUniformLocation(program2, "u_textureAnimationMatrix");
   program2.u_cubeTexture = gl.getUniformLocation(program2, "u_cubeTexture");
-
-
+  program2.u_colorOpacity = gl.getUniformLocation(program2, "u_colorOpacity");
+  program2.u_textureOpacity = gl.getUniformLocation(program2, "u_textureOpacity");
+  program2.u_secondaryLightDirection = gl.getUniformLocation(program2, "u_secondaryLightDirection");
+  program2.u_toonSpecularThreshold = gl.getUniformLocation(program2, "u_toonSpecularThreshold");
+  program2.u_toonDiffuseThreshold = gl.getUniformLocation(program2, "u_toonDiffuseThreshold");
+  program2.u_roughness = gl.getUniformLocation(program2, "u_roughness");
+  // program2.u_decay = gl.getUniformLocation(program2, "u_decay");
+  // program2.u_spotlightPower = gl.getUniformLocation(program2, "u_spotlightPower");
+  // program2.u_ambientOpacity = gl.getUniformLocation(program2, "u_ambientOpacity");
+  // program2.u_depthTexture3 = gl.getUniformLocation(program2, "u_depthTexture3");
+  // program2.u_lightViewProjectionTextureMatrix3 = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix3");
+  // program2.u_pointLightColor = gl.getUniformLocation(program2, "u_pointLightColor");
+  // program2.u_spotlightDirection = gl.getUniformLocation(program2, "u_spotlightDirection");
+  // program2.u_spotlightInnerLimit = gl.getUniformLocation(program2, "u_spotlightInnerLimit");
+  // program2.u_spotlightOuterLimit = gl.getUniformLocation(program2, "u_spotlightOuterLimit");
+  // program2.u_spotlightPosition = gl.getUniformLocation(program2, "u_spotlightPosition");
+  // program2.u_uniformLightColor = gl.getUniformLocation(program2, "u_uniformLightColor");
+  // program2.u_lightWorldPosition = gl.getUniformLocation(program2, "u_lightWorldPosition");
   program2.a_position = gl.getAttribLocation(program2, "a_position");
   program2.a_normal = gl.getAttribLocation(program2, "a_normal");
   program2.a_textureCoordinates = gl.getAttribLocation(program2, "a_textureCoordinates");
   program2.a_backgroundPosition = gl.getAttribLocation(program2, "a_backgroundPosition");
-  debug([program2.a_position, program2.a_normal, program2.a_textureCoordinates, program2.a_backgroundPosition])
-
-  // gl.enableVertexAttribArray(program2.a_position);
-  // gl.enableVertexAttribArray(program2.a_normal);
-  // gl.enableVertexAttribArray(program2.a_textureCoordinates);
-  // gl.enableVertexAttribArray(program2.a_backgroundPosition);
-
-
-  // program3.u_worldMatrix = gl.getUniformLocation(program3, "u_worldMatrix");
-  // program3.u_lightWorldPosition = gl.getUniformLocation(program3, "u_lightWorldPosition");
-  // program3.u_worldViewProjectionMatrix = gl.getUniformLocation(program3, "u_worldViewProjectionMatrix");
-  // program3.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program3, "u_inverseTransposeWorldMatrix");
-  // program3.u_color = gl.getUniformLocation(program3, "u_color");
-  
-  
-
-  // program3.a_position = gl.getAttribLocation(program3, "a_position");
-  // program3.a_normal = gl.getAttribLocation(program3, "a_normal");
-  // gl.enableVertexAttribArray(program2.a_position);
-  // gl.enableVertexAttribArray(program2.a_normal);
-
-  
-  
-  // program2.a_position = gl.getAttribLocation(program2, "a_position");
-  // program2.a_normal = gl.getAttribLocation(program2, "a_normal");
-  // program2.u_worldViewProjection = gl.getUniformLocation(program2, "u_worldViewProjection");
-  // program2.u_worldInverseTranspose = gl.getUniformLocation(program2, "u_worldInverseTranspose");
-  // program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection");
+  // // calculations in camera space
+  // // program2.u_worldViewProjectionMatrix = gl.getUniformLocation(program2, "u_worldViewProjectionMatrix");
+  // program2.u_projectionMatrix = gl.getUniformLocation(program2, "u_projectionMatrix");
+  // // program2.u_inverseTransposeWorldMatrix = gl.getUniformLocation(program2, "u_inverseTransposeWorldMatrix");
+  // program2.u_reverseLightDirection = gl.getUniformLocation(program2, "u_reverseLightDirection")
   // program2.u_color = gl.getUniformLocation(program2, "u_color");
+  // // program2.u_worldMatrix = gl.getUniformLocation(program2, "u_worldMatrix");
+  // // program2.u_cameraWorldPosition = gl.getUniformLocation(program2, "u_cameraWorldPosition");
+  // program2.u_texture = gl.getUniformLocation(program2, "u_texture");
+  // // program2.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix");
+  // // program2.u_lightViewProjectionTextureMatrix2 = gl.getUniformLocation(program2, "u_lightViewProjectionTextureMatrix2");
+  // program2.u_textureMatrix = gl.getUniformLocation(program2, "u_textureMatrix");
+  // program2.u_textureMatrix2 = gl.getUniformLocation(program2, "u_textureMatrix2");
+  // program2.u_depthTexture = gl.getUniformLocation(program2, "u_depthTexture");
+  // program2.u_depthTexture2 = gl.getUniformLocation(program2, "u_depthTexture2");
+  // program2.u_bias = gl.getUniformLocation(program2, "u_bias");
+  // program2.u_textureAnimationMatrix = gl.getUniformLocation(program2, "u_textureAnimationMatrix");
+  // program2.u_cubeTexture = gl.getUniformLocation(program2, "u_cubeTexture");
+  // program2.u_colorOpacity = gl.getUniformLocation(program2, "u_colorOpacity");
+  // program2.u_textureOpacity = gl.getUniformLocation(program2, "u_textureOpacity");
+  // program2.u_secondaryLightDirection = gl.getUniformLocation(program2, "u_secondaryLightDirection");
+  // program2.u_toonSpecularThreshold = gl.getUniformLocation(program2, "u_toonSpecularThreshold");
+  // program2.u_toonDiffuseThreshold = gl.getUniformLocation(program2, "u_toonDiffuseThreshold");
+  // program2.u_roughness = gl.getUniformLocation(program2, "u_roughness");
+  // program2.a_cam_position = gl.getAttribLocation(program2, "a_cam_position");
+  // program2.a_cam_normal = gl.getAttribLocation(program2, "a_cam_normal");
+  // program2.a_textureCoordinates = gl.getAttribLocation(program2, "a_textureCoordinates");
+  // program2.a_backgroundPosition = gl.getAttribLocation(program2, "a_backgroundPosition");
   
+  // program for drawing shadowmaps
+  // local space
   simpleProgram.u_worldViewProjectionMatrix = gl.getUniformLocation(simpleProgram, "u_worldViewProjectionMatrix");
-  simpleProgram.u_inverseTransposeWorldMatrix = gl.getUniformLocation(simpleProgram, "u_inverseTransposeWorldMatrix");
-  simpleProgram.u_reverseLightDirection = gl.getUniformLocation(simpleProgram, "u_reverseLightDirection")
   simpleProgram.u_color = gl.getUniformLocation(simpleProgram, "u_color");
-  simpleProgram.u_worldMatrix = gl.getUniformLocation(simpleProgram, "u_worldMatrix");
-  simpleProgram.u_lightWorldPosition = gl.getUniformLocation(simpleProgram, "u_lightWorldPosition");
-  simpleProgram.u_cameraWorldPosition = gl.getUniformLocation(simpleProgram, "u_cameraWorldPosition");
-  simpleProgram.u_uniformLightColor = gl.getUniformLocation(simpleProgram, "u_uniformLightColor");
-  simpleProgram.u_pointLightColor = gl.getUniformLocation(simpleProgram, "u_pointLightColor");
-  simpleProgram.u_spotlightDirection = gl.getUniformLocation(simpleProgram, "u_spotlightDirection");
-  simpleProgram.u_spotlightInnerLimit = gl.getUniformLocation(simpleProgram, "u_spotlightInnerLimit");
-  simpleProgram.u_spotlightOuterLimit = gl.getUniformLocation(simpleProgram, "u_spotlightOuterLimit");
-  simpleProgram.u_spotlightPosition = gl.getUniformLocation(simpleProgram, "u_spotlightPosition");
-  simpleProgram.u_texture = gl.getUniformLocation(simpleProgram, "u_texture");
-  simpleProgram.u_depthTexture = gl.getUniformLocation(simpleProgram, "u_depthTexture");
-  simpleProgram.u_textureAnimationMatrix = gl.getUniformLocation(simpleProgram, "u_textureAnimationMatrix");
-  simpleProgram.u_cubeTexture = gl.getUniformLocation(simpleProgram, "u_cubeTexture");
-  simpleProgram.u_bias = gl.getUniformLocation(simpleProgram, "u_bias");
-  simpleProgram.u_lightViewProjectionTextureMatrix = gl.getUniformLocation(simpleProgram, "u_lightViewProjectionTextureMatrix");
-
-
-
-
-
   simpleProgram.a_position = gl.getAttribLocation(simpleProgram, "a_position");
-  simpleProgram.a_normal = gl.getAttribLocation(simpleProgram, "a_normal");
-  simpleProgram.a_textureCoordinates = gl.getAttribLocation(simpleProgram, "a_textureCoordinates");
-  simpleProgram.a_backgroundPosition = gl.getAttribLocation(simpleProgram, "a_backgroundPosition");
+  // // camera space
+  // simpleProgram.u_projectionMatrix = gl.getUniformLocation(simpleProgram, "u_projectionMatrix");
+  // simpleProgram.u_color = gl.getUniformLocation(simpleProgram, "u_color");
+  // simpleProgram.a_cam_position = gl.getAttribLocation(simpleProgram, "a_cam_position");
 
-  gl.enableVertexAttribArray(simpleProgram.a_position);
-  // gl.enableVertexAttribArray(simpleProgram.a_normal);
-  // gl.enableVertexAttribArray(simpleProgram.a_textureCoordinates);
-
-
+  // program for drawing skybox
   skyboxProgram.a_position= gl.getAttribLocation(skyboxProgram, "a_position");
   gl.enableVertexAttribArray(skyboxProgram.a_position);
   skyboxProgram.u_skybox= gl.getUniformLocation(skyboxProgram, "u_skybox");
